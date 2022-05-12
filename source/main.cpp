@@ -1,6 +1,4 @@
-#include <iostream>
 #include "test.hpp"
-
 
 int main() {
     TNP head = get_token();

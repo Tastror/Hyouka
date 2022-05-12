@@ -2,6 +2,7 @@
 // Created by Tastror on 2022/5/13.
 //
 
+#include <iostream>
 #include "include/define.h"
 
 token_node* get_token() {
@@ -9,7 +10,7 @@ token_node* get_token() {
     token_node* temp = head;
 
     { auto n = new token_node;
-        n->type = (token_type) IDENT;
+        n->type = (token_type) KEYWORD;
         n->data = "int";
         temp->next = n;
         temp = n; }
@@ -39,13 +40,13 @@ token_node* get_token() {
         temp = n; }
 
     { auto n = new token_node;
-        n->type = (token_type) IDENT;
+        n->type = (token_type) KEYWORD;
         n->data = "const";
         temp->next = n;
         temp = n; }
 
     { auto n = new token_node;
-        n->type = (token_type) IDENT;
+        n->type = (token_type) KEYWORD;
         n->data = "float";
         temp->next = n;
         temp = n; }
@@ -87,7 +88,7 @@ token_node* get_token() {
         temp = n; }
 
     { auto n = new token_node;
-        n->type = (token_type) IDENT;
+        n->type = (token_type) KEYWORD;
         n->data = "return";
         temp->next = n;
         temp = n; }
