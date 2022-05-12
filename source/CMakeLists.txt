@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
-project(source)
+project(Hyouka)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
-include_directories(front)
+include_directories(
+        front
+        front/include
+)
 
-add_executable(source
+add_executable(
+        front/test.hpp
         front/AST.hpp
-        main.cpp)
+        main.cpp
+)
