@@ -1,8 +1,8 @@
-# Hyouka Vision 1
+# Hyouka
+A repository for Huawei Bisheng Cup by team Hyouka from NWPU
 
-Hyouka 编译器第一版
-
-
+## 队名来源
+Hyouka 冰果（氷菓・ひょうか）
 
 ## 基本内容
 
