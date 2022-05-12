@@ -8,7 +8,7 @@ include_directories(
         front/include
 )
 
-add_executable(
+add_executable(source
         front/test.hpp
         front/AST.hpp
         main.cpp

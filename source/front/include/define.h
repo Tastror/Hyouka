@@ -8,7 +8,7 @@
 #include <string>
 
 enum token_type {
-    ident, punct, number, rname, operat
+    IDENT, PUNCT, NUMBER, RNAME, OPERAT
 };
 
 struct token_node {
@@ -21,20 +21,23 @@ struct token_node {
 
 /*
 input:
-1 <ident, int>
-2 <rname, main>
-3 <punct, (>
-4 <punct, )>
-5 <punct, {>
-6 <ident, const>
-7 <ident, float>
-8 <rname, pi>
-9 <number, 3.14>
-10 <punct, ;>
-11 <ident, return>
-12 <number, 0>
-13 <punct, ;>
-14 <punct, }>
+1 <IDENT, int>
+2 <RNAME, main>
+3 <PUNCT, (>
+4 <PUNCT, )>
+5 <PUNCT, {>
+6 <IDENT, const>
+7 <IDENT, float>
+8 <RNAME, pi>
+9 <OPEART, =>
+10 <NUMBER, 0.14>
+11 <OPEART, +>
+12 <NUMBER, 3>
+13 <PUNCT, ;>
+14 <IDENT, return>
+15 <NUMBER, 0>
+16 <PUNCT, ;>
+17 <PUNCT, }>
 */
 
 /*

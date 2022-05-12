@@ -3,6 +3,7 @@
 
 
 int main() {
-	std::cout << "TBD..." << std::endl;
+    TNP head = get_token();
+    print_all_tokens(head);
 	return 0; 
 } 

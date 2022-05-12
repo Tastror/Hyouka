@@ -5,48 +5,108 @@
 #include "include/define.h"
 
 token_node* get_token() {
-    auto head = (TNP)malloc(sizeof(token_node));
+    auto head = new token_node;
     token_node* temp = head;
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) ident;
+    { auto n = new token_node;
+        n->type = (token_type) IDENT;
         n->data = "int";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) rname;
+    { auto n = new token_node;
+        n->type = (token_type) RNAME;
         n->data = "main";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) punct;
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
         n->data = "(";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) punct;
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
         n->data = ")";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) punct;
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
         n->data = "{";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) ident;
+    { auto n = new token_node;
+        n->type = (token_type) IDENT;
         n->data = "const";
         temp->next = n;
         temp = n; }
 
-    { auto n = (TNP)malloc(sizeof(token_node));
-        n->type = (token_type) ident;
+    { auto n = new token_node;
+        n->type = (token_type) IDENT;
         n->data = "float";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) RNAME;
+        n->data = "x";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) OPERAT;
+        n->data = "=";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) NUMBER;
+        n->data = "0.14";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) OPERAT;
+        n->data = "+";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) NUMBER;
+        n->data = "3";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = ";";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) IDENT;
+        n->data = "return";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) NUMBER;
+        n->data = "0";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = ";";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = "}";
         temp->next = n;
         temp = n; }
 
@@ -55,10 +115,9 @@ token_node* get_token() {
 }
 
 void print_all_tokens(token_node* head) {
-    token_node* now = head;
-    if (now != nullptr) {
+    auto now = head;
+    if (now != nullptr)
         now = now->next;
-    }
     while (now != nullptr) {
         std::cout << now->type << ", " << now->data << "\n";
         now = now->next;
@@ -66,10 +125,10 @@ void print_all_tokens(token_node* head) {
 }
 
 void delete_all_tokens(token_node* head) {
-    token_node* now = head;
+    auto now = head;
     while (now != nullptr) {
-        token_node* temp = now;
+        auto temp = now;
         now = now->next;
-        free(temp);
+        delete temp;
     }
 }
