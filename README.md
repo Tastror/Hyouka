@@ -24,7 +24,7 @@ Hyouka 冰果（氷菓・ひょうか）
 
 交叉编译平台：x84_64 Ubuntu 18.04
 
-运行平台：Raspbian GNU/Linux 10 (buster)，32位 - ARM v7 rev 3
+运行平台：Raspbery 4B, Raspberry Pi OS (Raspbian GNU/Linux 10), 32位 - ARMv7 Cortex-A72
 
 汇编命令：
 

@@ -3,5 +3,5 @@
 int main() {
     TNP head = get_token();
     print_all_tokens(head);
-	return 0; 
+    return 0;
 } 
