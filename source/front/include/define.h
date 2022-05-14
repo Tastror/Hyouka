@@ -20,21 +20,17 @@ struct token_node {
     token_node* next = nullptr;
 };
 
-const std::string expression_ending[] = {";", ",", ")", "}", "]", "?", ":", "#"};
-
 token_node* next(token_node* now);
 std::string data(token_node* node);
 token_type type(token_node* now);
 bool search_data(token_node* now, const std::string& target, const std::string& end);
-bool search_data(token_node* now, const std::string& target, int len = 5, const std::string* end = expression_ending);
-bool search_type(token_node* now, const token_type& target, const token_type& end);
 
 enum AST_type {
     None, ProgramBody,
 
     Number, Identifier, BasicType, FunctionType,
 
-    Expression, DownTopExpression, FunctionRealParam,
+    Expression, DownTopExpression, FunctionUsage, FunctionRealParam,
 
     BlockStatement, Statement,
     NormalStatement, DeclarationStatement,
@@ -50,7 +46,7 @@ enum AST_type {
 const std::string AST_show_type[] = {
         "None", "ProgramBody",
         "Number", "Identifier", "BasicType", "FunctionType",
-        "Expression", "DownTopExpression", "FunctionRealParam",
+        "Expression", "DownTopExpression", "FunctionUsage", "FunctionRealParam",
         "BlockStatement", "Statement",
         "NormalStatement", "DeclarationStatement",
         "ConstDeclarationStatement", "VariableDeclarationStatement",
