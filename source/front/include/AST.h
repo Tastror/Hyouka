@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "include/define.h"
 #include <iostream>
+#include "define.h"
 
 void RaiseError(const std::string& error_code, const std::string& token_data);
 
@@ -19,15 +19,15 @@ class BaseAST {
 public:
     ANP head;
     TNP now_token;
-    TNP look_ahead;
+    TNP next_token;
     void GoNext() {
-        now_token = look_ahead;
-        look_ahead = next(now_token);
+        now_token = next_token;
+        next_token = next(now_token);
     }
     explicit BaseAST(TNP token_head) {
         head = new AST_node;
         now_token = token_head;
-        look_ahead = next(now_token);
+        next_token = next(now_token);
     };
     virtual ~BaseAST() = default;
 };
@@ -163,9 +163,29 @@ public:
 
 
 // examples:
+// 5;
+// 2 + 1;
+// int x = 3;
+//           ^
+//  def statement return
+// if (x > 2) {x = x - 1;}
+//                        ^
+//                normal stmt return
+// notice:
+// - including { and }
+// - self return at }::after
+class StatementAST: public BaseAST {
+public:
+    TNP Parse();
+    explicit StatementAST(TNP token_head): BaseAST(token_head) {}
+    ~StatementAST() override = default;
+};
+
+
+// examples:
 // { 5; 2 + 1; int x = 3; if (x > 2) {x = x - 1;} x = x + 5; return 0; }
 //                       ^                       ^                     ^
-//             def statement return      normal stmt return    normal stmt return
+//                statement return        statement return      statement return
 // notice:
 // - including { and }
 // - self return at }::after
@@ -178,7 +198,23 @@ public:
 
 
 // examples:
+// int x
+// float y
+// notice:
+// - end with , or )
+// - self return at , or )
+class FunctionFormParamAST: public BaseAST {
+public:
+    TNP Parse();
+    explicit FunctionFormParamAST(TNP token_head): BaseAST(token_head) {}
+    ~FunctionFormParamAST() override = default;
+};
+
+
+// examples:
 // int x, float y, int z
+//               ^
+//      single param return
 // notice:
 // - no ( or )
 // - end with )

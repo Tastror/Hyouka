@@ -11,5 +11,7 @@ include_directories(
 add_executable(source
         front/define.cpp
         front/AST.cpp
+        front/AST_expr.cpp
+        front/AST_keystmt.cpp
         main.cpp
 )

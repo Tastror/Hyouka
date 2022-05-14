@@ -2,8 +2,8 @@
 // Created by Tastror on 2022/5/11.
 //
 
-#include "include/AST.h"
-
+#include "AST.h"
+#include "AST_expr.h"
 
 void RaiseError(const std::string& error_code, const std::string& token_data) {
     std::cout << "ERROR: " << error_code << std::endl;
@@ -42,15 +42,17 @@ void print_all_ASTs(ANP AST_head) {
 }
 
 
-TNP ExpressionAST::Parse() {  // TBD
+TNP ExpressionAST::Parse() {
     head->type = Expression;
 
-    GoNext();
-    GoNext();
-    GoNext();
+    DownTopExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    now_token = expr.Parse();
+    next_token = next(now_token);
 
-    if (data(now_token) != "," && data(now_token) != ";" && data(now_token) != ")") {
-        RaiseError("in Expression, lost punctuation [;] [,] or [)]", data(now_token));
+    if (data(now_token) != "," && data(now_token) != ";" &&
+        data(now_token) != ")" && data(now_token) != "}") {
+        RaiseError("in Expression, lost punctuation [;] [,] [)] or [}]", data(now_token));
         return now_token;
     }
 
@@ -58,13 +60,15 @@ TNP ExpressionAST::Parse() {  // TBD
 }
 
 
-TNP SingleAssignmentAST::Parse() {
+TNP SingleAssignmentAST::Parse() {  // TBD
     head->type = SingleAssign;
+
     if (type(now_token) != RNAME) {
         RaiseError("in SingleAssignmentAST, beginning is not a valid name", data(now_token));
         return now_token;
     }
     GoNext();
+
     return now_token;
 }
 
@@ -101,10 +105,10 @@ TNP SingleDefinitionAST::Parse() {
     }
     GoNext();
 
-    ExpressionAST value_count(now_token);
-    connect_child(head, value_count.head);
-    now_token = value_count.Parse();
-    look_ahead = next(now_token);
+    ExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    now_token = expr.Parse();
+    next_token = next(now_token);
 
     if (data(now_token) != "," && data(now_token) != ";") {
         RaiseError("in SingleDefinition, lost punctuation [;] or [,]", data(now_token));
@@ -113,7 +117,6 @@ TNP SingleDefinitionAST::Parse() {
 
     return now_token;
 }
-
 
 
 TNP ArrayDefinitionAST::Parse() {  // TBD
@@ -125,7 +128,6 @@ TNP ArrayDefinitionAST::Parse() {  // TBD
     GoNext();
     return now_token;
 }
-
 
 
 TNP DeclarationStatementAST::Parse() {
@@ -155,16 +157,16 @@ TNP DeclarationStatementAST::Parse() {
     while (true) {
 
         if (type(now_token) == RNAME) {
-            if (data(look_ahead) == "[") {
+            if (data(next_token) == "[") {
                 ArrayDefinitionAST array_def(now_token);
                 connect_child(head, array_def.head);
                 now_token = array_def.Parse();
-                look_ahead = next(now_token);
+                next_token = next(now_token);
             } else {
                 SingleDefinitionAST single_def(now_token);
                 connect_child(head, single_def.head);
                 now_token = single_def.Parse();
-                look_ahead = next(now_token);
+                next_token = next(now_token);
             }
         }
 
@@ -187,29 +189,28 @@ TNP DeclarationStatementAST::Parse() {
 }
 
 
-
 TNP NormalStatementAST::Parse() {
     head->type = NormalStatement;
 
-    if (type(now_token) == RNAME && data(look_ahead) == "=") {
-        SingleAssignmentAST assi(now_token);
-        connect_child(head, assi.head);
-        now_token = assi.Parse();
-        look_ahead = next(now_token);
-    }
-
-    else if (type(now_token) == RNAME && data(look_ahead) == "[") {
-        ArrayAssignmentAST assi(now_token);
-        connect_child(head, assi.head);
-        now_token = assi.Parse();
-        look_ahead = next(now_token);
+    if (type(now_token) == RNAME && search_data(next_token, "=", ";")) {
+        if (data(next_token) == "[") {
+            ArrayAssignmentAST assi(now_token);
+            connect_child(head, assi.head);
+            now_token = assi.Parse();
+            next_token = next(now_token);
+        } else {
+            SingleAssignmentAST assi(now_token);
+            connect_child(head, assi.head);
+            now_token = assi.Parse();
+            next_token = next(now_token);
+        }
     }
 
     else if (data(now_token) == "{") {
         BlockStatementAST block(now_token);
         connect_child(head, block.head);
         now_token = block.Parse();
-        look_ahead = next(now_token);
+        next_token = next(now_token);
     }
 
     else if (type(now_token) == KEYWORD) {  // TBD
@@ -222,7 +223,7 @@ TNP NormalStatementAST::Parse() {
         ExpressionAST expr(now_token);
         connect_child(head, expr.head);
         now_token = expr.Parse();
-        look_ahead = next(now_token);
+        next_token = next(now_token);
         if (data(now_token) != ";") {
             RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
             return now_token;
@@ -239,6 +240,25 @@ TNP NormalStatementAST::Parse() {
 }
 
 
+TNP StatementAST::Parse() {
+    head->type = Statement;
+    if (data(now_token) == "int" || data(now_token) == "float" ||
+        data(now_token) == "const") {
+        DeclarationStatementAST decl_stmt(now_token);
+        connect_child(head, decl_stmt.head);
+        now_token = decl_stmt.Parse();
+        next_token = next(now_token);
+    }
+
+    else if (data(now_token) != "}" && now_token != nullptr) {
+        NormalStatementAST norm_stmt(now_token);
+        connect_child(head, norm_stmt.head);
+        now_token = norm_stmt.Parse();
+        next_token = next(now_token);
+    }
+    return now_token;
+}
+
 
 TNP BlockStatementAST::Parse() {
     head->type = BlockStatement;
@@ -251,19 +271,11 @@ TNP BlockStatementAST::Parse() {
 
     while (true) {
 
-        if (data(now_token) == "int" || data(now_token) == "float" ||
-            data(now_token) == "const") {
-            DeclarationStatementAST decl_stmt(now_token);
-            connect_child(head, decl_stmt.head);
-            now_token = decl_stmt.Parse();
-            look_ahead = next(now_token);
-        }
-
-        else if (data(now_token) != "}" && now_token != nullptr) {
-            NormalStatementAST norm_stmt(now_token);
-            connect_child(head, norm_stmt.head);
-            now_token = norm_stmt.Parse();
-            look_ahead = next(now_token);
+        if (data(now_token) != "}" && now_token != nullptr) {
+            StatementAST stmt(now_token);
+            connect_child(head, stmt.head);
+            now_token = stmt.Parse();
+            next_token = next(now_token);
         }
 
         else if (data(now_token) == "}") {
@@ -281,15 +293,73 @@ TNP BlockStatementAST::Parse() {
 }
 
 
+TNP FunctionFormParamAST::Parse() {
+    head->type = FunctionFormParam;
 
-TNP FunctionParamsAST::Parse() {  // TBD
-    head->type = FunctionParams;
-    if (data(now_token) == ")") {
+    if (data(now_token) != "int" && data(now_token) != "float") {
+        RaiseError("in FunctionFormParam, type is not [int] or [float]", data(now_token));
         return now_token;
     }
+    ANP type_name = new AST_node;
+    connect_child(head, type_name);
+    type_name->type = BasicType;
+    type_name->data = now_token->data;
+    GoNext();
+
+    if (type(now_token) != RNAME) {
+        RaiseError("in FunctionFormParam, identify name is not valid", data(now_token));
+        return now_token;
+    }
+    ANP id_name = new AST_node;
+    connect_child(head, id_name);
+    id_name->type = BasicType;
+    id_name->data = now_token->data;
+    GoNext();
+
     return now_token;
 }
 
+
+TNP FunctionParamsAST::Parse() {  // TBD
+    head->type = FunctionParams;
+
+    if (data(now_token) == ")") {
+        return now_token;
+    }
+
+    if (data(now_token) != "int" && data(now_token) != "float") {
+        RaiseError("in FunctionParams, type should be [int] or [float]", data(now_token));
+        return now_token;
+    }
+    FunctionFormParamAST func_param(now_token);
+    connect_child(head, func_param.head);
+    now_token = func_param.Parse();
+    next_token = next(now_token);
+
+    while (true) {
+
+        if (data(now_token) == ")") {
+            break;
+        }
+
+        if (data(now_token) != ",") {
+            RaiseError("in FunctionParams, punctuation should be [,]", data(now_token));
+            return now_token;
+        }
+        GoNext();
+
+        if (data(now_token) != "int" && data(now_token) != "float") {
+            RaiseError("in FunctionParams, type should be [int] or [float]", data(now_token));
+            return now_token;
+        }
+        FunctionFormParamAST addi_func_param(now_token);
+        connect_child(head, addi_func_param.head);
+        now_token = addi_func_param.Parse();
+        next_token = next(now_token);
+    }
+
+    return now_token;
+}
 
 
 TNP FunctionDefinitionAST::Parse() {
@@ -324,7 +394,7 @@ TNP FunctionDefinitionAST::Parse() {
     FunctionParamsAST func_para(now_token);
     connect_child(head, func_para.head);
     now_token = func_para.Parse();
-    look_ahead = next(now_token);
+    next_token = next(now_token);
 
     if (data(now_token) != ")") {
         RaiseError("in FunctionDefinition, lost punctuation [)]", data(now_token));
@@ -336,18 +406,17 @@ TNP FunctionDefinitionAST::Parse() {
     connect_child(head, func_block.head);
     func_block.head->data = "FunctionBlock";
     now_token = func_block.Parse();
-    look_ahead = next(now_token);
+    next_token = next(now_token);
 
     return now_token;
 }
-
 
 
 TNP ProgramAST::Parse() {
     head->type = ProgramBody;
 
     while (now_token != nullptr) {
-        TNP look_next = next(look_ahead);
+        TNP look_next = next(next_token);
 
         if (data(now_token) == "void" ||
            ((data(now_token) == "int" || data(now_token) == "float")
@@ -355,7 +424,7 @@ TNP ProgramAST::Parse() {
             FunctionDefinitionAST func_def(now_token);
             connect_child(head, func_def.head);
             now_token = func_def.Parse();
-            look_ahead = next(now_token);
+            next_token = next(now_token);
         }
 
         else if (data(now_token) == "int" || data(now_token) == "float" ||
@@ -364,7 +433,7 @@ TNP ProgramAST::Parse() {
             connect_child(head, stmt.head);
             stmt.head->data = "static";
             now_token = stmt.Parse();
-            look_ahead = next(now_token);
+            next_token = next(now_token);
         }
 
         else {
