@@ -11,12 +11,56 @@ token_node* get_token() {
     token_node* temp = head;
 
     /*
+     * int _abc = 7 * 2;
+     *
      * int main() {
      *     {}
      *     const float x = 0.14 + 3;
      *     return 0;
      * }
      */
+
+    { auto n = new token_node;
+        n->type = (token_type) KEYWORD;
+        n->data = "int";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) RNAME;
+        n->data = "_abc";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) OPERAT;
+        n->data = "=";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) NUMBER;
+        n->data = "7";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) OPERAT;
+        n->data = "*";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) NUMBER;
+        n->data = "2";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = ";";
+        temp->next = n;
+        temp = n; }
 
     { auto n = new token_node;
         n->type = (token_type) KEYWORD;

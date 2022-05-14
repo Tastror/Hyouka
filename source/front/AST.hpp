@@ -145,10 +145,11 @@ public:
 
 
 // examples:
-// x = 3, y = 4;
-// x[5] = 8;
+// x = 3, y = 4
+// x[5] = 8
 // notice:
-// including , and ;
+// including ,
+// no ;
 class VarAss: public BaseAST {
 public:
     TNP Parse() {
@@ -165,11 +166,12 @@ public:
                 now_token = single_def.Parse();
                 look_ahead = next(now_token);
             }
-            if (data(now_token) == ";")
+            if (data(now_token) == ";") {
                 break;
-            else if (data(now_token) == ",")
+            } else if (data(now_token) == ",") {
+                GoNext();
                 continue;
-            else {
+            } else {
                 RaiseError("in VarAss, separate punctuation is not [,] or [;]", data(now_token));
                 return now_token;
             }
@@ -245,10 +247,11 @@ public:
 
 
 // examples:
-// int x = 3, y = 4;
-// const float x[5] = {2.5, 1};
+// int x = 3, y = 4
+// const float x[5] = {2.5, 1}
 // notice:
-// including , and ;
+// including ,
+// no ;
 class VarDecl: public BaseAST {
 public:
     TNP Parse() {
@@ -282,11 +285,12 @@ public:
                 now_token = single_def.Parse();
                 look_ahead = next(now_token);
             }
-            if (data(now_token) == ";")
+            if (data(now_token) == ";") {
                 break;
-            else if (data(now_token) == ",")
+            } else if (data(now_token) == ",") {
+                GoNext();
                 continue;
-            else {
+            } else {
                 RaiseError("in VarDecl, separate punctuation is not [,] or [;]", data(now_token));
                 return now_token;
             }
@@ -299,12 +303,11 @@ public:
 
 
 // examples:
-// 5
-// 2 + 1
-// int x = 3
+// 5;
+// 2 + 1;
+// int x = 3;
 // notice:
-// no ;
-// end with ;
+// including ;
 class Statement: public BaseAST {  // TBD
 public:
     TNP Parse() {
@@ -326,6 +329,11 @@ public:
             RaiseError("in Statement, start is not a identify name or keyword", data(now_token));
             return now_token;
         }
+        if (data(now_token) != ";") {
+            RaiseError("in Statement, lost punctuation [;]", data(now_token));
+            return now_token;
+        }
+        GoNext();
         return now_token;
     }
     explicit Statement(TNP token_head): BaseAST(token_head) {}
@@ -359,11 +367,6 @@ public:
                 connect_child(head, stmt.head);
                 now_token = stmt.Parse();
                 look_ahead = next(now_token);
-                if (data(now_token) != ";") {
-                    RaiseError("in Block, lost punctuation [;]", data(now_token));
-                    return now_token;
-                }
-                GoNext();
             }
         }
         return now_token;
@@ -461,10 +464,10 @@ public:
         head->type = ProgramBody;
         while (now_token != nullptr) {
             if (data(now_token) == "const") {
-                VarDecl var_decl(now_token);
-                connect_child(head, var_decl.head);
-                var_decl.head->data = "static";
-                now_token = var_decl.Parse();
+                Statement stmt(now_token);
+                connect_child(head, stmt.head);
+                stmt.head->data = "static";
+                now_token = stmt.Parse();
                 look_ahead = next(now_token);
             } else if (data(now_token) == "void") {
                 FunctionDef funct_def(now_token);
@@ -479,10 +482,10 @@ public:
                     now_token = funct_def.Parse();
                     look_ahead = next(now_token);
                 } else {
-                    VarDecl var_decl(now_token);
-                    connect_child(head, var_decl.head);
-                    var_decl.head->data = "static";
-                    now_token = var_decl.Parse();
+                    Statement stmt(now_token);
+                    connect_child(head, stmt.head);
+                    stmt.head->data = "static";
+                    now_token = stmt.Parse();
                     look_ahead = next(now_token);
                 }
             } else {
