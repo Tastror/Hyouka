@@ -10,6 +10,14 @@ token_node* get_token() {
     auto head = new token_node;
     token_node* temp = head;
 
+    /*
+     * int main() {
+     *     {}
+     *     const float x = 0.14 + 3;
+     *     return 0;
+     * }
+     */
+
     { auto n = new token_node;
         n->type = (token_type) KEYWORD;
         n->data = "int";
@@ -41,6 +49,18 @@ token_node* get_token() {
         temp = n; }
 
     { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = "{";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
+        n->type = (token_type) PUNCT;
+        n->data = "}";
+        temp->next = n;
+        temp = n; }
+
+    { auto n = new token_node;
         n->type = (token_type) KEYWORD;
         n->data = "const";
         temp->next = n;
@@ -67,6 +87,8 @@ token_node* get_token() {
     { auto n = new token_node;
         n->type = (token_type) NUMBER;
         n->data = "0.14";
+        n->int_or_double = 2;
+        n->value.double_value = 0.14;
         temp->next = n;
         temp = n; }
 

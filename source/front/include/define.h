@@ -12,6 +12,11 @@ enum token_type {
 struct token_node {
     token_type type = NONE;
     std::string data;
+    int int_or_double = 0; // 1 is int, 2 is double, 0 is not use
+    union int_double {
+        int int_value;
+        double double_value = 0.0;
+    } value;
     token_node* next = nullptr;
 };
 
@@ -41,7 +46,9 @@ enum ASP_type {
 
     Identifier, BasicType, FunctionType,
 
-    BlockStatement,
+    NormalStatement, BlockStatement,
+
+    VariableAssign, SingleAssign, ArrayAssign,
 
     SingleDefinition, ArrayDefinition,
     ConstDeclaration, VariableDeclaration,
@@ -55,7 +62,8 @@ std::string ASP_show_type[] = {
     "ProgramBody",
     "Number", "ValueCalculate",
     "Identifier", "BasicType", "FunctionType",
-    "BlockStatement",
+    "NormalStatement", "BlockStatement",
+    "VariableAssign", "SingleAssign", "ArrayAssign",
     "SingleDefinition", "ArrayDefinition",
     "ConstDeclaration", "VariableDeclaration",
     "FunctionParams", "FunctionArguments",

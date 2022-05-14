@@ -27,12 +27,12 @@ void _print_all_ASTs(ANP now, int stage) {
     if (now == nullptr) return;
     for (int i = 0; i < stage; ++i)
         std::cout << "\t";
-    std::cout << ASP_show_type[now->type] << ", ";
+    std::cout << ASP_show_type[now->type];
     if (now->type == Number)
-        std::cout <<
+        std::cout  << ", " <<
         ((now->int_or_double == 1) ? now->value.int_value : ((now->int_or_double == 2) ? now->value.double_value : 0));
     else
-        std::cout << (now->data.empty() ? "no explicit data" : now->data);
+        std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << std::endl;
     _print_all_ASTs(now->child, stage + 1);
     _print_all_ASTs(now->sister, stage);
@@ -68,12 +68,32 @@ public:
 // (7 / 2) + 7 * 4.2
 // notice:
 // please check if it is int or float
+// end with ; or ,
 class ValueCal: public BaseAST {  // TBD
 public:
     TNP Parse() {
         head->type = ValueCalculate;
         GoNext();
+        GoNext();
+        GoNext();
         return now_token;
+
+        /*
+         * if (type(now_token) != NUMBER) {
+            RaiseError("in SingleDef, the content after = is not a number", data(now_token));
+            return now_token;
+        }
+        ANP var_value = new ASP_node;
+        connect_child(head, var_value);
+        var_value->type = Number;
+        var_value->data = now_token->data;
+        var_value->int_or_double = now_token->int_or_double;
+        if (var_value->int_or_double == 2) {
+            var_value->value.double_value = now_token->value.double_value;
+        } else if (var_value->int_or_double == 1) {
+            var_value->value.int_value = now_token->value.int_value;
+        }
+         */
     }
     explicit ValueCal(TNP token_head): BaseAST(token_head) {}
     ~ValueCal() override = default;
@@ -85,15 +105,114 @@ public:
 // y = 8 * 5 + 1
 // notice:
 // no , or ;
+// end with ; or ,
+class SingleAss: public BaseAST {  // TBD
+public:
+    TNP Parse() {
+        head->type = SingleAssign;
+        if (type(now_token) != RNAME) {
+            RaiseError("in SingleAss, beginning is not a valid name", data(now_token));
+            return now_token;
+        }
+        GoNext();
+        return now_token;
+    }
+    explicit SingleAss(TNP token_head): BaseAST(token_head) {}
+    ~SingleAss() override = default;
+};
+
+
+// examples:
+// x[2] = 3
+// y[7][4] = 8 * 5 + 1
+// notice:
+// no , or ;
+// end with ; or ,
+class ArrayAss: public BaseAST {  // TBD
+public:
+    TNP Parse() {
+        head->type = SingleAssign;
+        if (type(now_token) != RNAME) {
+            RaiseError("in ArrayAss, beginning is not a valid name", data(now_token));
+            return now_token;
+        }
+        GoNext();
+        return now_token;
+    }
+    explicit ArrayAss(TNP token_head): BaseAST(token_head) {}
+    ~ArrayAss() override = default;
+};
+
+
+// examples:
+// x = 3, y = 4;
+// x[5] = 8;
+// notice:
+// including , and ;
+class VarAss: public BaseAST {
+public:
+    TNP Parse() {
+        head->type = VariableAssign;
+        while (true) {
+            if (data(look_ahead) == "[") {
+                ArrayAss array_def(now_token);
+                connect_child(head, array_def.head);
+                now_token = array_def.Parse();
+                look_ahead = next(now_token);
+            } else {
+                SingleAss single_def(now_token);
+                connect_child(head, single_def.head);
+                now_token = single_def.Parse();
+                look_ahead = next(now_token);
+            }
+            if (data(now_token) == ";")
+                break;
+            else if (data(now_token) == ",")
+                continue;
+            else {
+                RaiseError("in VarAss, separate punctuation is not [,] or [;]", data(now_token));
+                return now_token;
+            }
+        }
+        return now_token;
+    }
+    explicit VarAss(TNP token_head): BaseAST(token_head) {}
+    ~VarAss() override = default;
+};
+
+
+// examples:
+// x = 3
+// y = 8 * 5 + 1
+// notice:
+// no , or ;
+// end with , or ;
 class SingleDef: public BaseAST {  // TBD
 public:
     TNP Parse() {
         head->type = SingleDefinition;
         if (type(now_token) != RNAME) {
-            RaiseError("in ValueDef, beginning is not a valid name", data(now_token));
+            RaiseError("in SingleDef, beginning is not a valid name", data(now_token));
+            return now_token;
+        }
+        ANP var_name = new ASP_node;
+        connect_child(head, var_name);
+        var_name->type = Identifier;
+        var_name->data = now_token->data;
+        GoNext();
+        if (data(now_token) != "=") {
+            RaiseError("in SingleDef, lost punctuation [=]", data(now_token));
             return now_token;
         }
         GoNext();
+        ValueCal value_count(now_token);
+        connect_child(head, value_count.head);
+        now_token = value_count.Parse();
+        look_ahead = next(now_token);
+        if (data(now_token) != "," && data(now_token) != ";") {
+            RaiseError("in SingleDef, lost punctuation [;] or [,]", data(now_token));
+            return now_token;
+        }
         return now_token;
     }
     explicit SingleDef(TNP token_head): BaseAST(token_head) {}
@@ -108,6 +227,7 @@ public:
 // z[3][3] = {{}, {2}, 1, 3}
 // notice:
 // no , or ;
+// end with , or ;
 class ArrayDef: public BaseAST {  // TBD
 public:
     TNP Parse() {
@@ -134,16 +254,15 @@ public:
     TNP Parse() {
         head->type = VariableDeclaration;
         if (data(now_token) != "const" && data(now_token) != "int" && data(now_token) != "float") {
-            RaiseError("in ConstDecl, beginning is not [const]", data(now_token));
+            RaiseError("in VarDecl, beginning is not [const] [int] or [float]", data(now_token));
             return now_token;
         }
-        GoNext();
         if (data(now_token) == "const") {
             head->type = ConstDeclaration;
             GoNext();
         }
         if (data(now_token) != "int" && data(now_token) != "float") {
-            RaiseError("in ConstDecl, type is not [int] or [float]", data(now_token));
+            RaiseError("in VarDecl, type is not [int] or [float]", data(now_token));
             return now_token;
         }
         ANP var_type = new ASP_node;
@@ -168,7 +287,7 @@ public:
             else if (data(now_token) == ",")
                 continue;
             else {
-                RaiseError("in ConstDecl, separate punctuation is not [,] or [;]", data(now_token));
+                RaiseError("in VarDecl, separate punctuation is not [,] or [;]", data(now_token));
                 return now_token;
             }
         }
@@ -180,8 +299,85 @@ public:
 
 
 // examples:
+// 5
+// 2 + 1
+// int x = 3
+// notice:
+// no ;
+// end with ;
+class Statement: public BaseAST {  // TBD
+public:
+    TNP Parse() {
+        head->type = NormalStatement;
+        if (data(now_token) == "const" || data(now_token) == "int" || data(now_token) == "float") {
+            VarDecl stmt(now_token);
+            connect_child(head, stmt.head);
+            now_token = stmt.Parse();
+            look_ahead = next(now_token);
+        } else if (type(now_token) == RNAME) {
+            SingleAss stmt(now_token);
+            connect_child(head, stmt.head);
+            now_token = stmt.Parse();
+            look_ahead = next(now_token);
+        } else if (type(now_token) == KEYWORD) {
+            GoNext();
+            GoNext();
+        } else {
+            RaiseError("in Statement, start is not a identify name or keyword", data(now_token));
+            return now_token;
+        }
+        return now_token;
+    }
+    explicit Statement(TNP token_head): BaseAST(token_head) {}
+    ~Statement() override = default;
+};
+
+
+// examples:
+// 5; 2 + 1; putint(3); int x = 3; if (x > 2) x = x - 1; return 0;
+// notice:
+// no { or }
+// end with }
+class Block: public BaseAST {
+public:
+    TNP Parse() {
+        head->type = BlockStatement;
+        while (data(now_token) != "}") {
+            if (data(now_token) == "{") {
+                GoNext();
+                Block new_block(now_token);
+                connect_child(head, new_block.head);
+                now_token = new_block.Parse();
+                look_ahead = next(now_token);
+                if (data(now_token) != "}") {
+                    RaiseError("in Block, lost punctuation [}]", data(now_token));
+                    return now_token;
+                }
+                GoNext();
+            } else {
+                Statement stmt(now_token);
+                connect_child(head, stmt.head);
+                now_token = stmt.Parse();
+                look_ahead = next(now_token);
+                if (data(now_token) != ";") {
+                    RaiseError("in Block, lost punctuation [;]", data(now_token));
+                    return now_token;
+                }
+                GoNext();
+            }
+        }
+        return now_token;
+    }
+    explicit Block(TNP token_head): BaseAST(token_head) {}
+    ~Block() override = default;
+};
+
+
+// examples:
 // int x, float y, int z
-// no ( or ), end with )
+// notice:
+// no ( or )
+// end with )
 class FunctionPara: public BaseAST {  // TBD
 public:
     TNP Parse() {
@@ -193,33 +389,6 @@ public:
     }
     explicit FunctionPara(TNP token_head): BaseAST(token_head) {}
     ~FunctionPara() override = default;
-};
-
-
-
-// examples:
-// 5; 2 + 1; putint(3); int x = 3; if (x > 2) x = x - 1; return 0;
-// notice:
-// no { or }
-class Block: public BaseAST {  // TBD
-public:
-    TNP Parse() {
-        head->type = BlockStatement;
-        if (data(now_token) == "{") {
-            GoNext();
-            Block new_block(now_token);
-            connect_child(head, new_block.head);
-            now_token = new_block.Parse();
-            look_ahead = next(now_token);
-            if (data(now_token) != "}") {
-                RaiseError("in FunctionDef, lost punctuation [}]", data(now_token));
-                return now_token;
-            }
-        }
-        return now_token;
-    }
-    explicit Block(TNP token_head): BaseAST(token_head) {}
-    ~Block() override = default;
 };
 
 
@@ -277,6 +446,7 @@ public:
             RaiseError("in FunctionDef, lost punctuation [}]", data(now_token));
             return now_token;
         }
+        GoNext();
         return now_token;
     }
     explicit FunctionDef(TNP token_head): BaseAST(token_head) {}
@@ -293,6 +463,7 @@ public:
             if (data(now_token) == "const") {
                 VarDecl var_decl(now_token);
                 connect_child(head, var_decl.head);
+                var_decl.head->data = "static";
                 now_token = var_decl.Parse();
                 look_ahead = next(now_token);
             } else if (data(now_token) == "void") {
@@ -310,6 +481,7 @@ public:
                 } else {
                     VarDecl var_decl(now_token);
                     connect_child(head, var_decl.head);
+                    var_decl.head->data = "static";
                     now_token = var_decl.Parse();
                     look_ahead = next(now_token);
                 }
