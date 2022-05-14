@@ -2,19 +2,33 @@
 // Created by Tastror on 2022/5/13.
 //
 
+#pragma once
 #include <string>
 
 enum token_type {
-    KEYWORD, PUNCT, NUMBER, RNAME, OPERAT
+    NONE, KEYWORD, PUNCT, NUMBER, RNAME, OPERAT
 };
 
 struct token_node {
-    token_type type;
+    token_type type = NONE;
     std::string data;
-    token_node* next;
+    token_node* next = nullptr;
 };
 
+token_node* next(token_node* now) {
+    if (now != nullptr)
+        return now->next;
+    return nullptr;
+}
+
+std::string data(token_node* node) {
+    if (node != nullptr)
+        return node->data;
+    return "";
+}
+
 enum ASP_type {
+    None,
     ProgramBody,
     IncludeSharp,
     Identifier,
@@ -24,63 +38,13 @@ enum ASP_type {
 };
 
 struct ASP_node {
-    ASP_type type;
+    ASP_type type = None;
     std::string data;
-    ASP_node* sister;
-    ASP_node* child;
-    ASP_node* parent;
+    ASP_node* sister = nullptr;
+    ASP_node* child = nullptr;
+    ASP_node* parent = nullptr;
+    ASP_node* last_child = nullptr;
 };
 
 #define TNP token_node*
 #define ANP ASP_node*
-
-/*
-input:
-1 <KEYWORD, int>
-2 <RNAME, main>
-3 <PUNCT, (>
-4 <PUNCT, )>
-5 <PUNCT, {>
-6 <KEYWORD, const>
-7 <KEYWORD, float>
-8 <RNAME, pi>
-9 <OPEART, =>
-10 <NUMBER, 0.14>
-11 <OPEART, +>
-12 <NUMBER, 3>
-13 <PUNCT, ;>
-14 <KEYWORD, return>
-15 <NUMBER, 0>
-16 <PUNCT, ;>
-17 <PUNCT, }>
-*/
-
-/*
-Risou na output:
-
-PROGRAM
-|
-function
-|     |     |    |       |    |    |              |
-type  name  (    param   )    {    block-content  }
-|     |          |
-int   main       epsilon
-
-
-block-content
-|                             |
-block                         block
-|          |                  |         |
-statement  ;                  statement ;
-|                             |
-define                        return_state
-|         |     |             |      |
-typeident type  name-define   return value
-|         |     |    | |             |
-const     float name = value         0
-                |      |
-                pi     3.14
-
-数据全用链表保存。
-
-*/

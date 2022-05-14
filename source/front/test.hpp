@@ -2,6 +2,7 @@
 // Created by Tastror on 2022/5/13.
 //
 
+#pragma once
 #include <iostream>
 #include "include/define.h"
 
