@@ -20,6 +20,7 @@ public:
     ANP head;
     TNP now_token;
     TNP next_token;
+    bool error;
     void GoNext() {
         now_token = next_token;
         next_token = next(now_token);
@@ -29,6 +30,7 @@ public:
         now_token = token_head;
         next_token = next(now_token);
     };
+    bool UpdateError();
     virtual ~BaseAST() = default;
 };
 

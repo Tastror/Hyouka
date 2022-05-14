@@ -5,9 +5,16 @@
 #include "AST.h"
 #include "AST_expr.h"
 
+bool GlobalError = false;
+
+bool BaseAST::UpdateError() {
+    return (error = GlobalError);
+}
+
 void RaiseError(const std::string& error_code, const std::string& token_data) {
     std::cout << "ERROR: " << error_code << std::endl;
     std::cout << "    where: " << token_data << std::endl;
+    GlobalError = true;
 }
 
 void connect_child(ANP parent, ANP child) {
@@ -154,7 +161,36 @@ TNP DeclarationStatementAST::Parse() {
     var_type->data = now_token->data;
     GoNext();
 
+    if (type(now_token) == RNAME) {
+        if (data(next_token) == "[") {
+            ArrayDefinitionAST array_def(now_token);
+            connect_child(head, array_def.head);
+            now_token = array_def.Parse();
+            next_token = next(now_token);
+        } else {
+            SingleDefinitionAST single_def(now_token);
+            connect_child(head, single_def.head);
+            now_token = single_def.Parse();
+            next_token = next(now_token);
+        }
+    } else {
+        RaiseError("in DeclarationStatement, missing identify name", data(now_token));
+        return now_token;
+    }
+
     while (true) {
+
+        if (data(now_token) == ";") {
+            GoNext();
+            break;
+        }
+
+        else if (data(now_token) == ",") {
+            GoNext();
+        } else {
+            RaiseError("in DeclarationStatement, separate punctuation should be [,]", data(now_token));
+            return now_token;
+        }
 
         if (type(now_token) == RNAME) {
             if (data(next_token) == "[") {
@@ -168,22 +204,11 @@ TNP DeclarationStatementAST::Parse() {
                 now_token = single_def.Parse();
                 next_token = next(now_token);
             }
-        }
-
-        else if (data(now_token) == ",") {
-            GoNext();
-            continue;
-        }
-
-        else if (data(now_token) == ";") {
-            GoNext();
-            break;
-        }
-
-        else {
-            RaiseError("in DeclarationStatement, separate punctuation is not [,] or [;]", data(now_token));
+        } else {
+            RaiseError("in DeclarationStatement, missing identify name", data(now_token));
             return now_token;
         }
+
     }
     return now_token;
 }
@@ -233,6 +258,7 @@ TNP NormalStatementAST::Parse() {
 
     else {
         RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
+        GoNext();
         return now_token;
     }
 
@@ -441,6 +467,10 @@ TNP ProgramAST::Parse() {
                        data(now_token));
             break;
         }
+
+        if (UpdateError()) { break; }
     }
+
+
     return now_token;
 };

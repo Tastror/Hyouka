@@ -11,7 +11,7 @@ token_node* get_token() {
     token_node* temp = head;
 
     /*
-     * int _abc = 7 * 2;
+     * int _abc = 7 + 5 / 3 + 4 * (8 - 2) - -3 || 4 >= 2;
      *
      * float test(int a, float x) {
      *     float b = a + x;
@@ -29,7 +29,24 @@ token_node* get_token() {
     { auto n = new token_node; n->type = RNAME; n->data = "_abc"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "="; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = NUMBER; n->data = "7"; n->int_or_double = 1; n->value.int_value = 7; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "+"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "5"; n->int_or_double = 1; n->value.int_value = 5; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "/"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "3"; n->int_or_double = 1; n->value.int_value = 3; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "+"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "4"; n->int_or_double = 1; n->value.int_value = 4; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "*"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "("; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "8"; n->int_or_double = 1; n->value.int_value = 8; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "2"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = ")"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "3"; n->int_or_double = 1; n->value.int_value = 3; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "||"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "4"; n->int_or_double = 1; n->value.int_value = 4; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = ">="; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = NUMBER; n->data = "2"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = PUNCT; n->data = ";"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = KEYWORD; n->data = "float"; temp->next = n; temp = n; }
