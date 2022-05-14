@@ -1,5 +1,5 @@
 #include "test.hpp"
-#include "AST.hpp"
+#include "AST.h"
 
 int main() {
 

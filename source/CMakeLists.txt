@@ -9,7 +9,7 @@ include_directories(
 )
 
 add_executable(source
-        front/test.hpp
-        front/AST.hpp
+        front/define.cpp
+        front/AST.cpp
         main.cpp
 )
