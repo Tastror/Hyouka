@@ -4,18 +4,17 @@
 
 #include "AST_expr.h"
 #include <stack>
-#include <queue>
 
 int assign_operator(const std::string& op) {
-    if (op == ",") return -1;
-    else if (op == "||") return 0;
-    else if (op == "&&") return 1;
-    else if (op == "==" || op == "!=") return 2;
-    else if (op == "<" || op == ">" || op == "<=" || op == ">=") return 3;
-    else if (op == "+" || op == "-") return 4;
-    else if (op == "*" || op == "/" || op == "%") return 5;
-    else if (op == "+unary" || op == "-unary" || op == "!") return 6;
-    else return 100;
+    if (op == "begin" || op == "end") return 0;
+    else if (op == "||") return 1;
+    else if (op == "&&") return 2;
+    else if (op == "==" || op == "!=") return 3;
+    else if (op == "<" || op == ">" || op == "<=" || op == ">=") return 4;
+    else if (op == "+" || op == "-") return 5;
+    else if (op == "*" || op == "/" || op == "%") return 6;
+    else if (op == "+unary" || op == "-unary" || op == "!") return 64;
+    else return -1;
 }
 
 int compare(const std::string& op1, const std::string& op2) {
@@ -24,40 +23,74 @@ int compare(const std::string& op1, const std::string& op2) {
 }
 
 
-TNP FunctionRealParamAST::Parse() {
-    head->type = FunctionRealParam;
-    GoNext();
-    return now_token;
-}
-
-
 TNP FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
-    // just for test
-    while (data(now_token) != ")")
+    if (type(now_token) != RNAME) {
+        RaiseError("in FunctionUsage, identify name is not valid", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    if (data(now_token) != "(") {
+        RaiseError("in FunctionUsage, begin punctuation should be [(]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    if (data(now_token) == ")") {
+        return now_token;
+    }
+
+    ExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    expr.head->data = "argument";
+    now_token = expr.Parse();
+    next_token = next(now_token);
+
+    while (true) {
+
+        if (data(now_token) == ")") {
+            break;
+        }
+
+        if (data(now_token) != ",") {
+            RaiseError("in FunctionUsage, punctuation should be [,]", data(now_token));
+            return now_token;
+        }
         GoNext();
+
+        ExpressionAST addi_expr(now_token);
+        connect_child(head, addi_expr.head);
+        addi_expr.head->data = "argument";
+        now_token = addi_expr.Parse();
+        next_token = next(now_token);
+    }
+
+    return now_token;
 
     return now_token;
 }
 
 
-TNP DownTopExpressionAST::Parse() {
-    head->type = DownTopExpression;
+TNP ExpressionAST::Parse() {
+    head->type = Expression;
 
     std::stack<std::string> opt;
     std::stack<ANP> sym;
-    std::queue<ANP> res;
+    opt.push("begin");
 
     bool quit = false;
     while (true) {
 
+
+
         if (now_token == nullptr) {
-            RaiseError("in DownTopExpression, lost ending", data(now_token));
+            RaiseError("in Expression, lost ending", data(now_token));
             return now_token;
         }
 
-        const std::string expression_ending[] = {";", ")", "}", "]"};
+        const std::string expression_ending[] = {";", ",", ")", "}", "]"};
         for (const auto& i : expression_ending)
             if (data(now_token) == i) {
                 quit = true;
@@ -66,13 +99,44 @@ TNP DownTopExpressionAST::Parse() {
 
         if (quit) {
 
-            if (opt.empty()) {
-                // ...
+            while (true) {
+
+                if (opt.size() == 1 && opt.top() == "begin") {
+                    opt.pop();
+                    break;
+                }
+
+                if (opt.empty()) {
+                    RaiseError("in Expression, fatal error occurred", data(now_token));
+                    return now_token;
+                }
+
+                if (sym.empty()) {
+                    RaiseError("in Expression, number or variable is not enough", data(now_token));
+                    return now_token;
+                }
+                ANP k1 = sym.top(); sym.pop();
+                if (sym.empty()) {
+                    RaiseError("in Expression, number or variable is not enough", data(now_token));
+                    return now_token;
+                }
+                ANP k2 = sym.top(); sym.pop();
+                ANP tog = new AST_node;  // a new here, remember to delete
+                tog->data = opt.top(); opt.pop();
+                tog->type = Expression;
+                reverse_connect_child(tog, k1);
+                reverse_connect_child(tog, k2);
+                sym.push(tog);
+            }
+
+            if (sym.size() == 1) {
+                connect_child(head, sym.top());
+                sym.pop();
                 break;
             }
 
             else {
-                RaiseError("in DownTopExpression, missing operators or numbers", data(now_token));
+                RaiseError("in Expression, missing operators or numbers", data(now_token));
                 return now_token;
             }
         }
@@ -86,33 +150,43 @@ TNP DownTopExpressionAST::Parse() {
                 // 1.1.1 function usage
                 if (data(next_token) == "(") {
 
-                    FunctionUsageAST func_use(now_token);
+                    FunctionUsageAST func_use(now_token);  // a new here, remember to delete
                     sym.push(func_use.head);
                     now_token = func_use.Parse();
                     next_token = next(now_token);
 
                     if (data(now_token) != ")") {
-                        RaiseError("in DownTopExpression, missing punctuation [)]", data(now_token));
+                        RaiseError("in Expression, missing punctuation [)]", data(now_token));
                         return now_token;
                     }
                 }
 
                 // 1.1.2 normal variables
                 else {
-                    ANP token_to_AST = new AST_node;
+                    ANP token_to_AST = new AST_node;  // a new here, remember to delete
                     token_to_AST->data = now_token->data;
-                    token_to_AST->type = DownTopExpression;
+                    token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
                 }
             }
 
             // 1.2 normal numbers
             else if (type(now_token) == NUMBER) {
-                // ...
+                ANP token_to_AST = new AST_node;  // a new here, remember to delete
+                token_to_AST->data = now_token->data;
+                token_to_AST->type = Number;
+                token_to_AST->int_or_double = now_token->int_or_double;
+                if (token_to_AST->int_or_double == 1) {
+                    token_to_AST->value.int_value = now_token->value.int_value;
+                } else if (token_to_AST->int_or_double == 2) {
+                    token_to_AST->value.double_value = now_token->value.double_value;
+                }
+                sym.push(token_to_AST);
             }
 
+            // 1.3 wrong name
             else {
-                RaiseError("in DownTopExpression, members should only be identify name or number", data(now_token));
+                RaiseError("in Expression, members should only be identify name or number", data(now_token));
                 return now_token;
             }
         }
@@ -120,24 +194,68 @@ TNP DownTopExpressionAST::Parse() {
         // 2 operators
         else {
 
-            // 2.1 find unary + and -
+            // find unary + and -
             if (data(next_token) == "+" || data(next_token) == "-")
                 next_token->data += "unary";
 
-            // 2.2 use ( )
-            else if (data(now_token) == "(") {
+            // unary+, unary-, ! should become unary (use a placeholder)
+            if (assign_operator(data(now_token)) == 64) {
+                ANP token_to_AST = new AST_node;  // a new here, remember to delete
+                token_to_AST->data = "placeholder";
+                token_to_AST->type = Expression;
+                sym.push(token_to_AST);
+            }
+
+            // 2.1 use ( )
+            if (data(now_token) == "(") {
                 GoNext();
 
-                DownTopExpressionAST recur_expr(now_token);
+                ExpressionAST recur_expr(now_token);  // a new here, remember to delete
                 sym.push(recur_expr.head);
+                recur_expr.head->data = "brace";
                 now_token = recur_expr.Parse();
                 next_token = next(now_token);
 
                 if (data(now_token) != ")") {
-                    RaiseError("in DownTopExpression, missing punctuation [)]", data(now_token));
+                    RaiseError("in Expression, missing punctuation [)]", data(now_token));
                     return now_token;
                 }
             }
+
+            // 2.2 other operator
+            else {
+                std::string now_op = data(now_token);
+
+                // 2.2.1 wrong operator
+                if (assign_operator(now_op) == -1) {
+                    RaiseError("in Expression, unexpected operator found", data(now_token));
+                    return now_token;
+                }
+
+                // 2.2.2 now - top <= 0  means you can reduce it
+                while (compare(now_op, opt.top()) <= 0) {
+                    if (sym.empty()) {
+                        RaiseError("in Expression, number or variable is not enough", data(now_token));
+                        return now_token;
+                    }
+                    ANP k1 = sym.top(); sym.pop();
+                    if (sym.empty()) {
+                        RaiseError("in Expression, number or variable is not enough", data(now_token));
+                        return now_token;
+                    }
+                    ANP k2 = sym.top(); sym.pop();
+                    ANP tog = new AST_node;  // a new here, remember to delete
+                    tog->data = opt.top(); opt.pop();
+                    tog->type = Expression;
+                    reverse_connect_child(tog, k1);
+                    reverse_connect_child(tog, k2);
+                    sym.push(tog);
+                }
+
+                opt.push(now_op);
+
+            }
+
         }
 
         GoNext();

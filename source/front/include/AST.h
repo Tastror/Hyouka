@@ -10,6 +10,8 @@ void RaiseError(const std::string& error_code, const std::string& token_data);
 
 void connect_child(ANP parent, ANP child);
 
+void reverse_connect_child(ANP parent, ANP child);
+
 void _print_all_ASTs(ANP now, int stage);
 
 void print_all_ASTs(ANP AST_head);
@@ -26,28 +28,13 @@ public:
         next_token = next(now_token);
     }
     explicit BaseAST(TNP token_head) {
+        error = false;
         head = new AST_node;
         now_token = token_head;
         next_token = next(now_token);
     };
     bool UpdateError();
     virtual ~BaseAST() = default;
-};
-
-
-// examples:
-// 5
-// 2 + 1
-// x == 3
-// notice:
-// - no ; , ) } ]
-// - end with ; , ) } ]
-// - self return at ; , ) } ]
-class ExpressionAST: public BaseAST {
-public:
-    TNP Parse();
-    explicit ExpressionAST(TNP token_head): BaseAST(token_head) {}
-    ~ExpressionAST() override = default;
 };
 
 

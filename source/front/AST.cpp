@@ -29,14 +29,33 @@ void connect_child(ANP parent, ANP child) {
     }
 }
 
+void reverse_connect_child(ANP parent, ANP child) {
+    if (parent->child == nullptr) {
+        parent->child = child;
+        parent->last_child = child;
+        child->parent = parent;
+    } else {
+        child->sister = parent->child;
+        parent->child = child;
+        child->parent = parent;
+    }
+}
+
 void _print_all_ASTs(ANP now, int stage) {
     if (now == nullptr) return;
     for (int i = 0; i < stage; ++i)
         std::cout << "\t";
     std::cout << AST_show_type[now->type];
-    if (now->type == Number)
-        std::cout  << ", " <<
-        ((now->int_or_double == 1) ? now->value.int_value : ((now->int_or_double == 2) ? now->value.double_value : 0));
+    if (now->type == Number) {
+        std::cout  << ", ";
+        if (now->int_or_double == 1) {
+            std::cout  << "int: " << now->value.int_value;
+        } else if (now->int_or_double == 2) {
+            std::cout  << "float: " << now->value.double_value;
+        } else {
+            std::cout << "data: " << now->data;
+        }
+    }
     else
         std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << std::endl;
@@ -46,24 +65,6 @@ void _print_all_ASTs(ANP now, int stage) {
 
 void print_all_ASTs(ANP AST_head) {
     _print_all_ASTs(AST_head, 0);
-}
-
-
-TNP ExpressionAST::Parse() {
-    head->type = Expression;
-
-    DownTopExpressionAST expr(now_token);
-    connect_child(head, expr.head);
-    now_token = expr.Parse();
-    next_token = next(now_token);
-
-    if (data(now_token) != "," && data(now_token) != ";" &&
-        data(now_token) != ")" && data(now_token) != "}") {
-        RaiseError("in Expression, lost punctuation [;] [,] [)] or [}]", data(now_token));
-        return now_token;
-    }
-
-    return now_token;
 }
 
 

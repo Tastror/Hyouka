@@ -5,21 +5,15 @@
 #pragma once
 #include "AST.h"
 
-class FunctionRealParamAST: public BaseAST {
-public:
-    TNP Parse();
-    explicit FunctionRealParamAST(TNP token_head): BaseAST(token_head) {}
-    ~FunctionRealParamAST() override = default;
-};
 
 // examples:
 // test(2, 3)
 //          ^
-//     param return
+//     expr return
 // notice:
 // - including ( )
 // - end with )
-// - self return at )
+// - self return at ) (!important) to adjust expression
 class FunctionUsageAST: public BaseAST {
 public:
     TNP Parse();
@@ -27,10 +21,18 @@ public:
     ~FunctionUsageAST() override = default;
 };
 
-class DownTopExpressionAST: public BaseAST {
+// examples:
+// 5
+// 2 + 1
+// x == 3
+// notice:
+// - no ; , ) } ]
+// - end with ; , ) } ]
+// - self return at ; , ) } ]
+class ExpressionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit DownTopExpressionAST(TNP token_head): BaseAST(token_head) {}
-    ~DownTopExpressionAST() override = default;
+    explicit ExpressionAST(TNP token_head): BaseAST(token_head) {}
+    ~ExpressionAST() override = default;
 };
 

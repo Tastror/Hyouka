@@ -30,7 +30,7 @@ enum AST_type {
 
     Number, Identifier, BasicType, FunctionType,
 
-    Expression, DownTopExpression, FunctionUsage, FunctionRealParam,
+    Expression, FunctionUsage, FunctionRealParam,
 
     BlockStatement, Statement,
     NormalStatement, DeclarationStatement,
@@ -46,7 +46,7 @@ enum AST_type {
 const std::string AST_show_type[] = {
         "None", "ProgramBody",
         "Number", "Identifier", "BasicType", "FunctionType",
-        "Expression", "DownTopExpression", "FunctionUsage", "FunctionRealParam",
+        "Expression", "FunctionUsage", "FunctionRealParam",
         "BlockStatement", "Statement",
         "NormalStatement", "DeclarationStatement",
         "ConstDeclarationStatement", "VariableDeclarationStatement",
