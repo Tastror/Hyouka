@@ -22,9 +22,9 @@ token_node* get_token() {
      *     {}
      *     const float x = 0.14 + 3 * 1;
      *     if (x > 3 || x < 2)
-     *         x;
+     *         x = x - 2;
      *     else if (x <= 3.5)
-     *         x + 1;
+     *         x = x + 1;
      *     else {
      *         ;
      *     }
@@ -112,6 +112,10 @@ token_node* get_token() {
     { auto n = new token_node; n->type = NUMBER; n->data = "4"; n->int_or_double = 1; n->value.int_value = 3; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = PUNCT; n->data = ")"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = RNAME; n->data = "x"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "="; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = RNAME; n->data = "x"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "2"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = PUNCT; n->data = ";"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = KEYWORD; n->data = "else"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = KEYWORD; n->data = "if"; temp->next = n; temp = n; }
@@ -120,6 +124,8 @@ token_node* get_token() {
     { auto n = new token_node; n->type = OPERAT; n->data = "<"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = NUMBER; n->data = "3.5"; n->int_or_double = 2; n->value.double_value = 3.5; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = PUNCT; n->data = ")"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = RNAME; n->data = "x"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "="; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = RNAME; n->data = "x"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "+"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = NUMBER; n->data = "1"; n->int_or_double = 1; n->value.int_value = 1; temp->next = n; temp = n; }

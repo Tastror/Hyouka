@@ -73,10 +73,31 @@ TNP SingleAssignmentAST::Parse() {  // TBD
     head->type = SingleAssign;
 
     if (type(now_token) != RNAME) {
-        RaiseError("in SingleAssignmentAST, beginning is not a valid name", data(now_token));
+        RaiseError("in SingleAssignment, beginning is not a valid name", data(now_token));
+        return now_token;
+    }
+    ANP var_name = new AST_node;
+    connect_child(head, var_name);
+    var_name->type = Identifier;
+    var_name->data = now_token->data;
+    GoNext();
+
+    if (data(now_token) != "=") {
+        RaiseError("in SingleAssignment, lost punctuation [=]", data(now_token));
         return now_token;
     }
     GoNext();
+
+    ExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    expr.head->data = "assignment";
+    now_token = expr.Parse();
+    next_token = next(now_token);
+
+    if (data(now_token) != "," && data(now_token) != ";") {
+        RaiseError("in SingleAssignment, lost punctuation [;] or [,]", data(now_token));
+        return now_token;
+    }
 
     return now_token;
 }
@@ -226,11 +247,21 @@ TNP NormalStatementAST::Parse() {
             connect_child(head, assi.head);
             now_token = assi.Parse();
             next_token = next(now_token);
+            if (data(now_token) != ";") {
+                RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
+                return now_token;
+            }
+            GoNext();
         } else {
             SingleAssignmentAST assi(now_token);
             connect_child(head, assi.head);
             now_token = assi.Parse();
             next_token = next(now_token);
+            if (data(now_token) != ";") {
+                RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
+                return now_token;
+            }
+            GoNext();
         }
     }
 

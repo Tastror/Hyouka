@@ -73,7 +73,7 @@ TNP FunctionUsageAST::Parse() {
 }
 
 
-TNP ExpressionAST::Parse() {
+TNP ExpressionAST::Parse() {  // TBD, add a[expr]
     head->type = Expression;
 
     std::stack<std::string> opt;
