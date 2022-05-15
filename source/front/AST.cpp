@@ -4,6 +4,7 @@
 
 #include "AST.h"
 #include "AST_expr.h"
+#include "AST_keystmt.h"
 
 bool GlobalError = false;
 
@@ -115,6 +116,7 @@ TNP SingleDefinitionAST::Parse() {
 
     ExpressionAST expr(now_token);
     connect_child(head, expr.head);
+    expr.head->data = "definition";
     now_token = expr.Parse();
     next_token = next(now_token);
 
@@ -239,15 +241,29 @@ TNP NormalStatementAST::Parse() {
         next_token = next(now_token);
     }
 
-    else if (type(now_token) == KEYWORD) {  // TBD
-        GoNext();
-        GoNext();
-        GoNext();
+    else if (type(now_token) == KEYWORD) {
+
+        std::string now_data = data(now_token);
+        if (now_data == "if" || now_data == "while" || now_data == "break" ||
+            now_data == "continue" || now_data == "return") {
+            KeywordStatementAST key_stmt(now_token);
+            connect_child(head, key_stmt.head);
+            now_token = key_stmt.Parse();
+            next_token = next(now_token);
+        }
+
+        else {
+            RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
+            GoNext();  // !important, to avoid circle in normal statement
+            return now_token;
+        }
+
     }
 
     else if (type(now_token) == NUMBER || type(now_token) == RNAME) {
         ExpressionAST expr(now_token);
         connect_child(head, expr.head);
+        expr.head->data = "statement";
         now_token = expr.Parse();
         next_token = next(now_token);
         if (data(now_token) != ";") {
@@ -259,7 +275,7 @@ TNP NormalStatementAST::Parse() {
 
     else {
         RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
-        GoNext();
+        GoNext();  // !important, to avoid circle in normal statement
         return now_token;
     }
 
@@ -269,6 +285,7 @@ TNP NormalStatementAST::Parse() {
 
 TNP StatementAST::Parse() {
     head->type = Statement;
+
     if (data(now_token) == "int" || data(now_token) == "float" ||
         data(now_token) == "const") {
         DeclarationStatementAST decl_stmt(now_token);
@@ -283,6 +300,7 @@ TNP StatementAST::Parse() {
         now_token = norm_stmt.Parse();
         next_token = next(now_token);
     }
+
     return now_token;
 }
 

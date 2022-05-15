@@ -9,11 +9,9 @@
 void RaiseError(const std::string& error_code, const std::string& token_data);
 
 void connect_child(ANP parent, ANP child);
-
 void reverse_connect_child(ANP parent, ANP child);
 
 void _print_all_ASTs(ANP now, int stage);
-
 void print_all_ASTs(ANP AST_head);
 
 
@@ -41,8 +39,8 @@ public:
 // examples:
 // x = 3
 // y = 8 * 5 + 1
-//               ^
-//           expr return
+//              ^
+//         expr return
 // notice:
 // - no , ; )
 // - end with ; , )
@@ -76,7 +74,7 @@ public:
 // x = 3
 // y = 8 * 5 + 1
 //              ^
-//          expr return
+//         expr return
 // notice:
 // - no , or ;
 // - end with , or ;
@@ -139,10 +137,13 @@ public:
 // if (x == 3) x = 2;
 // if (x > 2) {}
 //              ^
-//           if return
+//          key return
+// return 2 + 5;
+//              ^
+//          key return
 // notice:
 // - including ;
-// - self return at ;::after, }::after or at last }
+// - self return at ;::after or }::after
 class NormalStatementAST: public BaseAST {
 public:
     TNP Parse();
@@ -162,7 +163,7 @@ public:
 //                normal stmt return
 // notice:
 // - including { and }
-// - self return at }::after
+// - self return at }::after or ;::after
 class StatementAST: public BaseAST {
 public:
     TNP Parse();
