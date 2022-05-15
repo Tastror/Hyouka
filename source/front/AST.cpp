@@ -273,6 +273,10 @@ TNP NormalStatementAST::Parse() {
         GoNext();
     }
 
+    else if (data(now_token) == ";") {
+        GoNext();
+    }
+
     else {
         RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
         GoNext();  // !important, to avoid circle in normal statement
@@ -357,7 +361,7 @@ TNP FunctionFormParamAST::Parse() {
     }
     ANP id_name = new AST_node;
     connect_child(head, id_name);
-    id_name->type = BasicType;
+    id_name->type = Identifier;
     id_name->data = now_token->data;
     GoNext();
 
@@ -365,7 +369,7 @@ TNP FunctionFormParamAST::Parse() {
 }
 
 
-TNP FunctionParamsAST::Parse() {  // TBD
+TNP FunctionParamsAST::Parse() {
     head->type = FunctionParams;
 
     if (data(now_token) == ")") {
