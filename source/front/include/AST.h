@@ -43,8 +43,8 @@ public:
 //         expr return
 // notice:
 // - no , ; )
-// - end with ; , )
-// - self return at , ; )
+// - usually end with ; , )
+// - self return at expr::after
 class SingleAssignmentAST: public BaseAST {
 public:
     TNP Parse();
@@ -60,8 +60,8 @@ public:
 //               expr return
 // notice:
 // - no , ; )
-// - end with ; , )
-// - self return at , ; )
+// - usually end with ; , )
+// - self return at expr::after
 class ArrayAssignmentAST: public BaseAST {
 public:
     TNP Parse();
@@ -71,14 +71,15 @@ public:
 
 
 // examples:
+// x
 // x = 3
 // y = 8 * 5 + 1
 //              ^
 //         expr return
 // notice:
 // - no , or ;
-// - end with , or ;
-// - self return at , or ;
+// - usually end with , or ;
+// - self return at identifyName::after or expr::after
 class SingleDefinitionAST: public BaseAST {
 public:
     TNP Parse();
@@ -88,16 +89,32 @@ public:
 
 
 // examples:
+// {}
+// {8 * 5 + 1, 7}
+// {{}, {2}, 1, 3}
+//        ^
+//   expr return
+// notice:
+// - self return at }::after
+class ArrayInitialBlockAST: public BaseAST {
+public:
+    TNP Parse();
+    explicit ArrayInitialBlockAST(TNP token_head): BaseAST(token_head) {}
+    ~ArrayInitialBlockAST() override = default;
+};
+
+
+// examples:
 // a[]
 // x[5] = {}
 // y[6] = {8 * 5 + 1, 7}
 // z[3][3] = {{}, {2}, 1, 3}
-//                  ^
-//             expr return
+//                          ^
+//                  init block return
 // notice:
 // - no , or ;
 // - end with , or ;
-// - self return at , or ;
+// - self return at ]::after or }::after
 class ArrayDefinitionAST: public BaseAST {
 public:
     TNP Parse();
@@ -128,7 +145,7 @@ public:
 // 2 + 1;
 //      ^
 // expr return
-// x = 5;
+// x = 51;
 //       ^
 // assign return
 // { x = 5; }
@@ -192,7 +209,7 @@ public:
 // float y
 // notice:
 // - end with , or )
-// - self return at , or )
+// - self return at identifyName::after
 class FunctionFormParamAST: public BaseAST {
 public:
     TNP Parse();
@@ -208,7 +225,7 @@ public:
 // notice:
 // - no ( or )
 // - end with )
-// - self return at )
+// - self return at identifyName::after
 class FunctionParamsAST: public BaseAST {
 public:
     TNP Parse();

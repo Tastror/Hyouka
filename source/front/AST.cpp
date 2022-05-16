@@ -70,7 +70,7 @@ void print_all_ASTs(ANP AST_head) {
 
 
 TNP SingleAssignmentAST::Parse() {
-    head->type = SingleAssign;
+    head->type = SingleAssignment;
 
     if (type(now_token) != RNAME) {
         RaiseError("in SingleAssignment, beginning is not a valid name", data(now_token));
@@ -94,6 +94,7 @@ TNP SingleAssignmentAST::Parse() {
     now_token = expr.Parse();
     next_token = next(now_token);
 
+    // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
         RaiseError("in SingleAssignment, lost punctuation [;] or [,]", data(now_token));
         return now_token;
@@ -103,14 +104,70 @@ TNP SingleAssignmentAST::Parse() {
 }
 
 
-TNP ArrayAssignmentAST::Parse() {  // TBD
-    head->type = SingleAssign;
+TNP ArrayAssignmentAST::Parse() {
+    head->type = ArrayAssignment;
 
     if (type(now_token) != RNAME) {
-        RaiseError("in ArrayAssignmentAST, beginning is not a valid name", data(now_token));
+        RaiseError("in ArrayAssignment, beginning is not a valid name", data(now_token));
+        return now_token;
+    }
+    ANP var_name = new AST_node;
+    connect_child(head, var_name);
+    var_name->type = Identifier;
+    var_name->data = now_token->data;
+    GoNext();
+
+    if (data(now_token) != "[") {
+        RaiseError("in ArrayAssignment, lost punctuation [[]", data(now_token));
         return now_token;
     }
     GoNext();
+
+    ExpressionAST index(now_token);
+    connect_child(head, index.head);
+    index.head->data = "index";
+    now_token = index.Parse();
+    next_token = next(now_token);
+
+    if (data(now_token) != "]") {
+        RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    while (data(now_token) == "[") {
+        GoNext();
+
+        ExpressionAST index_addi(now_token);
+        connect_child(head, index_addi.head);
+        index_addi.head->data = "index";
+        now_token = index_addi.Parse();
+        next_token = next(now_token);
+
+        if (data(now_token) != "]") {
+            RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+            return now_token;
+        }
+        GoNext();
+    }
+
+    if (data(now_token) != "=") {
+        RaiseError("in ArrayAssignment, lost punctuation [=]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    ExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    expr.head->data = "value";
+    now_token = expr.Parse();
+    next_token = next(now_token);
+
+    // meddle check, may cause error, could be removed
+    if (data(now_token) != "," && data(now_token) != ";") {
+        RaiseError("in ArrayAssignment, lost punctuation [;] or [,]", data(now_token));
+        return now_token;
+    }
 
     return now_token;
 }
@@ -129,18 +186,17 @@ TNP SingleDefinitionAST::Parse() {
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "=") {
-        RaiseError("in SingleDefinition, lost punctuation [=]", data(now_token));
-        return now_token;
+    if (data(now_token) == "=") {
+        GoNext();
+
+        ExpressionAST expr(now_token);
+        connect_child(head, expr.head);
+        expr.head->data = "value";
+        now_token = expr.Parse();
+        next_token = next(now_token);
     }
-    GoNext();
 
-    ExpressionAST expr(now_token);
-    connect_child(head, expr.head);
-    expr.head->data = "definition";
-    now_token = expr.Parse();
-    next_token = next(now_token);
-
+    // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
         RaiseError("in SingleDefinition, lost punctuation [;] or [,]", data(now_token));
         return now_token;
@@ -150,13 +206,131 @@ TNP SingleDefinitionAST::Parse() {
 }
 
 
-TNP ArrayDefinitionAST::Parse() {  // TBD
-    head->type = ArrayDefinition;
-    if (type(now_token) != RNAME) {
-        RaiseError("in ArrayDefinition, beginning is not a valid name", data(now_token));
+TNP ArrayInitialBlockAST::Parse() {
+    head->type = ArrayInitialBlock;
+
+    if (data(now_token) != "{") {
+        RaiseError("in ArrayInitialBlock, lost punctuation [{]", data(now_token));
         return now_token;
     }
     GoNext();
+
+    if (data(now_token) == "}") {
+        GoNext();
+        return now_token;
+    }
+
+    else if (data(now_token) == "{") {
+        ArrayInitialBlockAST recur_array_init(now_token);
+        connect_child(head, recur_array_init.head);
+        now_token = recur_array_init.Parse();
+        next_token = next(now_token);
+    }
+
+    else {
+        ExpressionAST index(now_token);
+        connect_child(head, index.head);
+        index.head->data = "value";
+        now_token = index.Parse();
+        next_token = next(now_token);
+    }
+
+    while (true) {
+
+        if (data(now_token) == "}") {
+            GoNext();
+            break;
+        }
+
+        else if (data(now_token) != ",") {
+            RaiseError("in ArrayInitialBlock, punctuation should be [{] or [,]", data(now_token));
+            return now_token;
+        }
+        GoNext();
+
+        if (data(now_token) == "{") {
+            ArrayInitialBlockAST recur_array_init(now_token);
+            connect_child(head, recur_array_init.head);
+            now_token = recur_array_init.Parse();
+            next_token = next(now_token);
+        }
+
+        else {
+            ExpressionAST index(now_token);
+            connect_child(head, index.head);
+            index.head->data = "value";
+            now_token = index.Parse();
+            next_token = next(now_token);
+        }
+
+    }
+
+    return now_token;
+}
+
+
+TNP ArrayDefinitionAST::Parse() {  // TBD
+    head->type = ArrayDefinition;
+
+    if (type(now_token) != RNAME) {
+        RaiseError("in ArrayAssignment, beginning is not a valid name", data(now_token));
+        return now_token;
+    }
+    ANP var_name = new AST_node;
+    connect_child(head, var_name);
+    var_name->type = Identifier;
+    var_name->data = now_token->data;
+    GoNext();
+
+    if (data(now_token) != "[") {
+        RaiseError("in ArrayAssignment, lost punctuation [[]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    ExpressionAST index(now_token);
+    connect_child(head, index.head);
+    index.head->data = "index";
+    now_token = index.Parse();
+    next_token = next(now_token);
+
+    if (data(now_token) != "]") {
+        RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    while (data(now_token) == "[") {
+        GoNext();
+
+        ExpressionAST index_addi(now_token);
+        connect_child(head, index_addi.head);
+        index_addi.head->data = "index";
+        now_token = index_addi.Parse();
+        next_token = next(now_token);
+
+        if (data(now_token) != "]") {
+            RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+            return now_token;
+        }
+        GoNext();
+    }
+
+    if (data(now_token) == "=") {
+        GoNext();
+
+        ArrayInitialBlockAST array_init(now_token);
+        connect_child(head, array_init.head);
+        now_token = array_init.Parse();
+        next_token = next(now_token);
+    }
+
+    // meddle check, may cause error, could be removed
+    if (data(now_token) != "," && data(now_token) != ";") {
+        RaiseError("in SingleDefinition, lost punctuation [;] or [,]", data(now_token));
+        return now_token;
+    }
+
     return now_token;
 }
 
@@ -197,7 +371,9 @@ TNP DeclarationStatementAST::Parse() {
             now_token = single_def.Parse();
             next_token = next(now_token);
         }
-    } else {
+    }
+
+    else {
         RaiseError("in DeclarationStatement, missing identify name", data(now_token));
         return now_token;
     }
@@ -211,7 +387,9 @@ TNP DeclarationStatementAST::Parse() {
 
         else if (data(now_token) == ",") {
             GoNext();
-        } else {
+        }
+
+        else {
             RaiseError("in DeclarationStatement, separate punctuation should be [,]", data(now_token));
             return now_token;
         }
@@ -228,7 +406,9 @@ TNP DeclarationStatementAST::Parse() {
                 now_token = single_def.Parse();
                 next_token = next(now_token);
             }
-        } else {
+        }
+
+        else {
             RaiseError("in DeclarationStatement, missing identify name", data(now_token));
             return now_token;
         }
@@ -242,21 +422,27 @@ TNP NormalStatementAST::Parse() {
     head->type = NormalStatement;
 
     if (type(now_token) == RNAME && search_data(next_token, "=", ";")) {
+
         if (data(next_token) == "[") {
+
             ArrayAssignmentAST assi(now_token);
             connect_child(head, assi.head);
             now_token = assi.Parse();
             next_token = next(now_token);
+
             if (data(now_token) != ";") {
                 RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
                 return now_token;
             }
             GoNext();
-        } else {
+        }
+
+        else {
             SingleAssignmentAST assi(now_token);
             connect_child(head, assi.head);
             now_token = assi.Parse();
             next_token = next(now_token);
+
             if (data(now_token) != ";") {
                 RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
                 return now_token;
@@ -292,11 +478,13 @@ TNP NormalStatementAST::Parse() {
     }
 
     else if (type(now_token) == NUMBER || type(now_token) == RNAME) {
+
         ExpressionAST expr(now_token);
         connect_child(head, expr.head);
         expr.head->data = "statement";
         now_token = expr.Parse();
         next_token = next(now_token);
+
         if (data(now_token) != ";") {
             RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
             return now_token;
@@ -321,8 +509,7 @@ TNP NormalStatementAST::Parse() {
 TNP StatementAST::Parse() {
     head->type = Statement;
 
-    if (data(now_token) == "int" || data(now_token) == "float" ||
-        data(now_token) == "const") {
+    if (data(now_token) == "int" || data(now_token) == "float" || data(now_token) == "const") {
         DeclarationStatementAST decl_stmt(now_token);
         connect_child(head, decl_stmt.head);
         now_token = decl_stmt.Parse();
@@ -407,10 +594,6 @@ TNP FunctionParamsAST::Parse() {
         return now_token;
     }
 
-    if (data(now_token) != "int" && data(now_token) != "float") {
-        RaiseError("in FunctionParams, type should be [int] or [float]", data(now_token));
-        return now_token;
-    }
     FunctionFormParamAST func_param(now_token);
     connect_child(head, func_param.head);
     now_token = func_param.Parse();
@@ -423,15 +606,11 @@ TNP FunctionParamsAST::Parse() {
         }
 
         if (data(now_token) != ",") {
-            RaiseError("in FunctionParams, punctuation should be [,]", data(now_token));
+            RaiseError("in FunctionParams, punctuation should be [,] or [)]", data(now_token));
             return now_token;
         }
         GoNext();
 
-        if (data(now_token) != "int" && data(now_token) != "float") {
-            RaiseError("in FunctionParams, type should be [int] or [float]", data(now_token));
-            return now_token;
-        }
         FunctionFormParamAST addi_func_param(now_token);
         connect_child(head, addi_func_param.head);
         now_token = addi_func_param.Parse();
@@ -499,8 +678,7 @@ TNP ProgramAST::Parse() {
         TNP look_next = next(next_token);
 
         if (data(now_token) == "void" ||
-           ((data(now_token) == "int" || data(now_token) == "float")
-            && data(look_next) == "(") ) {
+           ((data(now_token) == "int" || data(now_token) == "float") && data(look_next) == "(") ) {
             FunctionDefinitionAST func_def(now_token);
             connect_child(head, func_def.head);
             now_token = func_def.Parse();

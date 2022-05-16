@@ -36,7 +36,7 @@ enum AST_type {
     NormalStatement, DeclarationStatement,
     ConstDeclarationStatement, VariableDeclarationStatement,
 
-    SingleAssign, ArrayAssign,
+    SingleAssignment, ArrayAssignment, ArrayInitialBlock,
     SingleDefinition, ArrayDefinition,
 
     FunctionDefinition,
@@ -50,7 +50,7 @@ const std::string AST_show_type[] = {
         "BlockStatement", "Statement", "KeywordStatement",
         "NormalStatement", "DeclarationStatement",
         "ConstDeclarationStatement", "VariableDeclarationStatement",
-        "SingleAssign", "ArrayAssign",
+        "SingleAssignment", "ArrayAssignment", "ArrayInitialBlock",
         "SingleDefinition", "ArrayDefinition",
         "FunctionDefinition",
         "FunctionParams", "FunctionFormParam",
