@@ -4,14 +4,16 @@ project(Hyouka)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(
-        front
-        front/include
+        front/Lexical
+        front/Define/include
+        front/Parsing/include
 )
 
 add_executable(source
-        front/define.cpp
-        front/AST.cpp
-        front/AST_expr.cpp
-        front/AST_keystmt.cpp
+        front/Define/define.cpp
+        front/Lexical/test.hpp
+        front/Parsing/AST.cpp
+        front/Parsing/AST_expr.cpp
+        front/Parsing/AST_keystmt.cpp
         main.cpp
 )
