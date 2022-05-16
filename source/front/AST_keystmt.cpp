@@ -101,7 +101,7 @@ TNP KeywordStatementAST::Parse() {
 
         ExpressionAST expr(now_token);
         connect_child(head, expr.head);
-        expr.head->data = "return";
+        expr.head->data = "value";
         now_token = expr.Parse();
         next_token = next(now_token);
 

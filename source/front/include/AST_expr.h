@@ -5,6 +5,19 @@
 #pragma once
 #include "AST.h"
 
+// examples:
+// a[2 + 4][2]
+//        ^
+//   expr return
+// notice:
+// - including [ ]
+// - self return at ]::after
+class ArrayUsageAST: public BaseAST {
+public:
+    TNP Parse();
+    explicit ArrayUsageAST(TNP token_head): BaseAST(token_head) {}
+    ~ArrayUsageAST() override = default;
+};
 
 // examples:
 // test(2, 3)
@@ -13,7 +26,7 @@
 // notice:
 // - including ( )
 // - end with )
-// - self return at ) (!important) to adjust expression
+// - self return at )::after
 class FunctionUsageAST: public BaseAST {
 public:
     TNP Parse();

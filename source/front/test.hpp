@@ -16,7 +16,9 @@ token_node* get_token() {
      *     return a + x;
      * }
      *
-     * int _abc = 7 + 5 / 3 + 4 * (8 - 2) - (-3 || 4 >= 2) + test(7, 16);
+     * // int k[8][6] = {2, 3};
+     *
+     * int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(7, 16);
      *
      * int main() {
      *     {}
@@ -67,6 +69,16 @@ token_node* get_token() {
     { auto n = new token_node; n->type = NUMBER; n->data = "2"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = ")"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = RNAME; n->data = "k"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "["; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "2"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "+"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "3"; n->int_or_double = 1; n->value.int_value = 3; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "]"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "["; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = NUMBER; n->data = "5"; n->int_or_double = 1; n->value.int_value = 2; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "]"; temp->next = n; temp = n; }
+    { auto n = new token_node; n->type = OPERAT; n->data = "+"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "("; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = OPERAT; n->data = "-"; temp->next = n; temp = n; }
     { auto n = new token_node; n->type = NUMBER; n->data = "3"; n->int_or_double = 1; n->value.int_value = 3; temp->next = n; temp = n; }

@@ -45,7 +45,7 @@ void reverse_connect_child(ANP parent, ANP child) {
 void _print_all_ASTs(ANP now, int stage) {
     if (now == nullptr) return;
     for (int i = 0; i < stage; ++i)
-        std::cout << "\t";
+        std::cout << "    ";
     std::cout << AST_show_type[now->type];
     if (now->type == Number) {
         std::cout  << ", ";
@@ -69,7 +69,7 @@ void print_all_ASTs(ANP AST_head) {
 }
 
 
-TNP SingleAssignmentAST::Parse() {  // TBD
+TNP SingleAssignmentAST::Parse() {
     head->type = SingleAssign;
 
     if (type(now_token) != RNAME) {
@@ -90,7 +90,7 @@ TNP SingleAssignmentAST::Parse() {  // TBD
 
     ExpressionAST expr(now_token);
     connect_child(head, expr.head);
-    expr.head->data = "assignment";
+    expr.head->data = "value";
     now_token = expr.Parse();
     next_token = next(now_token);
 

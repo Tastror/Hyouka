@@ -17,9 +17,72 @@ int assign_operator(const std::string& op) {
     else return -1;
 }
 
+int assign_operator_2(const std::string& op) {
+    if (op == "begin" || op == "end") return 0;
+    else if (op == "||") return 1;
+    else if (op == "&&") return 2;
+    else if (op == "==" || op == "!=") return 3;
+    else if (op == "<" || op == ">" || op == "<=" || op == ">=") return 4;
+    else if (op == "+" || op == "-") return 5;
+    else if (op == "*" || op == "/" || op == "%") return 6;
+    else if (op == "+unary" || op == "-unary" || op == "!") return 63;
+    else return -1;
+}
+
 int compare(const std::string& op1, const std::string& op2) {
-    int a = assign_operator(op1), b = assign_operator(op2);
+    int a = assign_operator(op1), b = assign_operator_2(op2);
     return a - b;
+}
+
+
+TNP ArrayUsageAST::Parse() {
+    head->type = ArrayUsage;
+
+    if (type(now_token) != RNAME) {
+        RaiseError("in ArrayUsage, identify name is not valid", data(now_token));
+        return now_token;
+    }
+    ANP var_name = new AST_node;
+    connect_child(head, var_name);
+    var_name->type = Identifier;
+    var_name->data = now_token->data;
+    GoNext();
+
+    if (data(now_token) != "[") {
+        RaiseError("in ArrayUsage, begin punctuation should be [[]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    ExpressionAST expr(now_token);
+    connect_child(head, expr.head);
+    expr.head->data = "index";
+    now_token = expr.Parse();
+    next_token = next(now_token);
+
+    if (data(now_token) != "]") {
+        RaiseError("in ArrayUsage, end punctuation should be []]", data(now_token));
+        return now_token;
+    }
+    GoNext();
+
+    while (data(now_token) == "[") {
+        GoNext();
+
+        ExpressionAST expr(now_token);
+        connect_child(head, expr.head);
+        expr.head->data = "index";
+        now_token = expr.Parse();
+        next_token = next(now_token);
+
+        if (data(now_token) != "]") {
+            RaiseError("in ArrayUsage, end punctuation should be []]", data(now_token));
+            return now_token;
+        }
+        GoNext();
+    }
+
+    return now_token;
 }
 
 
@@ -30,6 +93,10 @@ TNP FunctionUsageAST::Parse() {
         RaiseError("in FunctionUsage, identify name is not valid", data(now_token));
         return now_token;
     }
+    ANP var_name = new AST_node;
+    connect_child(head, var_name);
+    var_name->type = Identifier;
+    var_name->data = now_token->data;
     GoNext();
 
     if (data(now_token) != "(") {
@@ -51,6 +118,7 @@ TNP FunctionUsageAST::Parse() {
     while (true) {
 
         if (data(now_token) == ")") {
+            GoNext();
             break;
         }
 
@@ -73,7 +141,7 @@ TNP FunctionUsageAST::Parse() {
 }
 
 
-TNP ExpressionAST::Parse() {  // TBD, add a[expr]
+TNP ExpressionAST::Parse() {
     head->type = Expression;
 
     std::stack<std::string> opt;
@@ -82,8 +150,6 @@ TNP ExpressionAST::Parse() {  // TBD, add a[expr]
 
     bool quit = false;
     while (true) {
-
-
 
         if (now_token == nullptr) {
             RaiseError("in Expression, lost ending", data(now_token));
@@ -147,26 +213,29 @@ TNP ExpressionAST::Parse() {  // TBD, add a[expr]
             // 1.1 function or variables
             if (type(now_token) == RNAME) {
 
-                // 1.1.1 function usage
+                // 1.1.1 function usage [No GoNext]
                 if (data(next_token) == "(") {
-
                     FunctionUsageAST func_use(now_token);  // a new here, remember to delete
                     sym.push(func_use.head);
                     now_token = func_use.Parse();
                     next_token = next(now_token);
-
-                    if (data(now_token) != ")") {
-                        RaiseError("in Expression, missing punctuation [)]", data(now_token));
-                        return now_token;
-                    }
                 }
 
-                // 1.1.2 normal variables
+                // 1.1.2 array usage [No GoNext]
+                else if (data(next_token) == "[") {
+                    ArrayUsageAST array_use(now_token);  // a new here, remember to delete
+                    sym.push(array_use.head);
+                    now_token = array_use.Parse();
+                    next_token = next(now_token);
+                }
+
+                // 1.1.3 normal variables
                 else {
                     ANP token_to_AST = new AST_node;  // a new here, remember to delete
                     token_to_AST->data = now_token->data;
                     token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
+                    GoNext();
                 }
             }
 
@@ -182,6 +251,7 @@ TNP ExpressionAST::Parse() {  // TBD, add a[expr]
                     token_to_AST->value.double_value = now_token->value.double_value;
                 }
                 sym.push(token_to_AST);
+                GoNext();
             }
 
             // 1.3 wrong name
@@ -220,6 +290,7 @@ TNP ExpressionAST::Parse() {  // TBD, add a[expr]
                     RaiseError("in Expression, missing punctuation [)]", data(now_token));
                     return now_token;
                 }
+                GoNext();
             }
 
             // 2.2 other operator
@@ -253,12 +324,10 @@ TNP ExpressionAST::Parse() {  // TBD, add a[expr]
                 }
 
                 opt.push(now_op);
-
+                GoNext();
             }
 
         }
-
-        GoNext();
     }
     return now_token;
 }

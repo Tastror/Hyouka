@@ -22,6 +22,7 @@ token_type type(token_node* now) {
     return NONE;
 }
 
+// only use in assign
 bool search_data(token_node* now, const std::string& target, const std::string& end) {
     while (now != nullptr) {
         if (data(now) == target)
