@@ -39,7 +39,7 @@ TNP ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in ArrayUsage, identify name is not valid", data(now_token));
+        RaiseError("in ArrayUsage, identify name is not valid", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -49,7 +49,7 @@ TNP ArrayUsageAST::Parse() {
     GoNext();
 
     if (data(now_token) != "[") {
-        RaiseError("in ArrayUsage, begin punctuation should be [[]", data(now_token));
+        RaiseError("in ArrayUsage, begin punctuation should be [[]", now_token);
         return now_token;
     }
     GoNext();
@@ -61,7 +61,7 @@ TNP ArrayUsageAST::Parse() {
     next_token = next(now_token);
 
     if (data(now_token) != "]") {
-        RaiseError("in ArrayUsage, end punctuation should be []]", data(now_token));
+        RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
         return now_token;
     }
     GoNext();
@@ -76,7 +76,7 @@ TNP ArrayUsageAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != "]") {
-            RaiseError("in ArrayUsage, end punctuation should be []]", data(now_token));
+            RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
             return now_token;
         }
         GoNext();
@@ -90,7 +90,7 @@ TNP FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in FunctionUsage, identify name is not valid", data(now_token));
+        RaiseError("in FunctionUsage, identify name is not valid", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -100,7 +100,7 @@ TNP FunctionUsageAST::Parse() {
     GoNext();
 
     if (data(now_token) != "(") {
-        RaiseError("in FunctionUsage, begin punctuation should be [(]", data(now_token));
+        RaiseError("in FunctionUsage, begin punctuation should be [(]", now_token);
         return now_token;
     }
     GoNext();
@@ -123,7 +123,7 @@ TNP FunctionUsageAST::Parse() {
         }
 
         if (data(now_token) != ",") {
-            RaiseError("in FunctionUsage, punctuation should be [,]", data(now_token));
+            RaiseError("in FunctionUsage, punctuation should be [,]", now_token);
             return now_token;
         }
         GoNext();
@@ -150,7 +150,7 @@ TNP ExpressionAST::Parse() {
     while (true) {
 
         if (now_token == nullptr) {
-            RaiseError("in Expression, lost ending", data(now_token));
+            RaiseError("in Expression, lost ending", now_token);
             return now_token;
         }
 
@@ -171,17 +171,17 @@ TNP ExpressionAST::Parse() {
                 }
 
                 if (opt.empty()) {
-                    RaiseError("in Expression, fatal error occurred", data(now_token));
+                    RaiseError("in Expression, fatal error occurred", now_token);
                     return now_token;
                 }
 
                 if (sym.empty()) {
-                    RaiseError("in Expression, number or variable is not enough", data(now_token));
+                    RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
                 ANP k1 = sym.top(); sym.pop();
                 if (sym.empty()) {
-                    RaiseError("in Expression, number or variable is not enough", data(now_token));
+                    RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
                 ANP k2 = sym.top(); sym.pop();
@@ -200,7 +200,7 @@ TNP ExpressionAST::Parse() {
             }
 
             else {
-                RaiseError("in Expression, missing operators or numbers", data(now_token));
+                RaiseError("in Expression, missing operators or numbers", now_token);
                 return now_token;
             }
         }
@@ -254,7 +254,7 @@ TNP ExpressionAST::Parse() {
 
             // 1.3 wrong name
             else {
-                RaiseError("in Expression, members should only be identify name or number", data(now_token));
+                RaiseError("in Expression, members should only be identify name or number", now_token);
                 return now_token;
             }
         }
@@ -285,7 +285,7 @@ TNP ExpressionAST::Parse() {
                 next_token = next(now_token);
 
                 if (data(now_token) != ")") {
-                    RaiseError("in Expression, missing punctuation [)]", data(now_token));
+                    RaiseError("in Expression, missing punctuation [)]", now_token);
                     return now_token;
                 }
                 GoNext();
@@ -297,19 +297,19 @@ TNP ExpressionAST::Parse() {
 
                 // 2.2.1 wrong operator
                 if (assign_operator(now_op) == -1) {
-                    RaiseError("in Expression, unexpected operator found", data(now_token));
+                    RaiseError("in Expression, unexpected operator found", now_token);
                     return now_token;
                 }
 
                 // 2.2.2 now - top <= 0  means you can reduce it
                 while (compare(now_op, opt.top()) <= 0) {
                     if (sym.empty()) {
-                        RaiseError("in Expression, number or variable is not enough", data(now_token));
+                        RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
                     ANP k1 = sym.top(); sym.pop();
                     if (sym.empty()) {
-                        RaiseError("in Expression, number or variable is not enough", data(now_token));
+                        RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
                     ANP k2 = sym.top(); sym.pop();

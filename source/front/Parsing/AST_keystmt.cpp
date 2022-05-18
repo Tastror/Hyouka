@@ -12,7 +12,7 @@ TNP KeywordStatementAST::Parse() {
         GoNext();
 
         if (data(now_token) != "(") {
-            RaiseError("in KeywordStatement, if condition statement should begin with [(]", data(now_token));
+            RaiseError("in KeywordStatement, if condition statement should begin with [(]", now_token);
             return now_token;
         }
         GoNext();
@@ -24,7 +24,7 @@ TNP KeywordStatementAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != ")") {
-            RaiseError("in KeywordStatement, if condition statement should end with [)]", data(now_token));
+            RaiseError("in KeywordStatement, if condition statement should end with [)]", now_token);
             return now_token;
         }
         GoNext();
@@ -50,7 +50,7 @@ TNP KeywordStatementAST::Parse() {
         GoNext();
 
         if (data(now_token) != "(") {
-            RaiseError("in KeywordStatement, while condition statement should begin with [(]", data(now_token));
+            RaiseError("in KeywordStatement, while condition statement should begin with [(]", now_token);
             return now_token;
         }
         GoNext();
@@ -62,7 +62,7 @@ TNP KeywordStatementAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != ")") {
-            RaiseError("in KeywordStatement, while condition statement should end with [)]", data(now_token));
+            RaiseError("in KeywordStatement, while condition statement should end with [)]", now_token);
             return now_token;
         }
         GoNext();
@@ -78,7 +78,7 @@ TNP KeywordStatementAST::Parse() {
         GoNext();
 
         if (data(now_token) != ";") {
-            RaiseError("in KeywordStatement, break should end with [;]", data(now_token));
+            RaiseError("in KeywordStatement, break should end with [;]", now_token);
             return now_token;
         }
         GoNext();
@@ -89,7 +89,7 @@ TNP KeywordStatementAST::Parse() {
         GoNext();
 
         if (data(now_token) != ";") {
-            RaiseError("in KeywordStatement, continue should end with [;]", data(now_token));
+            RaiseError("in KeywordStatement, continue should end with [;]", now_token);
             return now_token;
         }
         GoNext();
@@ -106,14 +106,14 @@ TNP KeywordStatementAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != ";") {
-            RaiseError("in KeywordStatement, return should end with [;]", data(now_token));
+            RaiseError("in KeywordStatement, return should end with [;]", now_token);
             return now_token;
         }
         GoNext();
     }
 
     else {
-        RaiseError("in KeywordStatement, begin with wrong sign", data(now_token));
+        RaiseError("in KeywordStatement, begin with wrong sign", now_token);
         return now_token;
     }
 

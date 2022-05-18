@@ -6,12 +6,10 @@
 #include <iostream>
 #include "define.h"
 
-void RaiseError(const std::string& error_code, const std::string& token_data);
+void RaiseError(const std::string& error_code, TNP token_node);
 
 void connect_child(ANP parent, ANP child);
 void reverse_connect_child(ANP parent, ANP child);
-
-
 
 
 class BaseAST {

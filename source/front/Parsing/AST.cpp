@@ -12,9 +12,14 @@ bool BaseAST::UpdateError() {
     return (error = GlobalError);
 }
 
-void RaiseError(const std::string& error_code, const std::string& token_data) {
+void RaiseError(const std::string& error_code, TNP token_node) {
     std::cout << "ERROR: " << error_code << std::endl;
-    std::cout << "    where: " << token_data << std::endl;
+    if (token_node != nullptr)
+        std::cout << "    where: " << token_node->data
+                  << " at line " << token_node->line << ", column "
+                  << token_node->column << std::endl;
+    else
+        std::cout << "    where: reach the end of the file" << std::endl;
     GlobalError = true;
 }
 
@@ -46,7 +51,7 @@ TNP SingleAssignmentAST::Parse() {
     head->type = SingleAssignment;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in SingleAssignment, beginning is not a valid name", data(now_token));
+        RaiseError("in SingleAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -56,7 +61,7 @@ TNP SingleAssignmentAST::Parse() {
     GoNext();
 
     if (data(now_token) != "=") {
-        RaiseError("in SingleAssignment, lost punctuation [=]", data(now_token));
+        RaiseError("in SingleAssignment, lost punctuation [=]", now_token);
         return now_token;
     }
     GoNext();
@@ -69,7 +74,7 @@ TNP SingleAssignmentAST::Parse() {
 
     // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
-        RaiseError("in SingleAssignment, lost punctuation [;] or [,]", data(now_token));
+        RaiseError("in SingleAssignment, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
 
@@ -81,7 +86,7 @@ TNP ArrayAssignmentAST::Parse() {
     head->type = ArrayAssignment;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in ArrayAssignment, beginning is not a valid name", data(now_token));
+        RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -91,7 +96,7 @@ TNP ArrayAssignmentAST::Parse() {
     GoNext();
 
     if (data(now_token) != "[") {
-        RaiseError("in ArrayAssignment, lost punctuation [[]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
         return now_token;
     }
     GoNext();
@@ -103,7 +108,7 @@ TNP ArrayAssignmentAST::Parse() {
     next_token = next(now_token);
 
     if (data(now_token) != "]") {
-        RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
         return now_token;
     }
     GoNext();
@@ -118,14 +123,14 @@ TNP ArrayAssignmentAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != "]") {
-            RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+            RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
             return now_token;
         }
         GoNext();
     }
 
     if (data(now_token) != "=") {
-        RaiseError("in ArrayAssignment, lost punctuation [=]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation [=]", now_token);
         return now_token;
     }
     GoNext();
@@ -138,7 +143,7 @@ TNP ArrayAssignmentAST::Parse() {
 
     // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
-        RaiseError("in ArrayAssignment, lost punctuation [;] or [,]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
 
@@ -150,7 +155,7 @@ TNP SingleDefinitionAST::Parse() {
     head->type = SingleDefinition;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in SingleDefinition, beginning is not a valid name", data(now_token));
+        RaiseError("in SingleDefinition, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -171,7 +176,7 @@ TNP SingleDefinitionAST::Parse() {
 
     // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
-        RaiseError("in SingleDefinition, lost punctuation [;] or [,]", data(now_token));
+        RaiseError("in SingleDefinition, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
 
@@ -183,7 +188,7 @@ TNP ArrayInitialBlockAST::Parse() {
     head->type = ArrayInitialBlock;
 
     if (data(now_token) != "{") {
-        RaiseError("in ArrayInitialBlock, lost punctuation [{]", data(now_token));
+        RaiseError("in ArrayInitialBlock, lost punctuation [{]", now_token);
         return now_token;
     }
     GoNext();
@@ -216,7 +221,7 @@ TNP ArrayInitialBlockAST::Parse() {
         }
 
         else if (data(now_token) != ",") {
-            RaiseError("in ArrayInitialBlock, punctuation should be [{] or [,]", data(now_token));
+            RaiseError("in ArrayInitialBlock, punctuation should be [{] or [,]", now_token);
             return now_token;
         }
         GoNext();
@@ -246,7 +251,7 @@ TNP ArrayDefinitionAST::Parse() {
     head->type = ArrayDefinition;
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in ArrayAssignment, beginning is not a valid name", data(now_token));
+        RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = new AST_node;
@@ -256,7 +261,7 @@ TNP ArrayDefinitionAST::Parse() {
     GoNext();
 
     if (data(now_token) != "[") {
-        RaiseError("in ArrayAssignment, lost punctuation [[]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
         return now_token;
     }
     GoNext();
@@ -268,7 +273,7 @@ TNP ArrayDefinitionAST::Parse() {
     next_token = next(now_token);
 
     if (data(now_token) != "]") {
-        RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+        RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
         return now_token;
     }
     GoNext();
@@ -283,7 +288,7 @@ TNP ArrayDefinitionAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != "]") {
-            RaiseError("in ArrayAssignment, lost punctuation []]", data(now_token));
+            RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
             return now_token;
         }
         GoNext();
@@ -300,7 +305,7 @@ TNP ArrayDefinitionAST::Parse() {
 
     // meddle check, may cause error, could be removed
     if (data(now_token) != "," && data(now_token) != ";") {
-        RaiseError("in SingleDefinition, lost punctuation [;] or [,]", data(now_token));
+        RaiseError("in SingleDefinition, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
 
@@ -312,7 +317,7 @@ TNP DeclarationStatementAST::Parse() {
     head->type = DeclarationStatement;
 
     if (data(now_token) != "const" && data(now_token) != "int" && data(now_token) != "float") {
-        RaiseError("in DeclarationStatement, beginning is not [const] [int] or [float]", data(now_token));
+        RaiseError("in DeclarationStatement, beginning is not [const] [int] or [float]", now_token);
         return now_token;
     }
 
@@ -323,7 +328,7 @@ TNP DeclarationStatementAST::Parse() {
     }
 
     if (data(now_token) != "int" && data(now_token) != "float") {
-        RaiseError("in DeclarationStatement, type is not [int] or [float]", data(now_token));
+        RaiseError("in DeclarationStatement, type is not [int] or [float]", now_token);
         return now_token;
     }
     ANP var_type = new AST_node;
@@ -347,7 +352,7 @@ TNP DeclarationStatementAST::Parse() {
     }
 
     else {
-        RaiseError("in DeclarationStatement, missing identify name", data(now_token));
+        RaiseError("in DeclarationStatement, missing identify name", now_token);
         return now_token;
     }
 
@@ -363,7 +368,7 @@ TNP DeclarationStatementAST::Parse() {
         }
 
         else {
-            RaiseError("in DeclarationStatement, separate punctuation should be [,]", data(now_token));
+            RaiseError("in DeclarationStatement, separate punctuation should be [,]", now_token);
             return now_token;
         }
 
@@ -382,7 +387,7 @@ TNP DeclarationStatementAST::Parse() {
         }
 
         else {
-            RaiseError("in DeclarationStatement, missing identify name", data(now_token));
+            RaiseError("in DeclarationStatement, missing identify name", now_token);
             return now_token;
         }
 
@@ -404,7 +409,7 @@ TNP NormalStatementAST::Parse() {
             next_token = next(now_token);
 
             if (data(now_token) != ";") {
-                RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
+                RaiseError("in NormalStatement, lost punctuation [;]", now_token);
                 return now_token;
             }
             GoNext();
@@ -417,7 +422,7 @@ TNP NormalStatementAST::Parse() {
             next_token = next(now_token);
 
             if (data(now_token) != ";") {
-                RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
+                RaiseError("in NormalStatement, lost punctuation [;]", now_token);
                 return now_token;
             }
             GoNext();
@@ -443,7 +448,7 @@ TNP NormalStatementAST::Parse() {
         }
 
         else {
-            RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
+            RaiseError("in NormalStatement, begin with wrong sign", now_token);
             GoNext();  // !important, to avoid circle in normal statement
             return now_token;
         }
@@ -459,7 +464,7 @@ TNP NormalStatementAST::Parse() {
         next_token = next(now_token);
 
         if (data(now_token) != ";") {
-            RaiseError("in NormalStatement, lost punctuation [;]", data(now_token));
+            RaiseError("in NormalStatement, lost punctuation [;]", now_token);
             return now_token;
         }
         GoNext();
@@ -470,7 +475,7 @@ TNP NormalStatementAST::Parse() {
     }
 
     else {
-        RaiseError("in NormalStatement, begin with wrong sign", data(now_token));
+        RaiseError("in NormalStatement, begin with wrong sign", now_token);
         GoNext();  // !important, to avoid circle in normal statement
         return now_token;
     }
@@ -504,7 +509,7 @@ TNP BlockStatementAST::Parse() {
     head->type = BlockStatement;
 
     if (data(now_token) != "{") {
-        RaiseError("in BlockStatement, beginning is not [{]", data(now_token));
+        RaiseError("in BlockStatement, beginning is not [{]", now_token);
         return now_token;
     }
     GoNext();
@@ -524,7 +529,7 @@ TNP BlockStatementAST::Parse() {
         }
 
         else {
-            RaiseError("in BlockStatement, ending is not [}]", data(now_token));
+            RaiseError("in BlockStatement, ending is not [}]", now_token);
             return now_token;
         }
     }
@@ -537,7 +542,7 @@ TNP FunctionFormParamAST::Parse() {
     head->type = FunctionFormParam;
 
     if (data(now_token) != "int" && data(now_token) != "float") {
-        RaiseError("in FunctionFormParam, type is not [int] or [float]", data(now_token));
+        RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
         return now_token;
     }
     ANP type_name = new AST_node;
@@ -547,7 +552,7 @@ TNP FunctionFormParamAST::Parse() {
     GoNext();
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in FunctionFormParam, identify name is not valid", data(now_token));
+        RaiseError("in FunctionFormParam, identify name is not valid", now_token);
         return now_token;
     }
     ANP id_name = new AST_node;
@@ -579,7 +584,7 @@ TNP FunctionParamsAST::Parse() {
         }
 
         if (data(now_token) != ",") {
-            RaiseError("in FunctionParams, punctuation should be [,] or [)]", data(now_token));
+            RaiseError("in FunctionParams, punctuation should be [,] or [)]", now_token);
             return now_token;
         }
         GoNext();
@@ -598,7 +603,7 @@ TNP FunctionDefinitionAST::Parse() {
     head->type = FunctionDefinition;
 
     if (data(now_token) != "int" && data(now_token) != "void" && data(now_token) != "float") {
-        RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", data(now_token));
+        RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
         return now_token;
     }
     ANP func_type = new AST_node;
@@ -608,7 +613,7 @@ TNP FunctionDefinitionAST::Parse() {
     GoNext();
 
     if (type(now_token) != IDENTI) {
-        RaiseError("in FunctionDefinition, function name is not a valid name", data(now_token));
+        RaiseError("in FunctionDefinition, function name is not a valid name", now_token);
         return now_token;
     }
     ANP func_name = new AST_node;
@@ -618,7 +623,7 @@ TNP FunctionDefinitionAST::Parse() {
     GoNext();
 
     if (data(now_token) != "(") {
-        RaiseError("in FunctionDefinition, lost punctuation [(]", data(now_token));
+        RaiseError("in FunctionDefinition, lost punctuation [(]", now_token);
         return now_token;
     }
     GoNext();
@@ -629,7 +634,7 @@ TNP FunctionDefinitionAST::Parse() {
     next_token = next(now_token);
 
     if (data(now_token) != ")") {
-        RaiseError("in FunctionDefinition, lost punctuation [)]", data(now_token));
+        RaiseError("in FunctionDefinition, lost punctuation [)]", now_token);
         return now_token;
     }
     GoNext();
@@ -668,8 +673,7 @@ TNP ProgramAST::Parse() {
         }
 
         else {
-            RaiseError("in ProgramAST, beginning must be a keyword [int] [float] [void] or [const]",
-                       data(now_token));
+            RaiseError("in ProgramAST, beginning must be a keyword [int] [float] [void] or [const]", now_token);
             break;
         }
 
