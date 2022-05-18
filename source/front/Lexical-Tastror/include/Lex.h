@@ -12,7 +12,6 @@
 #include <iostream>
 
 
-
 void delete_all_tokens(token_node* head) {
     auto now = head;
     while (now != nullptr) {
