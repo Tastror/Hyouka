@@ -21,9 +21,9 @@ return {keyword("return");}
 
 {id} {id(yytext);}
 {floating} {floating(yytext);}
-{decint} {decint(yytext);}
-{hexint} {hexint(yytext);}
-{octint} {octint(yytext);}
+{decint} {integer(yytext);}
+{hexint} {integer(yytext);}
+{octint} {integer(yytext);}
 
 
 "="   {operat("=");}
@@ -52,8 +52,6 @@ extern void keyword(char *name){};
 extern void operat(char *name){};
 
 extern void id(char *name){}; 
-
-extern void number(char *name){};
 
 extern void floating(char *name){};
 

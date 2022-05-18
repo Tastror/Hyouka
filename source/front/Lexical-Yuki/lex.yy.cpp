@@ -16,10 +16,11 @@
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
 /* begin standard C headers. */
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
+#include <cstdlib>
+#include "Lexical.hpp"
 
 /* end standard C headers. */
 
@@ -1943,17 +1944,66 @@ void yyfree (void * ptr )
 #line 48 "SysY.l"
 
 
-extern void keyword(char *name){};
+token_node *token_head=new token_node();
+token_node *token_now=token_head;
+token_node *token_head=new token_node();
+token_node *token_now=token_head;
 
-extern void operat(char *name){};
+void keyword(char *name){
+    token_node* now=new token_node();
+    now->type=KEYWORD;
+    now->data=std::string(name);
+    now->int_or_double=0;
+    token_now->next=now;
+}
 
-extern void id(char *name){}; 
+void operat(char *name){
+    token_node* now=new token_node();
+    now->type=OPERAT;
+    now->data=std::string(name);
+    now->int_or_double=0;
+    token_now->next=now;
+}
 
-extern void floating(char *name){};
+void id(char *name){
+    token_node* now=new token_node();
+    now->type=RNAME;
+    now->data=std::string(name);
+    now->int_or_double=0;
+    token_now->next=now;
+} 
 
-extern void integer(char *name){};
+void number(char *name){
+    token_node* now=new token_node();
+    now->type=NUMBER;
+    now->data=std::string(name);
+    now->int_or_double=0;
+    token_now->next=now;
+}
 
+void floating(char *name){
+    token_node* now=new token_node();
+    now->type=NUMBER;
+    now->data=stod(std::string(name));
+    now->int_or_double=2;
+    token_now->next=now;
+}
+
+void integer(char *name){
+    token_node* now=new token_node();
+    now->type=NUMBER;
+    now->data=stoi(std::string(name));
+    now->int_or_double=1;
+    token_now->next=now;
+}
 
 int main(){
-	
+	yyin=freopen("test.c","r",stdin);
+	yylex();
+	token_node* cur=token_head;
+	do{
+		std::cout<<cur->type<<" "<<cur->data<<std::endl;
+		cur=cur->next;
+	}
+	while(cur->next!=nullptr);
 }
