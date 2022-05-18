@@ -3,10 +3,10 @@
 //
 
 #pragma once
-#include <iostream>
+
 #include "define.h"
 
-token_node* get_token() {
+token_node* test_get_token() {
     auto head = new token_node;
     token_node* temp = head;
 
@@ -206,23 +206,4 @@ token_node* get_token() {
 
     temp->next = nullptr;
     return head;
-}
-
-void print_all_tokens(token_node* head) {
-    auto now = head;
-    if (now != nullptr)
-        now = now->next;
-    while (now != nullptr) {
-        std::cout << now->type << ", " << now->data << "\n";
-        now = now->next;
-    }
-}
-
-void delete_all_tokens(token_node* head) {
-    auto now = head;
-    while (now != nullptr) {
-        auto temp = now;
-        now = now->next;
-        delete temp;
-    }
 }
