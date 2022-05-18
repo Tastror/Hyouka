@@ -11,15 +11,7 @@
 #include <fstream>
 #include <iostream>
 
-void print_all_tokens(token_node* head) {
-    auto now = head;
-    if (now != nullptr)
-        now = now->next;
-    while (now != nullptr) {
-        std::cout << now->type << ", " << now->data << "\n";
-        now = now->next;
-    }
-}
+
 
 void delete_all_tokens(token_node* head) {
     auto now = head;

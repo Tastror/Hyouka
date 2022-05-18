@@ -11,8 +11,7 @@ void RaiseError(const std::string& error_code, const std::string& token_data);
 void connect_child(ANP parent, ANP child);
 void reverse_connect_child(ANP parent, ANP child);
 
-void _print_all_ASTs(ANP now, int stage);
-void print_all_ASTs(ANP AST_head);
+
 
 
 class BaseAST {
