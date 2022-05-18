@@ -16,10 +16,15 @@ void shell_input(int argc, char** argv, std::string& input_filename, std::string
             "examples: hyouka demo.cpp -S -o demo.s  # -o default is output.s\n"
             "          hyouka demo.cpp --debug lex  # --debug default is none,\n"
             "          hyouka demo.cpp -S -o demo.s -O 1  # optimizer can use -O 0 or -O 1");
-    cmd_parser.add<std::string>("out", 'o', "output file name, for example demo.s", false, "output.s");
-    cmd_parser.add<std::string>("debug", 'd', "use to cut down at: shell, lex, parse", false, "none", cmdline::oneof<std::string>("shell", "lex", "parse", "none"));
+    cmd_parser.add<std::string>("out", 'o', "output file name, for example demo.s",
+                                false, "output.s");
+    cmd_parser.add<std::string>("debug", 'd', "use to cut down at: shell, lex, parse, sym",
+                                false, "none",
+                                cmdline::oneof<std::string>("shell", "lex", "parse", "sym", "none"));
     cmd_parser.add("only-to-assembly", 'S', "only compile to assembly");
-    cmd_parser.add<std::string>("optimizer", 'O', "optimizer, use 0 or 1", false, "0", cmdline::oneof<std::string>("0", "1"));
+    cmd_parser.add<std::string>("optimizer", 'O', "optimizer, use 0 or 1",
+                                false, "0",
+                                cmdline::oneof<std::string>("0", "1"));
     cmd_parser.parse_check(argc, argv);
     if (cmd_parser.rest().size() != 1) {
         if (cmd_parser.rest().empty())

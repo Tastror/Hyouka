@@ -78,3 +78,28 @@ void _print_all_ASTs(ANP now, int stage) {
 void print_all_ASTs(ANP AST_head) {
     _print_all_ASTs(AST_head, 0);
 }
+
+
+
+// Symbol Table
+
+int symtable_node::count = 0;
+
+void print_symtable(SNP symtable_node_head) {
+    SNP now = symtable_node_head;
+    while (now != nullptr) {
+        std::cout << "name: " << now->identifier_name
+                  << ", only_name: " << now->only_name
+                  << ", type: " << sym_id_show_type[now->id_type]
+                  << ", return_type: " << sym_return_show_type[now->return_type]
+                  << ", arg_num: " << now->arg_num
+                  << ", is_const: " << now->is_const
+                  << ", is_static: " << now->is_static << std::endl;
+        now = now->next;
+    }
+}
+
+void symtable_node::update_only_name() {
+    std::string name_pre = std::to_string(symtable_node::count);
+    only_name = "__" + name_pre + "_" + identifier_name;
+}
