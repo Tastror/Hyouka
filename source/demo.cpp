@@ -8,13 +8,13 @@ float test(int a, float x) {
 
 int k[8][6] = {{5}, {8, 2}, 11};
 
-const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(7, 16);
-
 int main() {
 
     /* comment 1 */
 
     {}  // comment 2
+
+    const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(7, 16);
 
     float x = 0.14 + 3 * 1;
 

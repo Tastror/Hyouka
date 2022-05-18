@@ -38,7 +38,7 @@ int compare(const std::string& op1, const std::string& op2) {
 TNP ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
-    if (type(now_token) != RNAME) {
+    if (type(now_token) != IDENTI) {
         RaiseError("in ArrayUsage, identify name is not valid", data(now_token));
         return now_token;
     }
@@ -69,10 +69,10 @@ TNP ArrayUsageAST::Parse() {
     while (data(now_token) == "[") {
         GoNext();
 
-        ExpressionAST expr(now_token);
-        connect_child(head, expr.head);
-        expr.head->data = "index";
-        now_token = expr.Parse();
+        ExpressionAST addi_expr(now_token);
+        connect_child(head, addi_expr.head);
+        addi_expr.head->data = "index";
+        now_token = addi_expr.Parse();
         next_token = next(now_token);
 
         if (data(now_token) != "]") {
@@ -89,7 +89,7 @@ TNP ArrayUsageAST::Parse() {
 TNP FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
-    if (type(now_token) != RNAME) {
+    if (type(now_token) != IDENTI) {
         RaiseError("in FunctionUsage, identify name is not valid", data(now_token));
         return now_token;
     }
@@ -134,8 +134,6 @@ TNP FunctionUsageAST::Parse() {
         now_token = addi_expr.Parse();
         next_token = next(now_token);
     }
-
-    return now_token;
 
     return now_token;
 }
@@ -211,7 +209,7 @@ TNP ExpressionAST::Parse() {
         if (type(now_token) != OPERAT && type(now_token) != PUNCT) {
 
             // 1.1 function or variables
-            if (type(now_token) == RNAME) {
+            if (type(now_token) == IDENTI) {
 
                 // 1.1.1 function usage [No GoNext]
                 if (data(next_token) == "(") {
