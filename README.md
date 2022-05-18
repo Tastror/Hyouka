@@ -33,6 +33,12 @@ Hyouka 冰果（氷菓・ひょうか）
 性能测试: compiler testcase.sysy -S -o testcase.s -O1
 ```
 
+当前实现为
+```shell
+hyouka testcase.sysy -S -o testcase.s
+hyouka testcase.sysy -S -o testcase.s -O 1    # 解析器有问题(见3rd-party)，之后会更换
+```
+
 
 
 ## 详细内容
