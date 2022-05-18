@@ -1,9 +1,9 @@
-%top{
+{%
     #pragma once
     #include"define.h"
     #include<iostream>
     #include<string>
-}
+%}
 newline [\n]
 whitespsce [\t ]
 comment ("/*".*"*/")|("//".*[\n])
