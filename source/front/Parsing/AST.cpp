@@ -269,7 +269,7 @@ TNP ArrayInitialBlockAST::Parse() {
 }
 
 
-TNP ArrayDefinitionAST::Parse() {  // TBD
+TNP ArrayDefinitionAST::Parse() {
     head->type = ArrayDefinition;
 
     if (type(now_token) != RNAME) {
