@@ -54,7 +54,7 @@ TNP ArrayUsageAST::Parse() {
     }
     GoNext();
 
-    ExpressionAST expr(now_token);
+    ExpressionAST expr(now_token, symtable);
     connect_child(head, expr.head);
     expr.head->data = "index";
     now_token = expr.Parse();
@@ -69,7 +69,7 @@ TNP ArrayUsageAST::Parse() {
     while (data(now_token) == "[") {
         GoNext();
 
-        ExpressionAST addi_expr(now_token);
+        ExpressionAST addi_expr(now_token, symtable);
         connect_child(head, addi_expr.head);
         addi_expr.head->data = "index";
         now_token = addi_expr.Parse();
@@ -109,7 +109,7 @@ TNP FunctionUsageAST::Parse() {
         return now_token;
     }
 
-    ExpressionAST expr(now_token);
+    ExpressionAST expr(now_token, symtable);
     connect_child(head, expr.head);
     expr.head->data = "argument";
     now_token = expr.Parse();
@@ -128,7 +128,7 @@ TNP FunctionUsageAST::Parse() {
         }
         GoNext();
 
-        ExpressionAST addi_expr(now_token);
+        ExpressionAST addi_expr(now_token, symtable);
         connect_child(head, addi_expr.head);
         addi_expr.head->data = "argument";
         now_token = addi_expr.Parse();
@@ -213,7 +213,7 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.1 function usage [No GoNext]
                 if (data(next_token) == "(") {
-                    FunctionUsageAST func_use(now_token);  // a new here, remember to delete
+                    FunctionUsageAST func_use(now_token, symtable);  // a new here, remember to delete
                     sym.push(func_use.head);
                     now_token = func_use.Parse();
                     next_token = next(now_token);
@@ -221,7 +221,7 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.2 array usage [No GoNext]
                 else if (data(next_token) == "[") {
-                    ArrayUsageAST array_use(now_token);  // a new here, remember to delete
+                    ArrayUsageAST array_use(now_token, symtable);  // a new here, remember to delete
                     sym.push(array_use.head);
                     now_token = array_use.Parse();
                     next_token = next(now_token);
@@ -278,7 +278,7 @@ TNP ExpressionAST::Parse() {
             if (data(now_token) == "(") {
                 GoNext();
 
-                ExpressionAST recur_expr(now_token);  // a new here, remember to delete
+                ExpressionAST recur_expr(now_token, symtable);  // a new here, remember to delete
                 sym.push(recur_expr.head);
                 recur_expr.head->data = "brace";
                 now_token = recur_expr.Parse();

@@ -21,11 +21,14 @@ int main(int argc, char** argv) {
     if (debug_mode == "lex")
         print_all_tokens(token_head);
 
-    ProgramAST program(token_head);
+    Symtable symtable;
+    ProgramAST program(token_head, symtable);
     program.Parse();
     ANP AST_head = program.head;
     if (debug_mode == "parse")
         print_all_ASTs(AST_head);
+    if (debug_mode == "sym")
+        Symtable::print_all();
 
     return 0;
 } 
