@@ -90,7 +90,8 @@ void print_symtable(const SNP& symtable_node_head) {
     SNP now = symtable_node_head;
     while (now != nullptr) {
         if (now->is_head) {
-            std::cout << "[head] type: " << sym_id_show_type[now->id_type]
+            std::cout << "[head] only_name: " << now->only_name
+                      << ", type: " << sym_id_show_type[now->id_type]
                       << ", return_type: " << sym_return_show_type[now->return_type]
                       << ", arg_num: " << now->arg_num
                       << ", is_const: " << now->is_const
@@ -106,6 +107,11 @@ void print_symtable(const SNP& symtable_node_head) {
         }
         now = now->next;
     }
+}
+
+void symtable_node::rename(const std::string& name) {
+    identifier_name = name;
+    update_only_name();
 }
 
 void symtable_node::update_only_name() {
