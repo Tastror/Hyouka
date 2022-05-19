@@ -15,7 +15,8 @@
 class ArrayUsageAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayUsageAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayUsageAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayUsageAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ArrayUsageAST() override = default;
 };
 
@@ -30,7 +31,8 @@ public:
 class FunctionUsageAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionUsageAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionUsageAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionUsageAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~FunctionUsageAST() override = default;
 };
 
@@ -45,7 +47,8 @@ public:
 class ExpressionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ExpressionAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ExpressionAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ExpressionAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ExpressionAST() override = default;
 };
 
