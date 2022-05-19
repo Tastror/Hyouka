@@ -5,7 +5,11 @@
 
 using namespace std;
 
-TNP token_head = new std::make_shared<token_node>();
+//<<<<<<< master
+TNP token_head = std::make_shared<token_node>();
+//=======
+//TNP token_head = new std::make_shared<token_node>();
+//>>>>>>> master
 TNP now = token_head;
 
 ifstream ifs;
@@ -18,7 +22,11 @@ void save_node(token_type type, string data, int row, int col)
     now->int_or_double = 0;
     now->column = col;
     now->line = row;
-    now->next = new std::make_shared<token_node>();
+//<<<<<<< master
+    now->next = std::make_shared<token_node>();
+//=======
+    //now->next = new std::make_shared<token_node>();
+//>>>>>>> master
     now = now->next;
 }
 
