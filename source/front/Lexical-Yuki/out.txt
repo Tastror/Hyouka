@@ -1,2 +1,150 @@
 float Keyword
-c ID
+test ID
+( Operator
+int Keyword
+a ID
+, Punctuation
+float Keyword
+x ID
+) Operator
+{ Punctuation
+return Keyword
+a ID
++ Operator
+x ID
+; Punctuation
+} Punctuation
+const Keyword
+int Keyword
+k ID
+[ Operator
+8
+] Operator
+[ Operator
+6
+] Operator
+= Operator
+{ Punctuation
+{ Punctuation
+{ Punctuation
+{ Punctuation
+{ Punctuation
+{ Punctuation
+{ Punctuation
+{ Punctuation
+2
+} Punctuation
+} Punctuation
+11
+} Punctuation
+} Punctuation
+int Keyword
+main ID
+( Operator
+) Operator
+{ Punctuation
+{ Punctuation
+{ Punctuation
+float Keyword
+x ID
+= Operator
+0.14
++ Operator
+3
+* Operator
+1
+; Punctuation
+int Keyword
+_abc ID
+= Operator
+7
++ Operator
+5
+/ Operator
+3
++ Operator
+4
+* Operator
+( Operator
+8
+- Operator
+2
+) Operator
+- Operator
+k ID
+[ Operator
+2
++ Operator
+3
+] Operator
+[ Operator
+5
+] Operator
++ Operator
+( Operator
+- Operator
+3
+|| Operator
+4
+>= Operator
+2
+) Operator
++ Operator
+test ID
+( Operator
+7
+, Punctuation
+16
+) Operator
+; Punctuation
+if Keyword
+( Operator
+x ID
+> Operator
+3
+|| Operator
+x ID
+< Operator
+2
+) Operator
+x ID
+= Operator
+x ID
+- Operator
+2
+; Punctuation
+else Keyword
+if Keyword
+( Operator
+x ID
+<= Operator
+3.5
+) Operator
+x ID
+= Operator
+x ID
++ Operator
+1
+; Punctuation
+else Keyword
+{ Punctuation
+; Punctuation
+} Punctuation
+while Keyword
+( Operator
+x ID
+< Operator
+20
+) Operator
+{ Punctuation
+x ID
+= Operator
+x ID
++ Operator
+3
+; Punctuation
+} Punctuation
+return Keyword
+0
+; Punctuation
+} Punctuation
