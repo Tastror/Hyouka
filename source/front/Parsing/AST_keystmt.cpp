@@ -17,7 +17,7 @@ TNP KeywordStatementAST::Parse() {
         }
         GoNext();
 
-        ExpressionAST expr(now_token, symtable);
+        ExpressionAST expr(now_token, symtable_ptr);
         connect_child(head, expr.head);
         expr.head->data = "condition";
         now_token = expr.Parse();
@@ -29,7 +29,7 @@ TNP KeywordStatementAST::Parse() {
         }
         GoNext();
 
-        StatementAST stmt(now_token, symtable);
+        StatementAST stmt(now_token, symtable_ptr);
         connect_child(head, stmt.head);
         now_token = stmt.Parse();
         next_token = next(now_token);
@@ -38,7 +38,7 @@ TNP KeywordStatementAST::Parse() {
             head->data = "if-else";
             GoNext();
 
-            StatementAST else_stmt(now_token, symtable);
+            StatementAST else_stmt(now_token, symtable_ptr);
             connect_child(head, else_stmt.head);
             now_token = else_stmt.Parse();
             next_token = next(now_token);
@@ -55,7 +55,7 @@ TNP KeywordStatementAST::Parse() {
         }
         GoNext();
 
-        ExpressionAST expr(now_token, symtable);
+        ExpressionAST expr(now_token, symtable_ptr);
         connect_child(head, expr.head);
         expr.head->data = "condition";
         now_token = expr.Parse();
@@ -67,7 +67,7 @@ TNP KeywordStatementAST::Parse() {
         }
         GoNext();
 
-        StatementAST stmt(now_token, symtable);
+        StatementAST stmt(now_token, symtable_ptr);
         connect_child(head, stmt.head);
         now_token = stmt.Parse();
         next_token = next(now_token);
@@ -99,7 +99,7 @@ TNP KeywordStatementAST::Parse() {
         head->data = "return";
         GoNext();
 
-        ExpressionAST expr(now_token, symtable);
+        ExpressionAST expr(now_token, symtable_ptr);
         connect_child(head, expr.head);
         expr.head->data = "value";
         now_token = expr.Parse();

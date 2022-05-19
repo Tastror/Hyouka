@@ -4,7 +4,6 @@
 
 #include "define.h"
 #include <iostream>
-#include <utility>
 
 
 
@@ -84,8 +83,6 @@ void print_all_ASTs(const ANP& AST_head) {
 
 // Symbol Table
 
-int symtable_node::count = 0;
-
 void print_symtable(const SNP& symtable_node_head) {
     SNP now = symtable_node_head;
     while (now != nullptr) {
@@ -110,12 +107,13 @@ void print_symtable(const SNP& symtable_node_head) {
     }
 }
 
-void symtable_node::rename(const std::string& name) {
-    identifier_name = name;
-    update_only_name();
+void symtable_node::rename() {
+    std::string name_pre = std::to_string(table_id);
+    only_name = "__" + name_pre + "_" + identifier_name;
 }
 
-void symtable_node::update_only_name() {
-    std::string name_pre = std::to_string(symtable_node::count);
+void symtable_node::rename(const std::string& name) {
+    identifier_name = name;
+    std::string name_pre = std::to_string(table_id);
     only_name = "__" + name_pre + "_" + identifier_name;
 }

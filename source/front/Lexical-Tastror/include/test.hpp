@@ -83,6 +83,15 @@ TNP test_get_token() {
     { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "}"; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = ";"; temp->next = n; temp = n; }
 
+    { TNP n = std::make_shared<token_node>(); n->type = KEYWORD; n->data = "int"; temp->next = n; temp = n; }
+    { TNP n = std::make_shared<token_node>(); n->type = IDENTI; n->data = "main"; temp->next = n; temp = n; }
+    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "("; temp->next = n; temp = n; }
+    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = ")"; temp->next = n; temp = n; }
+    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "{"; temp->next = n; temp = n; }
+
+    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "{"; temp->next = n; temp = n; }
+    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "}"; temp->next = n; temp = n; }
+
     { TNP n = std::make_shared<token_node>(); n->type = KEYWORD; n->data = "const"; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = KEYWORD; n->data = "int"; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = IDENTI; n->data = "_abc"; temp->next = n; temp = n; }
@@ -129,16 +138,6 @@ TNP test_get_token() {
     { TNP n = std::make_shared<token_node>(); n->type = NUMBER; n->data = "16"; n->int_or_double = 1; n->value.int_value = 16; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = OPERAT; n->data = ")"; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = ";"; temp->next = n; temp = n; }
-
-
-    { TNP n = std::make_shared<token_node>(); n->type = KEYWORD; n->data = "int"; temp->next = n; temp = n; }
-    { TNP n = std::make_shared<token_node>(); n->type = IDENTI; n->data = "main"; temp->next = n; temp = n; }
-    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "("; temp->next = n; temp = n; }
-    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = ")"; temp->next = n; temp = n; }
-    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "{"; temp->next = n; temp = n; }
-
-    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "{"; temp->next = n; temp = n; }
-    { TNP n = std::make_shared<token_node>(); n->type = PUNCT; n->data = "}"; temp->next = n; temp = n; }
 
     { TNP n = std::make_shared<token_node>(); n->type = KEYWORD; n->data = "float"; temp->next = n; temp = n; }
     { TNP n = std::make_shared<token_node>(); n->type = IDENTI; n->data = "x"; temp->next = n; temp = n; }
