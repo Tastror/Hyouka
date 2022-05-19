@@ -11,6 +11,39 @@ token_node *now = token_head;
 ifstream ifs;
 ofstream ofs;
 
+void save_node(token_type type, string data, int row, int col)
+{
+    now->data = data;
+    now->type = type;
+    now->int_or_double = 0;
+    now->column = col;
+    now->line = row;
+    now->next = new token_node();
+    now = now->next;
+}
+
+void save_node(int value, int row, int col)
+{
+    now->value.int_value = value;
+    now->type = NUMBER;
+    now->int_or_double = 1;
+    now->column = col;
+    now->line = row;
+    now->next = new token_node();
+    now = now->next;
+}
+
+void save_node(double value, int addon, int row, int col)
+{
+    now->value.double_value = value;
+    now->type = NUMBER;
+    now->int_or_double = 2;
+    now->column = col;
+    now->line = row;
+    now->next = new token_node();
+    now = now->next;
+}
+
 bool is_punct(char c)
 {
     if (c == ';' || c == ',' || c == '{' || c == '}')
@@ -39,7 +72,18 @@ bool is_blank(char c)
     return false;
 }
 
-void match(string read_buffer, int line, int column)
+string match_id(string read_buffer, int line, int column)
+{
+    regex id("([a-zA-Z]|_)([0-9a-zA-Z]|_)*");
+    regex key("if|while|else");
+    smatch match;
+    if (regex_search(read_buffer, match, id))
+    {
+        string result = match[0].str();
+    }
+}
+
+string match_number(string read_buffer, int line, int column)
 {
     regex dec_int("[0-9]+");
     regex dec_float("[0-9]+\\.[0-9]+");
@@ -47,67 +91,52 @@ void match(string read_buffer, int line, int column)
     regex oct_int("0[0-7]+");
     regex hex_int("0[x|X][0-9a-fA-F]+");
     smatch match;
-        if (regex_search(read_buffer, match, dec_float))
+    if (regex_search(read_buffer, match, dec_float))
     {
-        now->value.double_value = stod(match.str());
-        ofs<<match.str()<<endl;
-        now->int_or_double = 2;
-        now->type = NUMBER;
-        now->line = line;
-        now->column = column;
-        now->next = new token_node();
-        now = now->next;
-        return;
+        string result = match[0].str();
+        double value = stod(result);
+        save_node(value, 1, line, column);
+        ofs << result << endl;
+        ofs << read_buffer.substr(result.size()) << endl;
+        return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, dec_float_e))
     {
-        now->value.double_value = stod(match.str());
-        ofs<<match.str()<<endl;
-        now->int_or_double = 2;
-        now->type = NUMBER;
-        now->line = line;
-        now->column = column;
-        now->next = new token_node();
-        now = now->next;
-        return;
-    }
-    if (regex_search(read_buffer, match, dec_int))
-    {
-        now->value.double_value = stoi(match.str());
-        ofs<<match.str()<<endl;
-        now->int_or_double = 1;
-        now->type = NUMBER;
-        now->line = line;
-        now->column = column;
-        now->next = new token_node();
-        now = now->next;
-        return;
+        string result = match[0].str();
+        double value = stod(result);
+        save_node(value, 1, line, column);
+        ofs << result << endl;
+        ofs << read_buffer.substr(result.size()) << endl;
+        return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, hex_int))
     {
-        now->value.double_value = stoi(match.str());
-        ofs<<match.str()<<endl;
-        now->int_or_double = 1;
-        now->type = NUMBER;
-        now->line = line;
-        now->column = column;
-        now->next = new token_node();
-        now = now->next;
-        return;
+        string result = match[0].str();
+        int value = stoi(result);
+        save_node(value, line, column);
+        ofs << result << endl;
+        ofs << read_buffer.substr(result.size()) << endl;
+        return read_buffer.substr(result.size());
+    }
+    if (regex_search(read_buffer, match, dec_int))
+    {
+        string result = match[0].str();
+        int value = stoi(result);
+        save_node(value, line, column);
+        ofs << result << endl;
+        ofs << read_buffer.substr(result.size()) << endl;
+        return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, oct_int))
     {
-        now->value.double_value = stoi(match.str());
-        ofs<<match.str()<<endl;
-        now->int_or_double = 1;
-        now->type = NUMBER;
-        now->line = line;
-        now->column = column;
-        now->next = new token_node();
-        now = now->next;
-        return;
+        string result = match[0].str();
+        int value = stoi(result);
+        save_node(value, line, column);
+        ofs << result << endl;
+        ofs << read_buffer.substr(result.size()) << endl;
+        return read_buffer.substr(result.size());
     }
-    return;
+    return string("");
 }
 
 int main()
@@ -115,7 +144,7 @@ int main()
     char c;
     string read_buffer;
     int row = 0, col = 0;
-    ifs.open("test.c");
+    ifs.open("testnum.c");
     ofs.open("out.txt");
     if (!ifs.is_open())
     {
@@ -127,9 +156,17 @@ int main()
         ifs >> read_buffer;
 
         cout << read_buffer << endl;
-        if (read_buffer.size() > 0)
+        while (read_buffer.size() > 0)
         {
-            match(read_buffer, row, col);
+            if (is_number(read_buffer.at(0)) || read_buffer.at(0) == '.')
+            {
+                read_buffer = match_number(read_buffer, row, col);
+            }
+            if (is_letter(read_buffer.at(0)) || read_buffer.at(0) == '_')
+            {
+                read_buffer = match_id_key(read_buffer, row, col);
+            }
+
             read_buffer.clear();
         }
     }
