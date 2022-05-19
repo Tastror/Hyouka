@@ -612,10 +612,10 @@ TNP FunctionDefinitionAST::Parse() {
     sym_node.id_type = _function_;
     // ^ --- sym --- ^ //
 
-    // v --- new sym block --- v //
+    // v --- sym block --- v //
     Symtable func_block_symtable;
     func_block_symtable.extend_from(symtable);
-    // ^ --- new sym block --- ^ //
+    // ^ --- sym block --- ^ //
 
     if (data(now_token) != "int" && data(now_token) != "void" && data(now_token) != "float") {
         RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
@@ -679,6 +679,8 @@ TNP FunctionDefinitionAST::Parse() {
 
 TNP ProgramAST::Parse() {
     head->type = ProgramBody;
+
+    symtable.my_head->only_name = "this_program";
 
     while (now_token != nullptr) {
         TNP look_next = next(next_token);

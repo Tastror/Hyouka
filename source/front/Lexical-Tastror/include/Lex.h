@@ -31,6 +31,10 @@ public:
 
     void get_token() {
         if (fail) return;
+        char ch;
+        while ((ch = (char)ifs.get()) != EOF) {
+            std::cout << ch;
+        }
         head = next(test_get_token());
     }
 };
