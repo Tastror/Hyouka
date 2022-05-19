@@ -574,8 +574,12 @@ TNP BlockStatementAST::Parse() {
 }
 
 
-TNP FunctionFormParamAST::Parse() {  // TBD, lost array[][10], and sym should get down...
+TNP FunctionFormParamAST::Parse() {
     head->type = FunctionFormParam;
+
+    // v --- sym --- v //
+    symtable_node placeholder_sym_node;
+    // ^ --- sym --- ^ //
 
     if (data(now_token) != "int" && data(now_token) != "float") {
         RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
@@ -596,6 +600,43 @@ TNP FunctionFormParamAST::Parse() {  // TBD, lost array[][10], and sym should ge
     id_name->type = Identifier;
     id_name->data = now_token->data;
     GoNext();
+
+    if (data(now_token) == "[") {
+        GoNext();
+
+        if (data(now_token) == "]") {
+            GoNext();
+        }
+        else {
+            ExpressionAST index(now_token, symtable_ptr);
+            connect_child(head, index.head);
+            index.head->data = "index";
+            now_token = index.Parse();
+            next_token = next(now_token);
+
+            if (data(now_token) != "]") {
+                RaiseError("in FunctionFormParam, lost punctuation []]", now_token);
+                return now_token;
+            }
+            GoNext();
+        }
+
+        while (data(now_token) == "[") {
+            GoNext();
+
+            ExpressionAST index_addi(now_token, symtable_ptr);
+            connect_child(head, index_addi.head);
+            index_addi.head->data = "index";
+            now_token = index_addi.Parse();
+            next_token = next(now_token);
+
+            if (data(now_token) != "]") {
+                RaiseError("in FunctionFormParam, lost punctuation []]", now_token);
+                return now_token;
+            }
+            GoNext();
+        }
+    }
 
     return now_token;
 }
