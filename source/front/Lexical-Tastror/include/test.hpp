@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "define.h"
+#include "../../Define/include/define.h"
 
 token_node* test_get_token() {
     auto head = new token_node;
