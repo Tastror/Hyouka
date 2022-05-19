@@ -5,11 +5,8 @@
 
 using namespace std;
 
-//<<<<<<< master
 TNP token_head = std::make_shared<token_node>();
-//=======
-//TNP token_head = new std::make_shared<token_node>();
-//>>>>>>> master
+
 TNP now = token_head;
 
 ifstream ifs;
@@ -22,11 +19,8 @@ void save_node(token_type type, string data, int row, int col)
     now->int_or_double = 0;
     now->column = col;
     now->line = row;
-//<<<<<<< master
     now->next = std::make_shared<token_node>();
-//=======
-    //now->next = new std::make_shared<token_node>();
-//>>>>>>> master
+
     now = now->next;
 }
 
@@ -37,7 +31,7 @@ void save_node(int value, int row, int col)
     now->int_or_double = 1;
     now->column = col;
     now->line = row;
-    now->next = new std::make_shared<token_node>();
+    now->next = std::make_shared<token_node>();
     now = now->next;
 }
 
@@ -48,12 +42,17 @@ void save_node(double value, int addon, int row, int col)
     now->int_or_double = 2;
     now->column = col;
     now->line = row;
-    now->next = new std::make_shared<token_node>();
+    now->next = std::make_shared<token_node>();
     now = now->next;
 }
 
-bool is_operat(char c){
-    if(c=='+'||c=='-'||c=='*'||c=='/'||c=='%'||c=='('||c==')'||c=='['||c==']||c=='<'||)
+bool is_operat(char c)
+{
+    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '(' || c == ')' || c == '[' || c == ']' || c == '<' || c == '>' || c == '=' || c == '!' || c == '|' || c == '&')
+    {
+        return true;
+    }
+    return false;
 }
 
 bool is_punct(char c)
@@ -84,9 +83,26 @@ bool is_blank(char c)
     return false;
 }
 
-string match_operat(string read_buffer, int line, int colum)
+string match_operat(string read_buffer, int line, int column)
 {
-    //
+    regex op1("==|!=|>=|<=|\\|\\||&&");
+    regex op2("\\+|-|\\*|/|%|\\(|\\)|\\[|\\]|>|<|=|!");
+    smatch match;
+    if (regex_search(read_buffer, match, op1))
+    {
+        string result = match[0].str();
+        save_node(OPERAT, result, line, column);
+        ofs << result << " Operator" << endl;
+        return read_buffer.substr(result.size());
+    }
+    if (regex_search(read_buffer, match, op2))
+    {
+        string result = match[0].str();
+        save_node(OPERAT, result, line, column);
+        ofs << result << " Operator" << endl;
+        return read_buffer.substr(result.size());
+    }
+    return string("");
 }
 
 string match_id_key(string read_buffer, int line, int column)
@@ -110,6 +126,7 @@ string match_id_key(string read_buffer, int line, int column)
             return read_buffer.substr(result.size());
         }
     }
+    return string("");
 }
 
 string match_number(string read_buffer, int line, int column)
@@ -126,7 +143,6 @@ string match_number(string read_buffer, int line, int column)
         double value = stod(result);
         save_node(value, 1, line, column);
         ofs << result << endl;
-        ofs << read_buffer.substr(result.size()) << endl;
         return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, dec_float_e))
@@ -135,7 +151,6 @@ string match_number(string read_buffer, int line, int column)
         double value = stod(result);
         save_node(value, 1, line, column);
         ofs << result << endl;
-        ofs << read_buffer.substr(result.size()) << endl;
         return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, hex_int))
@@ -144,7 +159,6 @@ string match_number(string read_buffer, int line, int column)
         int value = stoi(result);
         save_node(value, line, column);
         ofs << result << endl;
-        ofs << read_buffer.substr(result.size()) << endl;
         return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, dec_int))
@@ -153,7 +167,6 @@ string match_number(string read_buffer, int line, int column)
         int value = stoi(result);
         save_node(value, line, column);
         ofs << result << endl;
-        ofs << read_buffer.substr(result.size()) << endl;
         return read_buffer.substr(result.size());
     }
     if (regex_search(read_buffer, match, oct_int))
@@ -162,7 +175,6 @@ string match_number(string read_buffer, int line, int column)
         int value = stoi(result);
         save_node(value, line, column);
         ofs << result << endl;
-        ofs << read_buffer.substr(result.size()) << endl;
         return read_buffer.substr(result.size());
     }
     return string("");
@@ -173,7 +185,7 @@ int main()
     char c;
     string read_buffer;
     int row = 0, col = 0;
-    ifs.open("testnum.c");
+    ifs.open("test.c");
     ofs.open("out.txt");
     if (!ifs.is_open())
     {
@@ -195,17 +207,21 @@ int main()
             {
                 read_buffer = match_id_key(read_buffer, row, col);
             }
-            else if(is_punct(c)){
-                save_node(PUNCT,string("")+c,row,col);
+            else if (is_punct(read_buffer.at(0)))
+            {
+                save_node(PUNCT, string("") + read_buffer.at(0), row, col);
+                ofs << read_buffer.at(0) << " Punctuation" << endl;
                 read_buffer.pop_back();
             }
-            else if(is_operat(c)){
-
+            else if (is_operat(read_buffer.at(0)))
+            {
+                read_buffer = match_operat(read_buffer, row, col);
             }
             else
             {
                 read_buffer.clear();
-                ofs<<"Error found in line"<<row<<", "<<"column"<<col<<".";
+                ofs << "Error found in line" << row << ", "
+                    << "column" << col << ".";
             }
         }
     }
