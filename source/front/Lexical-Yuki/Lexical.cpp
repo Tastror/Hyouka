@@ -47,7 +47,55 @@ void match(string read_buffer, int line, int column)
     regex oct_int("0[0-7]+");
     regex hex_int("0[x|X][0-9a-fA-F]+");
     smatch match;
+        if (regex_search(read_buffer, match, dec_float))
+    {
+        now->value.double_value = stod(match.str());
+        ofs<<match.str()<<endl;
+        now->int_or_double = 2;
+        now->type = NUMBER;
+        now->line = line;
+        now->column = column;
+        now->next = new token_node();
+        now = now->next;
+        return;
+    }
+    if (regex_search(read_buffer, match, dec_float_e))
+    {
+        now->value.double_value = stod(match.str());
+        ofs<<match.str()<<endl;
+        now->int_or_double = 2;
+        now->type = NUMBER;
+        now->line = line;
+        now->column = column;
+        now->next = new token_node();
+        now = now->next;
+        return;
+    }
     if (regex_search(read_buffer, match, dec_int))
+    {
+        now->value.double_value = stoi(match.str());
+        ofs<<match.str()<<endl;
+        now->int_or_double = 1;
+        now->type = NUMBER;
+        now->line = line;
+        now->column = column;
+        now->next = new token_node();
+        now = now->next;
+        return;
+    }
+    if (regex_search(read_buffer, match, hex_int))
+    {
+        now->value.double_value = stoi(match.str());
+        ofs<<match.str()<<endl;
+        now->int_or_double = 1;
+        now->type = NUMBER;
+        now->line = line;
+        now->column = column;
+        now->next = new token_node();
+        now = now->next;
+        return;
+    }
+    if (regex_search(read_buffer, match, oct_int))
     {
         now->value.double_value = stoi(match.str());
         ofs<<match.str()<<endl;
