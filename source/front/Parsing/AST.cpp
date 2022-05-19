@@ -13,7 +13,7 @@ bool BaseAST::UpdateError() {
     return (error = GlobalError);
 }
 
-void RaiseError(const std::string& error_code, TNP token_node) {
+void RaiseError(const std::string& error_code, const TNP& token_node) {
     std::cout << "ERROR: " << error_code << std::endl;
     if (token_node != nullptr)
         std::cout << "    where: " << token_node->data
@@ -24,7 +24,7 @@ void RaiseError(const std::string& error_code, TNP token_node) {
     GlobalError = true;
 }
 
-void connect_child(ANP parent, ANP child) {
+void connect_child(const ANP& parent, const ANP& child) {
     if (parent->child == nullptr) {
         parent->child = child;
         parent->last_child = child;
@@ -36,7 +36,7 @@ void connect_child(ANP parent, ANP child) {
     }
 }
 
-void reverse_connect_child(ANP parent, ANP child) {
+void reverse_connect_child(const ANP& parent, const ANP& child) {
     if (parent->child == nullptr) {
         parent->child = child;
         parent->last_child = child;
@@ -55,7 +55,7 @@ TNP SingleAssignmentAST::Parse() {
         RaiseError("in SingleAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -90,7 +90,7 @@ TNP ArrayAssignmentAST::Parse() {
         RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -159,7 +159,7 @@ TNP SingleDefinitionAST::Parse() {
         RaiseError("in SingleDefinition, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -255,7 +255,7 @@ TNP ArrayDefinitionAST::Parse() {
         RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -332,7 +332,7 @@ TNP DeclarationStatementAST::Parse() {
         RaiseError("in DeclarationStatement, type is not [int] or [float]", now_token);
         return now_token;
     }
-    ANP var_type = new AST_node;
+    ANP var_type = std::make_shared<AST_node>();
     connect_child(head, var_type);
     var_type->type = BasicType;
     var_type->data = now_token->data;
@@ -546,7 +546,7 @@ TNP FunctionFormParamAST::Parse() {  // TBD, lost array[][10], and sym should ge
         RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
         return now_token;
     }
-    ANP type_name = new AST_node;
+    ANP type_name = std::make_shared<AST_node>();
     connect_child(head, type_name);
     type_name->type = BasicType;
     type_name->data = now_token->data;
@@ -556,7 +556,7 @@ TNP FunctionFormParamAST::Parse() {  // TBD, lost array[][10], and sym should ge
         RaiseError("in FunctionFormParam, identify name is not valid", now_token);
         return now_token;
     }
-    ANP id_name = new AST_node;
+    ANP id_name = std::make_shared<AST_node>();
     connect_child(head, id_name);
     id_name->type = Identifier;
     id_name->data = now_token->data;
@@ -577,6 +577,7 @@ TNP FunctionParamsAST::Parse() {
     connect_child(head, func_param.head);
     now_token = func_param.Parse();
     next_token = next(now_token);
+    // symtable.my_head->arg_num++;
 
     while (true) {
 
@@ -594,13 +595,16 @@ TNP FunctionParamsAST::Parse() {
         connect_child(head, addi_func_param.head);
         now_token = addi_func_param.Parse();
         next_token = next(now_token);
+        // symtable.my_head->arg_num++;
     }
+
+    
 
     return now_token;
 }
 
 
-TNP FunctionDefinitionAST::Parse() {  // TBD, sym should get back...
+TNP FunctionDefinitionAST::Parse() {
     head->type = FunctionDefinition;
 
     // v --- sym --- v //
@@ -612,7 +616,7 @@ TNP FunctionDefinitionAST::Parse() {  // TBD, sym should get back...
         RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
         return now_token;
     }
-    ANP func_type = new AST_node;
+    ANP func_type = std::make_shared<AST_node>();
     connect_child(head, func_type);
     func_type->type = FunctionType;
     func_type->data = data(now_token);
@@ -626,14 +630,12 @@ TNP FunctionDefinitionAST::Parse() {  // TBD, sym should get back...
         RaiseError("in FunctionDefinition, function name is not a valid name", now_token);
         return now_token;
     }
-    ANP func_name = new AST_node;
+    ANP func_name = std::make_shared<AST_node>();
     connect_child(head, func_name);
     func_name->type = Identifier;
     func_name->data = data(now_token);
     sym_node.identifier_name = data(now_token);
     GoNext();
-
-    symtable.append(sym_node);
 
     if (data(now_token) != "(") {
         RaiseError("in FunctionDefinition, lost punctuation [(]", now_token);
@@ -650,6 +652,13 @@ TNP FunctionDefinitionAST::Parse() {  // TBD, sym should get back...
     connect_child(head, func_para.head);
     now_token = func_para.Parse();
     next_token = next(now_token);
+
+    SNP daughter_node_attribute_ptr = func_para.GetBackSymtableAttribute();
+    // sym_node.arg_num = daughter_node_attribute_ptr->arg_num;
+
+    // v --- sym append --- v //
+    symtable.append(sym_node);
+    // ^ --- sym append --- ^ //
 
     if (data(now_token) != ")") {
         RaiseError("in FunctionDefinition, lost punctuation [)]", now_token);

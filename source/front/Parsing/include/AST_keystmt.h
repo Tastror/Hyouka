@@ -23,6 +23,6 @@
 class KeywordStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit KeywordStatementAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit KeywordStatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~KeywordStatementAST() override = default;
 };

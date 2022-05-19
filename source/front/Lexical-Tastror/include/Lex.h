@@ -11,16 +11,6 @@
 #include <fstream>
 #include <iostream>
 
-
-void delete_all_tokens(token_node* head) {
-    auto now = head;
-    while (now != nullptr) {
-        auto temp = now;
-        now = now->next;
-        delete temp;
-    }
-}
-
 class Lexical {
 protected:
     std::ifstream ifs;

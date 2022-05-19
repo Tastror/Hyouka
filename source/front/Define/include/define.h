@@ -4,7 +4,7 @@
 
 #pragma once
 #include <string>
-
+#include <memory>
 
 
 enum token_type {
@@ -20,17 +20,17 @@ struct token_node {
         int int_value;
         double double_value = 0.0;
     } value;
-    token_node* next = nullptr;
+    std::shared_ptr<token_node> next = nullptr;
 };
 
-#define TNP token_node*
+#define TNP std::shared_ptr<token_node>
 
-token_node* next(token_node* now);
-std::string data(token_node* node);
-token_type type(token_node* now);
+std::shared_ptr<token_node> next(const std::shared_ptr<token_node>& now);
+std::string data(const std::shared_ptr<token_node>& node);
+token_type type(const std::shared_ptr<token_node>& now);
 
-void print_all_tokens(token_node* head);
-bool search_data(token_node* now, const std::string& target, const std::string& end);
+void print_all_tokens(const std::shared_ptr<token_node>& head);
+bool search_data(std::shared_ptr<token_node> now, const std::string& target, const std::string& end);
 
 
 
@@ -68,21 +68,20 @@ struct AST_node {
         int int_value;
         double double_value = 0.0;
     } value;
-    AST_node* sister = nullptr;
-    AST_node* child = nullptr;
-    AST_node* parent = nullptr;
-    AST_node* last_child = nullptr;
+    std::shared_ptr<AST_node> sister = nullptr;
+    std::shared_ptr<AST_node> child = nullptr;
+    std::shared_ptr<AST_node> parent = nullptr;
+    std::shared_ptr<AST_node> last_child = nullptr;
 };
 
-#define ANP AST_node*
+#define ANP std::shared_ptr<AST_node>
 
-void _print_all_ASTs(ANP now, int stage);
-void print_all_ASTs(ANP AST_head);
+void print_all_ASTs(const ANP& now, int stage);
+void print_all_ASTs(const ANP& AST_head);
 
 
-
-enum sym_id_type { _id_none_, _single_value_, _array_, _function_, _just_a_head_placeholder_ };
-const std::string sym_id_show_type[] = { "id_none", "single_value", "array", "function", "_just_a_head_placeholder_" };
+enum sym_id_type { _id_none_, _single_value_, _array_, _function_ };
+const std::string sym_id_show_type[] = { "id_none", "single_value", "array", "function" };
 enum sym_return_type { _return_none_, _int_, _float_, _void_ };
 const std::string sym_return_show_type[] = { "return_none", "int", "float", "void" };
 
@@ -90,22 +89,23 @@ struct symtable_node {
     static int count;
     std::string identifier_name;
     std::string only_name;
+    bool is_head = false;
     sym_id_type id_type = _id_none_;
     sym_return_type return_type = _return_none_;
     int arg_num = 0;
-    symtable_node* arg_symtable_node_head = nullptr;
+    std::shared_ptr<symtable_node> arg_symtable_node_head = nullptr;
     bool is_const = false;
     bool is_static = false;
-    symtable_node* next = nullptr;
+    std::shared_ptr<symtable_node> next = nullptr;
     explicit symtable_node(bool whether_count_or_not = false, bool is_head = false) {
         if (whether_count_or_not)
             count++;
         if (is_head)
-            id_type = _just_a_head_placeholder_;
+            this->is_head = true;
     }
     void update_only_name();
 };
 
-#define SNP symtable_node*
+#define SNP std::shared_ptr<symtable_node>
 
-void print_symtable(SNP symtable_node_head);
+void print_symtable(const SNP& symtable_node_head);
