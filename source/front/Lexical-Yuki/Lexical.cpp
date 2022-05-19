@@ -5,8 +5,8 @@
 
 using namespace std;
 
-token_node *token_head = new token_node();
-token_node *now = token_head;
+TNP token_head = new std::make_shared<token_node>();
+TNP now = token_head;
 
 ifstream ifs;
 ofstream ofs;
@@ -18,7 +18,7 @@ void save_node(token_type type, string data, int row, int col)
     now->int_or_double = 0;
     now->column = col;
     now->line = row;
-    now->next = new token_node();
+    now->next = new std::make_shared<token_node>();
     now = now->next;
 }
 
@@ -29,7 +29,7 @@ void save_node(int value, int row, int col)
     now->int_or_double = 1;
     now->column = col;
     now->line = row;
-    now->next = new token_node();
+    now->next = new std::make_shared<token_node>();
     now = now->next;
 }
 
@@ -40,8 +40,12 @@ void save_node(double value, int addon, int row, int col)
     now->int_or_double = 2;
     now->column = col;
     now->line = row;
-    now->next = new token_node();
+    now->next = new std::make_shared<token_node>();
     now = now->next;
+}
+
+bool is_operat(char c){
+    if(c=='+'||c=='-'||c=='*'||c=='/'||c=='%'||c=='('||c==')'||c=='['||c==']||c=='<'||)
 }
 
 bool is_punct(char c)
@@ -72,14 +76,31 @@ bool is_blank(char c)
     return false;
 }
 
-string match_id(string read_buffer, int line, int column)
+string match_operat(string read_buffer, int line, int colum)
+{
+    //
+}
+
+string match_id_key(string read_buffer, int line, int column)
 {
     regex id("([a-zA-Z]|_)([0-9a-zA-Z]|_)*");
-    regex key("if|while|else");
+    regex key("const|int|float|if|else|while|break|continue|return");
     smatch match;
     if (regex_search(read_buffer, match, id))
     {
         string result = match[0].str();
+        if (regex_match(result, key))
+        {
+            save_node(KEYWORD, result, line, column);
+            ofs << result << " Keyword" << endl;
+            return read_buffer.substr(result.size());
+        }
+        else
+        {
+            save_node(IDENTI, result, line, column);
+            ofs << result << " ID" << endl;
+            return read_buffer.substr(result.size());
+        }
     }
 }
 
@@ -162,12 +183,22 @@ int main()
             {
                 read_buffer = match_number(read_buffer, row, col);
             }
-            if (is_letter(read_buffer.at(0)) || read_buffer.at(0) == '_')
+            else if (is_letter(read_buffer.at(0)) || read_buffer.at(0) == '_')
             {
                 read_buffer = match_id_key(read_buffer, row, col);
             }
+            else if(is_punct(c)){
+                save_node(PUNCT,string("")+c,row,col);
+                read_buffer.pop_back();
+            }
+            else if(is_operat(c)){
 
-            read_buffer.clear();
+            }
+            else
+            {
+                read_buffer.clear();
+                ofs<<"Error found in line"<<row<<", "<<"column"<<col<<".";
+            }
         }
     }
     ifs.close();
