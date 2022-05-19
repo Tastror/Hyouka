@@ -4,31 +4,32 @@
 
 #include "define.h"
 #include <iostream>
+#include <utility>
 
 
 
 // Lexical
 
-token_node* next(token_node* now) {
+std::shared_ptr<token_node> next(const std::shared_ptr<token_node>& now) {
     if (now != nullptr)
         return now->next;
     return nullptr;
 }
 
-std::string data(token_node* node) {
+std::string data(const std::shared_ptr<token_node>& node) {
     if (node != nullptr)
         return node->data;
     return "";
 }
 
-token_type type(token_node* now) {
+token_type type(const std::shared_ptr<token_node>& now) {
     if (now != nullptr)
         return now->type;
     return NONE;
 }
 
 // only use in assign
-bool search_data(token_node* now, const std::string& target, const std::string& end) {
+bool search_data(std::shared_ptr<token_node> now, const std::string& target, const std::string& end) {
     while (now != nullptr) {
         if (data(now) == target)
             return true;
@@ -39,8 +40,8 @@ bool search_data(token_node* now, const std::string& target, const std::string& 
     return false;
 }
 
-void print_all_tokens(token_node* head) {
-    auto now = head;
+void print_all_tokens(const std::shared_ptr<token_node>& head) {
+    std::shared_ptr<token_node> now(head);
     if (now != nullptr)
         now = now->next;
     while (now != nullptr) {
@@ -53,7 +54,7 @@ void print_all_tokens(token_node* head) {
 
 // Parsing
 
-void _print_all_ASTs(ANP now, int stage) {
+void print_all_ASTs(const ANP& now, int stage) {
     if (now == nullptr) return;
     for (int i = 0; i < stage; ++i)
         std::cout << "    ";
@@ -71,12 +72,12 @@ void _print_all_ASTs(ANP now, int stage) {
     else
         std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << std::endl;
-    _print_all_ASTs(now->child, stage + 1);
-    _print_all_ASTs(now->sister, stage);
+    print_all_ASTs(now->child, stage + 1);
+    print_all_ASTs(now->sister, stage);
 }
 
-void print_all_ASTs(ANP AST_head) {
-    _print_all_ASTs(AST_head, 0);
+void print_all_ASTs(const ANP& AST_head) {
+    print_all_ASTs(AST_head, 0);
 }
 
 
@@ -85,16 +86,24 @@ void print_all_ASTs(ANP AST_head) {
 
 int symtable_node::count = 0;
 
-void print_symtable(SNP symtable_node_head) {
+void print_symtable(const SNP& symtable_node_head) {
     SNP now = symtable_node_head;
     while (now != nullptr) {
-        std::cout << "name: " << now->identifier_name
-                  << ", only_name: " << now->only_name
-                  << ", type: " << sym_id_show_type[now->id_type]
-                  << ", return_type: " << sym_return_show_type[now->return_type]
-                  << ", arg_num: " << now->arg_num
-                  << ", is_const: " << now->is_const
-                  << ", is_static: " << now->is_static << std::endl;
+        if (now->is_head) {
+            std::cout << "[head] type: " << sym_id_show_type[now->id_type]
+                      << ", return_type: " << sym_return_show_type[now->return_type]
+                      << ", arg_num: " << now->arg_num
+                      << ", is_const: " << now->is_const
+                      << ", is_static: " << now->is_static << std::endl;
+        } else {
+            std::cout << "name: " << now->identifier_name
+                      << ", only_name: " << now->only_name
+                      << ", type: " << sym_id_show_type[now->id_type]
+                      << ", return_type: " << sym_return_show_type[now->return_type]
+                      << ", arg_num: " << now->arg_num
+                      << ", is_const: " << now->is_const
+                      << ", is_static: " << now->is_static << std::endl;
+        }
         now = now->next;
     }
 }

@@ -42,7 +42,7 @@ TNP ArrayUsageAST::Parse() {
         RaiseError("in ArrayUsage, identify name is not valid", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -93,7 +93,7 @@ TNP FunctionUsageAST::Parse() {
         RaiseError("in FunctionUsage, identify name is not valid", now_token);
         return now_token;
     }
-    ANP var_name = new AST_node;
+    ANP var_name = std::make_shared<AST_node>();
     connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -185,7 +185,7 @@ TNP ExpressionAST::Parse() {
                     return now_token;
                 }
                 ANP k2 = sym.top(); sym.pop();
-                ANP tog = new AST_node;  // a new here, remember to delete
+                ANP tog = std::make_shared<AST_node>();
                 tog->data = opt.top(); opt.pop();
                 tog->type = Expression;
                 reverse_connect_child(tog, k1);
@@ -213,7 +213,7 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.1 function usage [No GoNext]
                 if (data(next_token) == "(") {
-                    FunctionUsageAST func_use(now_token, symtable);  // a new here, remember to delete
+                    FunctionUsageAST func_use(now_token, symtable);
                     sym.push(func_use.head);
                     now_token = func_use.Parse();
                     next_token = next(now_token);
@@ -221,7 +221,7 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.2 array usage [No GoNext]
                 else if (data(next_token) == "[") {
-                    ArrayUsageAST array_use(now_token, symtable);  // a new here, remember to delete
+                    ArrayUsageAST array_use(now_token, symtable);
                     sym.push(array_use.head);
                     now_token = array_use.Parse();
                     next_token = next(now_token);
@@ -229,7 +229,7 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.3 normal variables
                 else {
-                    ANP token_to_AST = new AST_node;  // a new here, remember to delete
+                    ANP token_to_AST = std::make_shared<AST_node>();
                     token_to_AST->data = now_token->data;
                     token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
@@ -239,7 +239,7 @@ TNP ExpressionAST::Parse() {
 
             // 1.2 normal numbers
             else if (type(now_token) == NUMBER) {
-                ANP token_to_AST = new AST_node;  // a new here, remember to delete
+                ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
                 token_to_AST->int_or_double = now_token->int_or_double;
@@ -268,7 +268,7 @@ TNP ExpressionAST::Parse() {
 
             // unary+, unary-, ! should become unary (use a placeholder)
             if (assign_operator(data(now_token)) == 64) {
-                ANP token_to_AST = new AST_node;  // a new here, remember to delete
+                ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
                 token_to_AST->type = Expression;
                 sym.push(token_to_AST);
@@ -278,7 +278,7 @@ TNP ExpressionAST::Parse() {
             if (data(now_token) == "(") {
                 GoNext();
 
-                ExpressionAST recur_expr(now_token, symtable);  // a new here, remember to delete
+                ExpressionAST recur_expr(now_token, symtable);
                 sym.push(recur_expr.head);
                 recur_expr.head->data = "brace";
                 now_token = recur_expr.Parse();
@@ -313,7 +313,7 @@ TNP ExpressionAST::Parse() {
                         return now_token;
                     }
                     ANP k2 = sym.top(); sym.pop();
-                    ANP tog = new AST_node;  // a new here, remember to delete
+                    ANP tog = std::make_shared<AST_node>();
                     tog->data = opt.top(); opt.pop();
                     tog->type = Expression;
                     reverse_connect_child(tog, k1);
