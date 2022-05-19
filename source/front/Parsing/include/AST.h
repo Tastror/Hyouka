@@ -28,7 +28,9 @@ public:
     Symtable() {
         table_id = table_counts;
         table_counts++;
-        my_head = std::make_shared<symtable_node>(table_id, true);
+        my_head = std::make_shared<symtable_node>();
+        my_head->table_id = table_id;
+        my_head->is_head = true;
         my_tail = my_head;
         heads_chain.push_back(my_head);
         all_symtable_heads.push_back(my_head);

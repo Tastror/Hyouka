@@ -97,10 +97,6 @@ struct symtable_node {
     bool is_static = false;
     int table_id;
     std::shared_ptr<symtable_node> next = nullptr;
-    explicit symtable_node(int _table_id = -1, bool is_head = false) {
-        if (is_head) this->is_head = true;
-        table_id = _table_id;
-    }
     void rename();
     void rename(const std::string& name);
 };
