@@ -5,11 +5,8 @@
 
 using namespace std;
 
-//<<<<<<< master
 TNP token_head = std::make_shared<token_node>();
-//=======
-//TNP token_head = new std::make_shared<token_node>();
-//>>>>>>> master
+
 TNP now = token_head;
 
 ifstream ifs;
@@ -22,11 +19,8 @@ void save_node(token_type type, string data, int row, int col)
     now->int_or_double = 0;
     now->column = col;
     now->line = row;
-//<<<<<<< master
     now->next = std::make_shared<token_node>();
-//=======
-    //now->next = new std::make_shared<token_node>();
-//>>>>>>> master
+
     now = now->next;
 }
 
@@ -37,7 +31,7 @@ void save_node(int value, int row, int col)
     now->int_or_double = 1;
     now->column = col;
     now->line = row;
-    now->next = new std::make_shared<token_node>();
+    now->next = std::make_shared<token_node>();
     now = now->next;
 }
 
@@ -48,12 +42,15 @@ void save_node(double value, int addon, int row, int col)
     now->int_or_double = 2;
     now->column = col;
     now->line = row;
-    now->next = new std::make_shared<token_node>();
+    now->next = std::make_shared<token_node>();
     now = now->next;
 }
 
-bool is_operat(char c){
-    if(c=='+'||c=='-'||c=='*'||c=='/'||c=='%'||c=='('||c==')'||c=='['||c==']||c=='<'||)
+bool is_operat(char c)
+{
+    if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '(' || c == ')' || c == '[' || c == ']' || c == '<' || c == '>')
+    {
+    }
 }
 
 bool is_punct(char c)
@@ -195,17 +192,19 @@ int main()
             {
                 read_buffer = match_id_key(read_buffer, row, col);
             }
-            else if(is_punct(c)){
-                save_node(PUNCT,string("")+c,row,col);
+            else if (is_punct(c))
+            {
+                save_node(PUNCT, string("") + c, row, col);
                 read_buffer.pop_back();
             }
-            else if(is_operat(c)){
-
+            else if (is_operat(c))
+            {
             }
             else
             {
                 read_buffer.clear();
-                ofs<<"Error found in line"<<row<<", "<<"column"<<col<<".";
+                ofs << "Error found in line" << row << ", "
+                    << "column" << col << ".";
             }
         }
     }
