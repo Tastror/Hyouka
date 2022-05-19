@@ -1,68 +1,19 @@
-#include"../Lexical-Tastror/include/Lex.h"
-#include<iostream>
-#include"../Define/include/define.h"
+#include <regex>
+#include "../Lexical-Tastror/include/Lex.h"
+#include <iostream>
+#include "../Define/include/define.h"
 
 using namespace std;
 
-token_node* token_head=new token_node();
-token_node* now=token_head;
+token_node *token_head = new token_node();
+token_node *now = token_head;
 
+ifstream ifs;
+ofstream ofs;
 
-void match_number(char c,ifstream ifs){
-    string token;
-    token.push_back(c);
-    if(c=='0'){
-        ifs.get(c);
-        token.push_back(c);
-        if(c=='x'||c=='X'){
-            ifs.get(c);
-            token.push_back(c);
-            if(c>='0'&&c<='9'||c>='a'&&c<='f'||c>='A'&&c<='F'){
-                ifs.get(c);
-                token.push_back(c);
-                while(c>='0'&&c<='9'||c>='a'&&c<='f'||c>='A'&&c<='F'){
-                    ifs.get(c);
-                    token.push_back(c);
-                }
-            }
-            else{
-                cout<<"Error: "<<c<<" is not a number"<<endl;
-                return;
-            }
-        }
-        else if(c>='0'&&c<='9'){
-            ifs.get(c);
-            token.push_back(c);
-            
-            while(c>='0'&&c<='9'){
-                ifs.get(c);
-                token.push_back(c);
-            }
-        }
-        else{
-            cout<<"Error: "<<c<<" is not a number"<<endl;
-            return;
-        }
-    }
-    else if(c>='1'&&c<='9'){
-        ifs.get(c);
-        token.push_back(c);
-        while(c>='0'&&c<='9'){
-            ifs.get(c);
-            token.push_back(c);
-        }
-    }
-    else{
-        cout<<"Error: "<<c<<" is not a number"<<endl;
-        return;
-    }
-    cout<<"Interger: "<<token<<endl;
-}
-
-
-
-bool is_punct(char c){
-    if(c==';'||c==','||c=='{'||c=='}')
+bool is_punct(char c)
+{
+    if (c == ';' || c == ',' || c == '{' || c == '}')
         return true;
     return false;
 }
@@ -88,18 +39,52 @@ bool is_blank(char c)
     return false;
 }
 
-int main(){
+void match(string read_buffer, int line, int column)
+{
+    regex dec_int("[0-9]+");
+    regex dec_float("[0-9]+\\.[0-9]+");
+    regex dec_float_e("[0-9]+\\.[0-9]+e[+|-]?[0-9]+");
+    regex oct_int("0[0-7]+");
+    regex hex_int("0[x|X][0-9a-fA-F]+");
+    smatch match;
+    if (regex_search(read_buffer, match, dec_int))
+    {
+        now->value.double_value = stoi(match.str());
+        ofs<<match.str()<<endl;
+        now->int_or_double = 1;
+        now->type = NUMBER;
+        now->line = line;
+        now->column = column;
+        now->next = new token_node();
+        now = now->next;
+        return;
+    }
+    return;
+}
+
+int main()
+{
     char c;
-    ifstream ifs;
+    string read_buffer;
+    int row = 0, col = 0;
     ifs.open("test.c");
-    if(!ifs.is_open()){
-        cout<<"open file error"<<endl;
+    ofs.open("out.txt");
+    if (!ifs.is_open())
+    {
+        cout << "open file error" << endl;
         return 0;
     }
-    while (!ifs.eof()) {
-        ifs.get(c);
-        if(is_number(c)){
-            match_interger(c,ifs);
+    while (!ifs.eof())
+    {
+        ifs >> read_buffer;
+
+        cout << read_buffer << endl;
+        if (read_buffer.size() > 0)
+        {
+            match(read_buffer, row, col);
+            read_buffer.clear();
         }
     }
+    ifs.close();
+    ofs.close();
 }
