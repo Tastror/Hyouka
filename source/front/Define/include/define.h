@@ -103,6 +103,7 @@ struct symtable_node {
         if (is_head)
             this->is_head = true;
     }
+    void rename(const std::string& name);
     void update_only_name();
 };
 

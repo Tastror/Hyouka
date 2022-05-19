@@ -36,14 +36,11 @@ public:
         heads_chain.push_back(my_head);
         sym_tail = last_symtable.sym_tail;
         sym_head = last_symtable.sym_head;
-        my_head = nullptr;
-        my_tail = nullptr;
     }
 
     void append(const symtable_node& append_sym_node) {
         SNP sym_ptr = std::make_shared<symtable_node>(true);
         *sym_ptr = append_sym_node;
-        sym_ptr->update_only_name();
         my_tail->next = sym_ptr;
         my_tail = sym_ptr;
         my_tail->next = nullptr;

@@ -577,7 +577,7 @@ TNP FunctionParamsAST::Parse() {
     connect_child(head, func_param.head);
     now_token = func_param.Parse();
     next_token = next(now_token);
-    // symtable.my_head->arg_num++;
+    symtable.my_head->arg_num++;
 
     while (true) {
 
@@ -595,7 +595,7 @@ TNP FunctionParamsAST::Parse() {
         connect_child(head, addi_func_param.head);
         now_token = addi_func_param.Parse();
         next_token = next(now_token);
-        // symtable.my_head->arg_num++;
+        symtable.my_head->arg_num++;
     }
 
     
@@ -611,6 +611,11 @@ TNP FunctionDefinitionAST::Parse() {
     symtable_node sym_node;
     sym_node.id_type = _function_;
     // ^ --- sym --- ^ //
+
+    // v --- new sym block --- v //
+    Symtable func_block_symtable;
+    func_block_symtable.extend_from(symtable);
+    // ^ --- new sym block --- ^ //
 
     if (data(now_token) != "int" && data(now_token) != "void" && data(now_token) != "float") {
         RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
@@ -634,7 +639,8 @@ TNP FunctionDefinitionAST::Parse() {
     connect_child(head, func_name);
     func_name->type = Identifier;
     func_name->data = data(now_token);
-    sym_node.identifier_name = data(now_token);
+    sym_node.rename(data(now_token));
+    func_block_symtable.my_head->only_name = sym_node.only_name;
     GoNext();
 
     if (data(now_token) != "(") {
@@ -643,18 +649,13 @@ TNP FunctionDefinitionAST::Parse() {
     }
     GoNext();
 
-    // v --- new sym block --- v //
-    Symtable func_block_symtable;
-    func_block_symtable.extend_from(symtable);
-    // ^ --- new sym block --- ^ //
-
     FunctionParamsAST func_para(now_token, func_block_symtable);
     connect_child(head, func_para.head);
     now_token = func_para.Parse();
     next_token = next(now_token);
 
     SNP daughter_node_attribute_ptr = func_para.GetBackSymtableAttribute();
-    // sym_node.arg_num = daughter_node_attribute_ptr->arg_num;
+    sym_node.arg_num = daughter_node_attribute_ptr->arg_num;
 
     // v --- sym append --- v //
     symtable.append(sym_node);
