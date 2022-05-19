@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "define.h"
+#include "../../Define/include/define.h"
 #include "test.hpp"
 
 #include <string>
@@ -43,5 +43,4 @@ public:
         if (fail) return;
         head = next(test_get_token());
     }
-
 };
