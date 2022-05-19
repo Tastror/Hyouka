@@ -89,7 +89,7 @@ public:
         symtable.my_head->is_const = symtable_node_ptr->is_const;
         symtable.my_head->is_static = symtable_node_ptr->is_static;
         symtable.my_head->id_type = symtable_node_ptr->id_type;
-        symtable.my_head->return_type = symtable_node_ptr->return_type;
+        symtable.my_head->value_type = symtable_node_ptr->value_type;
         symtable.my_head->arg_num = symtable_node_ptr->arg_num;
     }
     [[nodiscard]] SNP GetBackSymtableAttribute() const {

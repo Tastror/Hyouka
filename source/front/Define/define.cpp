@@ -90,9 +90,9 @@ void print_symtable(const SNP& symtable_node_head) {
     SNP now = symtable_node_head;
     while (now != nullptr) {
         if (now->is_head) {
-            std::cout << "[head] only_name: " << now->only_name;
+            std::cout << "[head] name: " << now->identifier_name << ", only_name: " << now->only_name;
             if (now->id_type != _id_none_) std::cout << ", type: " << sym_id_show_type[now->id_type];
-            if (now->return_type != _return_none_) std::cout << ", return_type: " << sym_return_show_type[now->return_type];
+            if (now->value_type != _value_none_) std::cout << ", value_type: " << sym_return_show_type[now->value_type];
             if (now->id_type == _function_) std::cout << ", arg_num: " << now->arg_num;
             if (now->is_const) std::cout << ", is_const";
             if (now->is_static) std::cout << ", is_static";
@@ -100,7 +100,7 @@ void print_symtable(const SNP& symtable_node_head) {
         } else {
             std::cout << "name: " << now->identifier_name << ", only_name: " << now->only_name;
             if (now->id_type != _id_none_) std::cout << ", type: " << sym_id_show_type[now->id_type];
-            if (now->return_type != _return_none_) std::cout << ", return_type: " << sym_return_show_type[now->return_type];
+            if (now->value_type != _value_none_) std::cout << ", value_type: " << sym_return_show_type[now->value_type];
             if (now->id_type == _function_) std::cout << ", arg_num: " << now->arg_num;
             if (now->is_const) std::cout << ", is_const";
             if (now->is_static) std::cout << ", is_static";
