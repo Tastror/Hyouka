@@ -82,8 +82,8 @@ void print_all_ASTs(const ANP& AST_head);
 
 enum sym_id_type { _id_none_, _single_value_, _array_, _function_ };
 const std::string sym_id_show_type[] = { "id_none", "single_value", "array", "function" };
-enum sym_return_type { _return_none_, _int_, _float_, _void_ };
-const std::string sym_return_show_type[] = { "return_none", "int", "float", "void" };
+enum sym_return_type { _value_none_, _int_, _float_, _void_ };
+const std::string sym_return_show_type[] = { "value_none", "int", "float", "void" };
 
 struct symtable_node {
     static int count;
@@ -91,7 +91,7 @@ struct symtable_node {
     std::string only_name;
     bool is_head = false;
     sym_id_type id_type = _id_none_;
-    sym_return_type return_type = _return_none_;
+    sym_return_type value_type = _value_none_;
     int arg_num = 0;
     std::shared_ptr<symtable_node> arg_symtable_node_head = nullptr;
     bool is_const = false;
