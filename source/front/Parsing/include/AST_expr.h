@@ -15,7 +15,7 @@
 class ArrayUsageAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayUsageAST(TNP token_head): BaseAST(token_head) {}
+    explicit ArrayUsageAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ArrayUsageAST() override = default;
 };
 
@@ -30,7 +30,7 @@ public:
 class FunctionUsageAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionUsageAST(TNP token_head): BaseAST(token_head) {}
+    explicit FunctionUsageAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~FunctionUsageAST() override = default;
 };
 
@@ -45,7 +45,7 @@ public:
 class ExpressionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ExpressionAST(TNP token_head): BaseAST(token_head) {}
+    explicit ExpressionAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ExpressionAST() override = default;
 };
 

@@ -4,6 +4,8 @@
 
 #pragma once
 #include <iostream>
+#include <utility>
+#include <vector>
 #include "define.h"
 
 void RaiseError(const std::string& error_code, TNP token_node);
@@ -12,17 +14,71 @@ void connect_child(ANP parent, ANP child);
 void reverse_connect_child(ANP parent, ANP child);
 
 
+class Symtable {
+public:
+    static std::vector<SNP> all_symtable_heads;
+
+    SNP sym_head = nullptr;
+    SNP sym_tail = nullptr;
+    SNP my_head = nullptr;
+    SNP my_tail = nullptr;
+    std::vector<SNP> heads_chain;
+
+    Symtable() {
+        my_head = new symtable_node(false, true);
+        my_tail = my_head;
+        heads_chain.push_back(my_head);
+        all_symtable_heads.push_back(my_head);
+    };
+
+    void extend_from(const Symtable& last_symtable) {
+        heads_chain = last_symtable.heads_chain;
+        heads_chain.push_back(my_head);
+        sym_tail = last_symtable.sym_tail;
+        sym_head = last_symtable.sym_head;
+        my_head = nullptr;
+        my_tail = nullptr;
+    }
+
+    void append(const symtable_node& new_sym_node) {
+        SNP new_sym = new symtable_node(true);
+        *new_sym = new_sym_node;
+        new_sym->update_only_name();
+        my_tail->next = new_sym;
+        my_tail = new_sym;
+        my_tail->next = nullptr;
+        sym_tail = my_tail;
+    }
+
+    void print() {
+        for (auto& i : heads_chain) {
+            print_symtable(i);
+        }
+    }
+
+    static void print_all() {
+        for (auto& i : all_symtable_heads) {
+            print_symtable(i);
+            std::cout << std::endl;
+        }
+    }
+
+    virtual ~Symtable() = default;
+};
+
+
 class BaseAST {
 public:
     ANP head;
     TNP now_token;
     TNP next_token;
     bool error;
+    Symtable& symtable;
     void GoNext() {
         now_token = next_token;
         next_token = next(now_token);
     }
-    explicit BaseAST(TNP token_head) {
+    explicit BaseAST(TNP token_head, Symtable& symtable): symtable(symtable) {
         error = false;
         head = new AST_node;
         now_token = token_head;
@@ -45,7 +101,7 @@ public:
 class SingleAssignmentAST: public BaseAST {
 public:
     TNP Parse();
-    explicit SingleAssignmentAST(TNP token_head): BaseAST(token_head) {}
+    explicit SingleAssignmentAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~SingleAssignmentAST() override = default;
 };
 
@@ -62,7 +118,7 @@ public:
 class ArrayAssignmentAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayAssignmentAST(TNP token_head): BaseAST(token_head) {}
+    explicit ArrayAssignmentAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ArrayAssignmentAST() override = default;
 };
 
@@ -80,7 +136,7 @@ public:
 class SingleDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit SingleDefinitionAST(TNP token_head): BaseAST(token_head) {}
+    explicit SingleDefinitionAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~SingleDefinitionAST() override = default;
 };
 
@@ -96,7 +152,7 @@ public:
 class ArrayInitialBlockAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayInitialBlockAST(TNP token_head): BaseAST(token_head) {}
+    explicit ArrayInitialBlockAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ArrayInitialBlockAST() override = default;
 };
 
@@ -115,7 +171,7 @@ public:
 class ArrayDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayDefinitionAST(TNP token_head): BaseAST(token_head) {}
+    explicit ArrayDefinitionAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ArrayDefinitionAST() override = default;
 };
 
@@ -133,7 +189,7 @@ public:
 class DeclarationStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit DeclarationStatementAST(TNP token_head): BaseAST(token_head) {}
+    explicit DeclarationStatementAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~DeclarationStatementAST() override = default;
 };
 
@@ -161,7 +217,7 @@ public:
 class NormalStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit NormalStatementAST(TNP token_head): BaseAST(token_head) {}
+    explicit NormalStatementAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~NormalStatementAST() override = default;
 };
 
@@ -181,7 +237,7 @@ public:
 class StatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit StatementAST(TNP token_head): BaseAST(token_head) {}
+    explicit StatementAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~StatementAST() override = default;
 };
 
@@ -196,7 +252,7 @@ public:
 class BlockStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit BlockStatementAST(TNP token_head): BaseAST(token_head) {}
+    explicit BlockStatementAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~BlockStatementAST() override = default;
 };
 
@@ -210,7 +266,7 @@ public:
 class FunctionFormParamAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionFormParamAST(TNP token_head): BaseAST(token_head) {}
+    explicit FunctionFormParamAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~FunctionFormParamAST() override = default;
 };
 
@@ -226,7 +282,7 @@ public:
 class FunctionParamsAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionParamsAST(TNP token_head): BaseAST(token_head) {}
+    explicit FunctionParamsAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~FunctionParamsAST() override = default;
 };
 
@@ -241,7 +297,7 @@ public:
 class FunctionDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionDefinitionAST(TNP token_head): BaseAST(token_head) {}
+    explicit FunctionDefinitionAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~FunctionDefinitionAST() override = default;
 };
 
@@ -250,6 +306,6 @@ public:
 class ProgramAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ProgramAST(TNP token_head): BaseAST(token_head) {}
+    explicit ProgramAST(TNP token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
     ~ProgramAST() override = default;
 };
