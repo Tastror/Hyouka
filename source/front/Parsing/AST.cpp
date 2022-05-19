@@ -317,6 +317,10 @@ TNP ArrayDefinitionAST::Parse() {
 TNP DeclarationStatementAST::Parse() {
     head->type = DeclarationStatement;
 
+    // v --- sym --- v //
+    symtable_node placeholder_sym_node;
+    // ^ --- sym --- ^ //
+
     if (data(now_token) != "const" && data(now_token) != "int" && data(now_token) != "float") {
         RaiseError("in DeclarationStatement, beginning is not [const] [int] or [float]", now_token);
         return now_token;
@@ -327,6 +331,7 @@ TNP DeclarationStatementAST::Parse() {
         head->type = ConstDeclarationStatement;
         GoNext();
     }
+    placeholder_sym_node.is_const = true;
 
     if (data(now_token) != "int" && data(now_token) != "float") {
         RaiseError("in DeclarationStatement, type is not [int] or [float]", now_token);
@@ -336,19 +341,42 @@ TNP DeclarationStatementAST::Parse() {
     connect_child(head, var_type);
     var_type->type = BasicType;
     var_type->data = now_token->data;
+    placeholder_sym_node.value_type =
+            data(now_token) == "int" ? _int_ :
+            data(now_token) == "float" ? _float_ : _value_none_;
     GoNext();
 
     if (type(now_token) == IDENTI) {
+
+        // v --- sym --- v //
+        symtable_node sym_node;
+        sym_node.rename(data(now_token));
+        sym_node.is_const = placeholder_sym_node.is_const;
+        sym_node.value_type = placeholder_sym_node.value_type;
+        // ^ --- sym --- ^ //
+
         if (data(next_token) == "[") {
+
+            sym_node.id_type = _array_;
+
             ArrayDefinitionAST array_def(now_token, symtable);
             connect_child(head, array_def.head);
             now_token = array_def.Parse();
             next_token = next(now_token);
-        } else {
+
+            symtable.append(sym_node);
+        }
+
+        else {
+
+            sym_node.id_type = _single_value_;
+
             SingleDefinitionAST single_def(now_token, symtable);
             connect_child(head, single_def.head);
             now_token = single_def.Parse();
             next_token = next(now_token);
+
+            symtable.append(sym_node);
         }
     }
 
@@ -509,6 +537,14 @@ TNP StatementAST::Parse() {
 TNP BlockStatementAST::Parse() {
     head->type = BlockStatement;
 
+    // v --- sym block --- v //
+    Symtable block_symtable;
+    block_symtable.extend_from(symtable);
+    block_symtable.my_head->identifier_name = "block";
+    block_symtable.my_head->only_name = "block";
+    symtable = block_symtable;
+    // ^ --- sym block --- ^ //
+
     if (data(now_token) != "{") {
         RaiseError("in BlockStatement, beginning is not [{]", now_token);
         return now_token;
@@ -598,8 +634,6 @@ TNP FunctionParamsAST::Parse() {
         symtable.my_head->arg_num++;
     }
 
-    
-
     return now_token;
 }
 
@@ -625,10 +659,10 @@ TNP FunctionDefinitionAST::Parse() {
     connect_child(head, func_type);
     func_type->type = FunctionType;
     func_type->data = data(now_token);
-    sym_node.return_type =
+    sym_node.value_type =
             data(now_token) == "int" ? _int_ :
             data(now_token) == "float" ? _float_ :
-            data(now_token) == "void" ? _void_ : _return_none_;
+            data(now_token) == "void" ? _void_ : _value_none_;
     GoNext();
 
     if (type(now_token) != IDENTI) {
@@ -640,6 +674,7 @@ TNP FunctionDefinitionAST::Parse() {
     func_name->type = Identifier;
     func_name->data = data(now_token);
     sym_node.rename(data(now_token));
+    func_block_symtable.my_head->identifier_name = "function";
     func_block_symtable.my_head->only_name = sym_node.only_name;
     GoNext();
 
@@ -680,6 +715,7 @@ TNP FunctionDefinitionAST::Parse() {
 TNP ProgramAST::Parse() {
     head->type = ProgramBody;
 
+    symtable.my_head->identifier_name = "this_program";
     symtable.my_head->only_name = "this_program";
 
     while (now_token != nullptr) {
@@ -710,6 +746,5 @@ TNP ProgramAST::Parse() {
         if (UpdateError()) { break; }
     }
 
-
     return now_token;
-};
+}
