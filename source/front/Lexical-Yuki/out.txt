@@ -2,4 +2,4 @@ float Keyword
 c ID
 = Operator
 233
-Error found in line1, column3.
+Error found in line1, column12.

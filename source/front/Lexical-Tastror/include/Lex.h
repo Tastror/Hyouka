@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../Define/include/define.h"
+#include "define.h"
 #include "test.hpp"
 
 #include <string>
