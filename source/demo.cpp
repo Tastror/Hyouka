@@ -1,5 +1,5 @@
 //
-// This demo is for Lexical Analysis and Parsing AST
+// This demo is for Lexical-WuXiwen Analysis and Parsing AST
 //
 
 float test(int a[6], float x) {

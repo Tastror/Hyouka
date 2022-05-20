@@ -301,7 +301,7 @@ TNP ExpressionAST::Parse() {
                     return now_token;
                 }
 
-                // 2.2.2 now - top <= 0  means you can reduce it
+                // 2.2.2 now_token - top <= 0  means you can reduce it
                 while (compare(now_op, opt.top()) <= 0) {
                     if (sym.empty()) {
                         RaiseError("in Expression, number or variable is not enough", now_token);

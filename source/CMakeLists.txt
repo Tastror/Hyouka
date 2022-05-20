@@ -9,7 +9,6 @@ include_directories(
         front/Define/include
 
         front/Lexical/include
-        front/Lexical-Tastror/include
 
         front/Parsing/include
 )
@@ -22,7 +21,7 @@ add_executable(hyouka
 
         front/Define/define.cpp
 
-        front/Lexical-Tastror/include/test.hpp
+        front/Lexical/Lex.cpp
 
         front/Parsing/AST.cpp
         front/Parsing/AST_expr.cpp

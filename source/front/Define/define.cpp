@@ -7,7 +7,7 @@
 
 
 
-// Lexical: token_node
+// Lexical-WuXiwen: token_node
 
 std::shared_ptr<token_node> next(const std::shared_ptr<token_node>& now) {
     if (now != nullptr)
@@ -41,10 +41,8 @@ bool search_data(std::shared_ptr<token_node> now, const std::string& target, con
 
 void print_all_tokens(const std::shared_ptr<token_node>& head) {
     std::shared_ptr<token_node> now(head);
-    if (now != nullptr)
-        now = now->next;
     while (now != nullptr) {
-        std::cout << now->type << ", " << now->data << "\n";
+        std::cout << token_show_type[now->type] << ", " << now->line << ", " << now->column << ", " << now->data << "\n";
         now = now->next;
     }
 }
