@@ -403,16 +403,36 @@ TNP DeclarationStatementAST::Parse() {
         }
 
         if (type(now_token) == IDENTI) {
+
+            // v --- sym --- v //
+            symtable_node sym_node;
+            sym_node.identifier_name = data(now_token);
+            sym_node.is_const = placeholder_sym_node.is_const;
+            sym_node.value_type = placeholder_sym_node.value_type;
+            // ^ --- sym --- ^ //
+
             if (data(next_token) == "[") {
+
+                sym_node.id_type = _array_;
+
                 ArrayDefinitionAST array_def(now_token, symtable_ptr);
                 connect_child(head, array_def.head);
                 now_token = array_def.Parse();
                 next_token = next(now_token);
-            } else {
+
+                symtable_ptr->append(sym_node);
+            }
+
+            else {
+
+                sym_node.id_type = _single_value_;
+
                 SingleDefinitionAST single_def(now_token, symtable_ptr);
                 connect_child(head, single_def.head);
                 now_token = single_def.Parse();
                 next_token = next(now_token);
+
+                symtable_ptr->append(sym_node);
             }
         }
 
