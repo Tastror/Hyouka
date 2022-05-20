@@ -17,7 +17,8 @@ void reverse_connect_child(const ANP& parent, const ANP& child);
 class Symtable {
 public:
     static std::vector<SNP> all_symtable_heads;
-
+    static int table_counts;
+    int table_id;
     SNP sym_head = nullptr;
     SNP sym_tail = nullptr;
     SNP my_head = nullptr;
@@ -25,22 +26,28 @@ public:
     std::vector<SNP> heads_chain;
 
     Symtable() {
-        my_head = std::make_shared<symtable_node>(false, true);
+        table_id = table_counts;
+        table_counts++;
+        my_head = std::make_shared<symtable_node>();
+        my_head->table_id = table_id;
+        my_head->is_head = true;
         my_tail = my_head;
         heads_chain.push_back(my_head);
         all_symtable_heads.push_back(my_head);
     };
 
-    void extend_from(const Symtable& last_symtable) {
-        heads_chain = last_symtable.heads_chain;
+    void extend_from(const std::shared_ptr<Symtable>& last_symtable_ptr) {
+        heads_chain = last_symtable_ptr->heads_chain;
         heads_chain.push_back(my_head);
-        sym_tail = last_symtable.sym_tail;
-        sym_head = last_symtable.sym_head;
+        sym_tail = last_symtable_ptr->sym_tail;
+        sym_head = last_symtable_ptr->sym_head;
     }
 
     void append(const symtable_node& append_sym_node) {
-        SNP sym_ptr = std::make_shared<symtable_node>(true);
+        SNP sym_ptr = std::make_shared<symtable_node>();
         *sym_ptr = append_sym_node;
+        sym_ptr->table_id = table_id;
+        sym_ptr->rename();
         my_tail->next = sym_ptr;
         my_tail = sym_ptr;
         my_tail->next = nullptr;
@@ -74,26 +81,34 @@ public:
     TNP now_token;
     TNP next_token;
     bool error;
-    Symtable& symtable;
+    std::shared_ptr<Symtable> symtable_ptr;
     void GoNext() {
         now_token = next_token;
         next_token = next(now_token);
     }
-    explicit BaseAST(const TNP& token_head, Symtable& symtable): symtable(symtable) {
+    explicit BaseAST(const TNP& token_head, const Symtable& symtable) {
         error = false;
+        symtable_ptr = std::make_shared<Symtable>(symtable);
+        head = std::make_shared<AST_node>();
+        now_token = token_head;
+        next_token = next(now_token);
+    }
+    explicit BaseAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr) {
+        error = false;
+        this->symtable_ptr = symtable_ptr;
         head = std::make_shared<AST_node>();
         now_token = token_head;
         next_token = next(now_token);
     }
     void PassDownSymtableAttribute(const SNP& symtable_node_ptr) const {
-        symtable.my_head->is_const = symtable_node_ptr->is_const;
-        symtable.my_head->is_static = symtable_node_ptr->is_static;
-        symtable.my_head->id_type = symtable_node_ptr->id_type;
-        symtable.my_head->value_type = symtable_node_ptr->value_type;
-        symtable.my_head->arg_num = symtable_node_ptr->arg_num;
+        symtable_ptr->my_head->is_const = symtable_node_ptr->is_const;
+        symtable_ptr->my_head->is_static = symtable_node_ptr->is_static;
+        symtable_ptr->my_head->id_type = symtable_node_ptr->id_type;
+        symtable_ptr->my_head->value_type = symtable_node_ptr->value_type;
+        symtable_ptr->my_head->arg_num = symtable_node_ptr->arg_num;
     }
     [[nodiscard]] SNP GetBackSymtableAttribute() const {
-        return symtable.my_head;
+        return symtable_ptr->my_head;
     }
     bool UpdateError();
     virtual ~BaseAST() = default;
@@ -112,7 +127,8 @@ public:
 class SingleAssignmentAST: public BaseAST {
 public:
     TNP Parse();
-    explicit SingleAssignmentAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit SingleAssignmentAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit SingleAssignmentAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~SingleAssignmentAST() override = default;
 };
 
@@ -129,7 +145,8 @@ public:
 class ArrayAssignmentAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayAssignmentAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayAssignmentAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayAssignmentAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ArrayAssignmentAST() override = default;
 };
 
@@ -147,7 +164,8 @@ public:
 class SingleDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit SingleDefinitionAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit SingleDefinitionAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit SingleDefinitionAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~SingleDefinitionAST() override = default;
 };
 
@@ -163,7 +181,8 @@ public:
 class ArrayInitialBlockAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayInitialBlockAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayInitialBlockAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayInitialBlockAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ArrayInitialBlockAST() override = default;
 };
 
@@ -182,7 +201,8 @@ public:
 class ArrayDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ArrayDefinitionAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayDefinitionAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayDefinitionAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ArrayDefinitionAST() override = default;
 };
 
@@ -200,7 +220,8 @@ public:
 class DeclarationStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit DeclarationStatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit DeclarationStatementAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit DeclarationStatementAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~DeclarationStatementAST() override = default;
 };
 
@@ -228,7 +249,8 @@ public:
 class NormalStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit NormalStatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit NormalStatementAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit NormalStatementAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~NormalStatementAST() override = default;
 };
 
@@ -248,7 +270,8 @@ public:
 class StatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit StatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit StatementAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit StatementAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~StatementAST() override = default;
 };
 
@@ -263,7 +286,8 @@ public:
 class BlockStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit BlockStatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit BlockStatementAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit BlockStatementAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~BlockStatementAST() override = default;
 };
 
@@ -277,7 +301,8 @@ public:
 class FunctionFormParamAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionFormParamAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionFormParamAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionFormParamAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~FunctionFormParamAST() override = default;
 };
 
@@ -293,7 +318,8 @@ public:
 class FunctionParamsAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionParamsAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionParamsAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionParamsAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~FunctionParamsAST() override = default;
 };
 
@@ -308,7 +334,8 @@ public:
 class FunctionDefinitionAST: public BaseAST {
 public:
     TNP Parse();
-    explicit FunctionDefinitionAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionDefinitionAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionDefinitionAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~FunctionDefinitionAST() override = default;
 };
 
@@ -317,6 +344,7 @@ public:
 class ProgramAST: public BaseAST {
 public:
     TNP Parse();
-    explicit ProgramAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ProgramAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ProgramAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ProgramAST() override = default;
 };

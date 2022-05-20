@@ -2,8 +2,8 @@
 // This demo is for Lexical Analysis and Parsing AST
 //
 
-float test(int a, float x) {
-    return a + x;
+float test(int a[6], float x) {
+    return a[1] + x;
 }
 
 int k[8][6] = {{5}, {8, 2}, 11};
@@ -14,7 +14,7 @@ int main() {
 
     {}  // comment 2
 
-    const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(7, 16);
+    const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(k[6], 16);
 
     float x = 0.14 + 3 * 1;
 
