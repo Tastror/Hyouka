@@ -1,12 +1,11 @@
 #include <regex>
 #include "../Lexical-Tastror/include/Lex.h"
 #include <iostream>
-#include "../Define/include/define.h"
+#include "define.h"
 
 using namespace std;
 
 TNP token_head = std::make_shared<token_node>();
-
 TNP now = token_head;
 
 ifstream ifs;

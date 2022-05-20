@@ -9,11 +9,13 @@
 
 
 
-// Lexical: token_node
+// Lexical-WuXiwen: token_node
 
 enum token_type {
     NONE, PUNCT, OPERAT, KEYWORD, NUMBER, IDENTI
 };
+
+const std::string token_show_type[] = { "NONE", "PUNCT", "OPERAT", "KEYWORD", "NUMBER", "IDENTI" };
 
 struct token_node {
     int line = 0, column = 0;
