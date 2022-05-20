@@ -85,8 +85,8 @@ bool is_blank(char c)
 
 string match_operat(string read_buffer, int line, int column)
 {
-    regex op1("==|!=|>=|<=|\\|\\||&&");
-    regex op2("\\+|-|\\*|/|%|\\(|\\)|\\[|\\]|>|<|=|!");
+    regex op1("^==|!=|>=|<=|\\|\\||&&");
+    regex op2("^\\+|-|\\*|/|%|\\(|\\)|\\[|\\]|>|<|=|!");
     smatch match;
     if (regex_search(read_buffer, match, op1))
     {
@@ -107,8 +107,8 @@ string match_operat(string read_buffer, int line, int column)
 
 string match_id_key(string read_buffer, int line, int column)
 {
-    regex id("([a-zA-Z]|_)([0-9a-zA-Z]|_)*");
-    regex key("const|int|float|if|else|while|break|continue|return");
+    regex id("^([a-zA-Z]|_)([0-9a-zA-Z]|_)*");
+    regex key("^const|int|float|if|else|while|break|continue|return");
     smatch match;
     if (regex_search(read_buffer, match, id))
     {
@@ -131,11 +131,11 @@ string match_id_key(string read_buffer, int line, int column)
 
 string match_number(string read_buffer, int line, int column)
 {
-    regex dec_int("[0-9]+");
-    regex dec_float("[0-9]+\\.[0-9]+");
-    regex dec_float_e("[0-9]+\\.[0-9]+e[+|-]?[0-9]+");
-    regex oct_int("0[0-7]+");
-    regex hex_int("0[x|X][0-9a-fA-F]+");
+    regex dec_int("^[0-9]+");
+    regex dec_float("^[0-9]+\\.[0-9]+");
+    regex dec_float_e("^[0-9]+\\.[0-9]+e[+|-]?[0-9]+");
+    regex oct_int("^0[0-7]+");
+    regex hex_int("^0[x|X][0-9a-fA-F]+");
     smatch match;
     if (regex_search(read_buffer, match, dec_float))
     {
@@ -184,8 +184,8 @@ int main()
 {
     char c;
     string read_buffer;
-    int row = 0, col = 0;
-    ifs.open("test.c");
+    int row = 1, col = 1;
+    ifs.open("testnum.c");
     ofs.open("out.txt");
     if (!ifs.is_open())
     {
@@ -194,34 +194,70 @@ int main()
     }
     while (!ifs.eof())
     {
-        ifs >> read_buffer;
+        while ((c = (char)ifs.get()) != EOF)
+        {
+            if (c == '\n')
+            {
+                col = 0;
+                row++;
+                break;
+            }
+            else if (c == '\t')
+            {
+                col += 4;
+                break;
+            }
+            else if (c == ' ')
+            {
+                col++;
+                break;
+            }
+            else if (c == ';')
+            {
+                col++;
+                read_buffer.push_back(c);
+                break;
+            }
+            else
+            {
+                col++;
+                read_buffer.push_back(c);
+            }
+        }
 
         cout << read_buffer << endl;
         while (read_buffer.size() > 0)
         {
             if (is_number(read_buffer.at(0)) || read_buffer.at(0) == '.')
             {
-                read_buffer = match_number(read_buffer, row, col);
+                read_buffer = match_number(read_buffer, row, col - read_buffer.size());
+                char x = read_buffer.at(0);
+                if (!(is_punct(x) && is_operat(x) && is_blank(x) && x == EOF))
+                {
+                    ofs << "Error found in line" << row << ", "
+                        << "column" << col - read_buffer.size() << ".";
+                    read_buffer.clear();
+                }
             }
             else if (is_letter(read_buffer.at(0)) || read_buffer.at(0) == '_')
             {
-                read_buffer = match_id_key(read_buffer, row, col);
+                read_buffer = match_id_key(read_buffer, row, col - read_buffer.size());
             }
             else if (is_punct(read_buffer.at(0)))
             {
-                save_node(PUNCT, string("") + read_buffer.at(0), row, col);
+                save_node(PUNCT, string("") + read_buffer.at(0), row, col - read_buffer.size());
                 ofs << read_buffer.at(0) << " Punctuation" << endl;
                 read_buffer.pop_back();
             }
             else if (is_operat(read_buffer.at(0)))
             {
-                read_buffer = match_operat(read_buffer, row, col);
+                read_buffer = match_operat(read_buffer, row, col - read_buffer.size());
             }
             else
             {
-                read_buffer.clear();
                 ofs << "Error found in line" << row << ", "
-                    << "column" << col << ".";
+                    << "column" << col - read_buffer.size() << ".";
+                read_buffer.clear();
             }
         }
     }
