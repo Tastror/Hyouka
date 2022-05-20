@@ -146,6 +146,9 @@ TNP ExpressionAST::Parse() {
     std::stack<ANP> sym;
     opt.push("begin");
 
+    if (data(now_token) == "+" || data(now_token) == "-")
+        now_token->data += "unary";
+
     bool quit = false;
     while (true) {
 

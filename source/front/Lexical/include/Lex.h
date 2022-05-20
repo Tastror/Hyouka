@@ -205,6 +205,7 @@ public:
         if ((char)(current_char) == '0' && ((char)(look_ahead) == 'x' || (char)(look_ahead) == 'X' || is_number((char)look_ahead))) {
             if ((char)(look_ahead) == 'x' || (char)(look_ahead) == 'X') {
                 GetNext(false);
+                buff.push_back((char)current_char);
                 while (is_hex_number((char)(look_ahead))) {
                     GetNext(false);
                     buff.push_back((char)current_char);
@@ -241,7 +242,7 @@ public:
             double value = stod(buff);
             save_float_node(value, buff);
         } else {
-            int value = stoi(buff);
+            int value = stoi(buff, 0, 0);
             save_int_node(value, buff);
         }
     }
