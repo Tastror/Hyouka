@@ -1,32 +1,15 @@
-//
-// This demo is for Lexical-WuXiwen Analysis and Parsing AST
-//
-
-float test(int a[6], float x) {
-    return a[1] + x;
-}
-
-int k[8][6] = {{5}, {8, 2}, 11};
-
 int main() {
-
-    /* comment 1 */
-
-    {int x = 3;}  // comment 2
-
-    const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(k[6], 16);
-
-    float x = 0.14 + 3 * 1, y, z[1];
-
-    if (x > 3 || x < 2)
-        x = x - 2;
-    else if (x <= 3.5)
-        x = x + 1;
-    else { int x = 6; }
-
-    while (x < 20) {
-        x = x + 3;
+    int res[400], i = 1;
+    res[0] = 1;
+    res[1] = 1;
+    while (i < 20) {
+        i = i + 1;
+        res[i] = res[i - 1] + res[i - 2];
     }
-
     return 0;
+
+    int a;
+    int& x = a;
+    int b;
+    x = b;
 }

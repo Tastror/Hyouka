@@ -3,6 +3,8 @@ project(Hyouka)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+
 include_directories(
         front/Shell/include
 

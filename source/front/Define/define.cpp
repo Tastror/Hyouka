@@ -116,12 +116,11 @@ void print_all_ASTs(const ANP& now, int stage) {
             std::cout << "data: " << now->data;
         }
     }
-    if (now->symtable_ptr != nullptr) {
-        std::cout << std::endl;
-        now->symtable_ptr->print_chain();
-    }
-    else
-        std::cout << (now->data.empty() ? "" : ", " + now->data);
+//    if (now->symtable_ptr != nullptr) {
+//        std::cout << std::endl;
+//        now->symtable_ptr->print_chain();
+//    }
+    std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << std::endl;
     print_all_ASTs(now->child, stage + 1);
     print_all_ASTs(now->sister, stage);
