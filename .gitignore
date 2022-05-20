@@ -1,1 +1,3 @@
-target /.vscode
+/.vscode
+/source/cmake-build-debug
+/.idea
