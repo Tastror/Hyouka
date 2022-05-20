@@ -184,8 +184,8 @@ int main()
 {
     char c;
     string read_buffer;
-    int row = 0, col = 0;
-    ifs.open("test.c");
+    int row = 1, col = 1;
+    ifs.open("testnum.c");
     ofs.open("out.txt");
     if (!ifs.is_open())
     {
@@ -194,7 +194,35 @@ int main()
     }
     while (!ifs.eof())
     {
-        ifs >> read_buffer;
+        while ((c = (char)ifs.get()) != EOF)
+        {
+            if (c == '\n')
+            {
+                col = 0;
+                row++;
+                break;
+            }
+            else if (c == '\t')
+            {
+                col += 4;
+                break;
+            }
+            else if (c == ' ')
+            {
+                col++;
+                break;
+            }
+            else if (c == ';')
+            {
+                col++;
+                read_buffer.push_back(c);
+                break;
+            }
+            else
+            {
+                read_buffer.push_back(c);
+            }
+        }
 
         cout << read_buffer << endl;
         while (read_buffer.size() > 0)
@@ -202,6 +230,12 @@ int main()
             if (is_number(read_buffer.at(0)) || read_buffer.at(0) == '.')
             {
                 read_buffer = match_number(read_buffer, row, col);
+                if (is_letter(read_buffer.at(0)))
+                {
+                    read_buffer.clear();
+                    ofs << "Error found in line" << row << ", "
+                        << "column" << col << ".";
+                }
             }
             else if (is_letter(read_buffer.at(0)) || read_buffer.at(0) == '_')
             {
