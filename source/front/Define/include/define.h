@@ -86,7 +86,6 @@ enum sym_return_type { _value_none_, _int_, _float_, _void_ };
 const std::string sym_return_show_type[] = { "value_none", "int", "float", "void" };
 
 struct symtable_node {
-    static int count;
     std::string identifier_name;
     std::string only_name;
     bool is_head = false;
@@ -96,15 +95,10 @@ struct symtable_node {
     std::shared_ptr<symtable_node> arg_symtable_node_head = nullptr;
     bool is_const = false;
     bool is_static = false;
+    int table_id;
     std::shared_ptr<symtable_node> next = nullptr;
-    explicit symtable_node(bool whether_count_or_not = false, bool is_head = false) {
-        if (whether_count_or_not)
-            count++;
-        if (is_head)
-            this->is_head = true;
-    }
+    void rename();
     void rename(const std::string& name);
-    void update_only_name();
 };
 
 #define SNP std::shared_ptr<symtable_node>

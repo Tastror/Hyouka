@@ -23,6 +23,7 @@
 class KeywordStatementAST: public BaseAST {
 public:
     TNP Parse();
-    explicit KeywordStatementAST(const TNP& token_head, Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit KeywordStatementAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit KeywordStatementAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~KeywordStatementAST() override = default;
 };
