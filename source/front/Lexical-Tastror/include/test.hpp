@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "define.h"
+#include "../../Define/include/define.h"
 
 TNP test_get_token() {
     TNP head = std::make_shared<token_node>();

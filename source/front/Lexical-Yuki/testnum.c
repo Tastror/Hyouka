@@ -1,1 +1,1 @@
-float c=233;
+float c=233a;
