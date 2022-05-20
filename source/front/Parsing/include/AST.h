@@ -5,74 +5,15 @@
 #pragma once
 #include <iostream>
 #include <utility>
-#include <vector>
+
 #include "define.h"
+
+
 
 void RaiseError(const std::string& error_code, const TNP& token_node);
 
 void connect_child(const ANP& parent, const ANP& child);
 void reverse_connect_child(const ANP& parent, const ANP& child);
-
-
-class Symtable {
-public:
-    static std::vector<SNP> all_symtable_heads;
-    static int table_counts;
-    int table_id;
-    SNP sym_head = nullptr;
-    SNP sym_tail = nullptr;
-    SNP my_head = nullptr;
-    SNP my_tail = nullptr;
-    std::vector<SNP> heads_chain;
-
-    Symtable() {
-        table_id = table_counts;
-        table_counts++;
-        my_head = std::make_shared<symtable_node>();
-        my_head->table_id = table_id;
-        my_head->is_head = true;
-        my_tail = my_head;
-        heads_chain.push_back(my_head);
-        all_symtable_heads.push_back(my_head);
-    };
-
-    void extend_from(const std::shared_ptr<Symtable>& last_symtable_ptr) {
-        heads_chain = last_symtable_ptr->heads_chain;
-        heads_chain.push_back(my_head);
-        sym_tail = last_symtable_ptr->sym_tail;
-        sym_head = last_symtable_ptr->sym_head;
-    }
-
-    void append(const symtable_node& append_sym_node) {
-        SNP sym_ptr = std::make_shared<symtable_node>();
-        *sym_ptr = append_sym_node;
-        sym_ptr->table_id = table_id;
-        sym_ptr->rename();
-        my_tail->next = sym_ptr;
-        my_tail = sym_ptr;
-        my_tail->next = nullptr;
-        sym_tail = my_tail;
-    }
-
-    void print_me() const {
-        print_symtable(my_head);
-    }
-
-    void print_chain() const {
-        for (auto& i : heads_chain) {
-            print_symtable(i);
-        }
-    }
-
-    static void print_all() {
-        for (auto& i : all_symtable_heads) {
-            print_symtable(i);
-            std::cout << std::endl;
-        }
-    }
-
-    virtual ~Symtable() = default;
-};
 
 
 class BaseAST {
@@ -90,6 +31,7 @@ public:
         error = false;
         symtable_ptr = std::make_shared<Symtable>(symtable);
         head = std::make_shared<AST_node>();
+        head->symtable_ptr = symtable_ptr;
         now_token = token_head;
         next_token = next(now_token);
     }
@@ -97,6 +39,7 @@ public:
         error = false;
         this->symtable_ptr = symtable_ptr;
         head = std::make_shared<AST_node>();
+        head->symtable_ptr = symtable_ptr;
         now_token = token_head;
         next_token = next(now_token);
     }

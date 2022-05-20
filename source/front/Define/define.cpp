@@ -7,7 +7,7 @@
 
 
 
-// Lexical
+// Lexical: token_node
 
 std::shared_ptr<token_node> next(const std::shared_ptr<token_node>& now) {
     if (now != nullptr)
@@ -51,37 +51,18 @@ void print_all_tokens(const std::shared_ptr<token_node>& head) {
 
 
 
-// Parsing
+// Parsing: Symtable
 
-void print_all_ASTs(const ANP& now, int stage) {
-    if (now == nullptr) return;
-    for (int i = 0; i < stage; ++i)
-        std::cout << "    ";
-    std::cout << AST_show_type[now->type];
-    if (now->type == Number) {
-        std::cout  << ", ";
-        if (now->int_or_double == 1) {
-            std::cout  << "int: " << now->value.int_value;
-        } else if (now->int_or_double == 2) {
-            std::cout  << "float: " << now->value.double_value;
-        } else {
-            std::cout << "data: " << now->data;
-        }
+void Symtable::print_all() {
+    for (auto& i : Symtable::all_symtable_heads) {
+        print_symtable(i);
+        std::cout << std::endl;
     }
-    else
-        std::cout << (now->data.empty() ? "" : ", " + now->data);
-    std::cout << std::endl;
-    print_all_ASTs(now->child, stage + 1);
-    print_all_ASTs(now->sister, stage);
-}
-
-void print_all_ASTs(const ANP& AST_head) {
-    print_all_ASTs(AST_head, 0);
 }
 
 
 
-// Symbol Table
+// Parsing: symtable_node
 
 void print_symtable(const SNP& symtable_node_head) {
     SNP now = symtable_node_head;
@@ -116,4 +97,38 @@ void symtable_node::rename(const std::string& name) {
     identifier_name = name;
     std::string name_pre = std::to_string(table_id);
     only_name = "__" + name_pre + "_" + identifier_name;
+}
+
+
+
+// Parsing: AST_node
+
+void print_all_ASTs(const ANP& now, int stage) {
+    if (now == nullptr) return;
+    for (int i = 0; i < stage; ++i)
+        std::cout << "    ";
+    std::cout << AST_show_type[now->type];
+    if (now->type == Number) {
+        std::cout  << ", ";
+        if (now->int_or_double == 1) {
+            std::cout  << "int: " << now->value.int_value;
+        } else if (now->int_or_double == 2) {
+            std::cout  << "float: " << now->value.double_value;
+        } else {
+            std::cout << "data: " << now->data;
+        }
+    }
+    if (now->symtable_ptr != nullptr) {
+        std::cout << std::endl;
+        now->symtable_ptr->print_chain();
+    }
+    else
+        std::cout << (now->data.empty() ? "" : ", " + now->data);
+    std::cout << std::endl;
+    print_all_ASTs(now->child, stage + 1);
+    print_all_ASTs(now->sister, stage);
+}
+
+void print_all_ASTs(const ANP& AST_head) {
+    print_all_ASTs(AST_head, 0);
 }
