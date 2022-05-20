@@ -48,7 +48,7 @@ hyouka testcase.sysy -S -o testcase.s -O 1    # 解析器有问题(见3rd-party)
 词法分析
 
 - `source/front/Lexical`，词法 token
-- 手写；*负责者：tly*
+- 手写；*负责者：tly, ss*
 - 错误类型
   - 词法错误：非法符号或名称
 

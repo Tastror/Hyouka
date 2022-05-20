@@ -12,17 +12,17 @@ int main() {
 
     /* comment 1 */
 
-    {}  // comment 2
+    {int x = 3;}  // comment 2
 
     const int _abc = 7 + 5 / 3 + 4 * (8 - 2) - k[2 + 3][5] +  (-3 || 4 >= 2) + test(k[6], 16);
 
-    float x = 0.14 + 3 * 1;
+    float x = 0.14 + 3 * 1, y, z[1];
 
     if (x > 3 || x < 2)
         x = x - 2;
     else if (x <= 3.5)
         x = x + 1;
-    else { ; }
+    else { int x = 6; }
 
     while (x < 20) {
         x = x + 3;
