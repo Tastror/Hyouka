@@ -85,10 +85,13 @@ FuncDef
   }
   ;
 
-// 同上, 不再解释
 FuncType
   : INT {
-    $$ = new string("int");
+    auto ast = new FuncTypeAST();
+    ast->func_type = unique_ptr<BaseAST>($1);
+    ast->ident = *unique_ptr<string>($2);
+    ast->block = unique_ptr<BaseAST>($5);
+    $$ = ast;
   }
   ;
 
