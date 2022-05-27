@@ -1,4 +1,7 @@
 /*	AST design and print	*/
+
+#pragma once
+
 #include <iostream>
 
 class BaseAST {
@@ -34,4 +37,46 @@ class FuncDefAST : public BaseAST {
   }
 };
 
-// TODO: other AST
+class FuncTypeAST : public BaseAST {
+ //public:
+
+  void Dump() const override {
+    std::cout << "FuncTypeAST { ";
+    std::cout << "int ";
+    std::cout << " }";
+  }
+};
+
+class BlockAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> stmt;
+
+  void Dump() const override {
+    std::cout << "BlockAST { ";
+    stmt->Dump();
+    std::cout << " }";
+  }
+};
+
+class StmtAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> number;
+
+  void Dump() const override {
+    std::cout << "StmtAST { return ";
+    number->Dump();
+    std::cout << " }";
+  }
+};
+
+class NumberAST : public BaseAST {
+ public:
+  std::string int_const;
+
+  void Dump() const override {
+    std::cout << "NumberAST { ";
+    std::cout << int_const;
+    std::cout << " }";
+  }
+};
+
