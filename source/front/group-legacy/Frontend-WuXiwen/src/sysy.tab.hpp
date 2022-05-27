@@ -67,12 +67,17 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 30 "sysy.y"
+#line 31 "sysy.y"
 
   std::string *str_val;
   int int_val;
+#line 37 "sysy.y"
 
-#line 76 "sysy.tab.hpp"
+  std::string *str_val;
+  int int_val;
+  BaseAST *ast_val;
+
+#line 81 "sysy.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -83,6 +88,6 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-int yyparse (std::unique_ptr<std::string> &ast);
+int yyparse (std::unique_ptr<BaseAST> &ast);
 
 #endif /* !YY_YY_SYSY_TAB_HPP_INCLUDED  */

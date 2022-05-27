@@ -72,15 +72,16 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include "../include/ast.h"	// AST define
 
 // 声明 lexer 函数和错误处理函数
 int yylex();
-void yyerror(std::unique_ptr<std::string> &ast, const char *s);
+void yyerror(std::unique_ptr<BaseAST> &ast, const char *s);
 
 using namespace std;
 
 
-#line 84 "sysy.tab.cpp"
+#line 85 "sysy.tab.cpp"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -128,7 +129,7 @@ extern int yydebug;
   #include <memory>
   #include <string>
 
-#line 132 "sysy.tab.cpp"
+#line 133 "sysy.tab.cpp"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -146,12 +147,17 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 30 "sysy.y"
+#line 31 "sysy.y"
 
   std::string *str_val;
   int int_val;
+#line 37 "sysy.y"
 
-#line 155 "sysy.tab.cpp"
+  std::string *str_val;
+  int int_val;
+  BaseAST *ast_val;
+
+#line 161 "sysy.tab.cpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -162,7 +168,7 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-int yyparse (std::unique_ptr<std::string> &ast);
+int yyparse (std::unique_ptr<BaseAST> &ast);
 
 #endif /* !YY_YY_SYSY_TAB_HPP_INCLUDED  */
 
@@ -527,7 +533,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    52,    52,    68,    78,    84,    91,    98
+       0,    61,    61,    79,    90,    96,   103,   110
 };
 #endif
 
@@ -699,7 +705,7 @@ do {                                                                      \
 `-----------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, std::unique_ptr<std::string> &ast)
+yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, std::unique_ptr<BaseAST> &ast)
 {
   FILE *yyoutput = yyo;
   YYUSE (yyoutput);
@@ -721,7 +727,7 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, st
 `---------------------------*/
 
 static void
-yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, std::unique_ptr<std::string> &ast)
+yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep, std::unique_ptr<BaseAST> &ast)
 {
   YYFPRINTF (yyo, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
@@ -759,7 +765,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule, std::unique_ptr<std::string> &ast)
+yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule, std::unique_ptr<BaseAST> &ast)
 {
   int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -1049,7 +1055,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, std::unique_ptr<std::string> &ast)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, std::unique_ptr<BaseAST> &ast)
 {
   YYUSE (yyvaluep);
   YYUSE (ast);
@@ -1079,7 +1085,7 @@ int yynerrs;
 `----------*/
 
 int
-yyparse (std::unique_ptr<std::string> &ast)
+yyparse (std::unique_ptr<BaseAST> &ast)
 {
     yy_state_fast_t yystate;
     /* Number of tokens to shift before error messages enabled.  */
@@ -1321,60 +1327,63 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 52 "sysy.y"
+#line 61 "sysy.y"
             {
-    ast = unique_ptr<string>((yyvsp[0].str_val));
+    auto comp_unit = make_unique<CompUnitAST>();
+    comp_unit->func_def = unique_ptr<BaseAST>((yyvsp[0].ast_val));
+    ast = move(comp_unit);
   }
-#line 1329 "sysy.tab.cpp"
+#line 1337 "sysy.tab.cpp"
     break;
 
   case 3:
-#line 68 "sysy.y"
+#line 79 "sysy.y"
                                  {
-    auto type = unique_ptr<string>((yyvsp[-4].str_val));
-    auto ident = unique_ptr<string>((yyvsp[-3].str_val));
-    auto block = unique_ptr<string>((yyvsp[0].str_val));
-    (yyval.str_val) = new string(*type + " " + *ident + "() " + *block);
+    auto ast = new FuncDefAST();
+    ast->func_type = unique_ptr<BaseAST>((yyvsp[-4].ast_val));
+    ast->ident = *unique_ptr<string>((yyvsp[-3].str_val));
+    ast->block = unique_ptr<BaseAST>((yyvsp[0].ast_val));
+    (yyval.ast_val) = ast;
   }
-#line 1340 "sysy.tab.cpp"
+#line 1349 "sysy.tab.cpp"
     break;
 
   case 4:
-#line 78 "sysy.y"
+#line 90 "sysy.y"
         {
-    (yyval.str_val) = new string("int");
-  }
-#line 1348 "sysy.tab.cpp"
-    break;
-
-  case 5:
-#line 84 "sysy.y"
-                 {
-    auto stmt = unique_ptr<string>((yyvsp[-1].str_val));
-    (yyval.str_val) = new string("{ " + *stmt + " }");
+    (yyval.ast_val) = new string("int");
   }
 #line 1357 "sysy.tab.cpp"
     break;
 
-  case 6:
-#line 91 "sysy.y"
-                      {
-    auto number = unique_ptr<string>((yyvsp[-1].str_val));
-    (yyval.str_val) = new string("return " + *number + ";");
+  case 5:
+#line 96 "sysy.y"
+                 {
+    auto stmt = unique_ptr<string>((yyvsp[-1].ast_val));
+    (yyval.ast_val) = new string("{ " + *stmt + " }");
   }
 #line 1366 "sysy.tab.cpp"
     break;
 
-  case 7:
-#line 98 "sysy.y"
-              {
-    (yyval.str_val) = new string(to_string((yyvsp[0].int_val)));
+  case 6:
+#line 103 "sysy.y"
+                      {
+    auto number = unique_ptr<string>((yyvsp[-1].int_val));
+    (yyval.ast_val) = new string("return " + *number + ";");
   }
-#line 1374 "sysy.tab.cpp"
+#line 1375 "sysy.tab.cpp"
+    break;
+
+  case 7:
+#line 110 "sysy.y"
+              {
+    (yyval.int_val) = new string(to_string((yyvsp[0].int_val)));
+  }
+#line 1383 "sysy.tab.cpp"
     break;
 
 
-#line 1378 "sysy.tab.cpp"
+#line 1387 "sysy.tab.cpp"
 
       default: break;
     }
@@ -1606,11 +1615,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 103 "sysy.y"
+#line 115 "sysy.y"
 
 
 // 定义错误处理函数, 其中第二个参数是错误信息
 // parser 如果发生错误 (例如输入的程序出现了语法错误), 就会调用这个函数
-void yyerror(unique_ptr<string> &ast, const char *s) {
+void yyerror(unique_ptr<BaseAST> &ast, const char *s) {
   cerr << "error: " << s << endl;
 }
