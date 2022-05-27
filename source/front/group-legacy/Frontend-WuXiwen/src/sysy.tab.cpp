@@ -530,7 +530,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    56,    56,    74,    84,    91,    99,   107
+       0,    56,    56,    74,    84,    91,    99,   109
 };
 #endif
 
@@ -1368,24 +1368,26 @@ yyreduce:
 #line 99 "sysy.y"
                       {
     auto ast = new StmtAST();
-    ast->number = unique_ptr<BaseAST>((yyvsp[-1].int_val));
+    //ast->rtn = *unique_ptr<string>($1);
+    //ast->number = unique_ptr<BaseAST>($2);
+    //ast->num = ($2);
     (yyval.ast_val) = ast;
   }
-#line 1375 "sysy.tab.cpp"
+#line 1377 "sysy.tab.cpp"
     break;
 
   case 7:
-#line 107 "sysy.y"
+#line 109 "sysy.y"
               {
     auto ast = new NumberAST();
-    ast->int_const = ((yyvsp[0].int_val));
+    //ast->int_const = ($1);
     (yyval.int_val) = ((yyvsp[0].int_val));
   }
-#line 1385 "sysy.tab.cpp"
+#line 1387 "sysy.tab.cpp"
     break;
 
 
-#line 1389 "sysy.tab.cpp"
+#line 1391 "sysy.tab.cpp"
 
       default: break;
     }
@@ -1617,7 +1619,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 114 "sysy.y"
+#line 116 "sysy.y"
 
 
 // 定义错误处理函数, 其中第二个参数是错误信息
