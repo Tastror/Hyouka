@@ -71,7 +71,7 @@ class StmtAST : public BaseAST {
 
 class NumberAST : public BaseAST {
  public:
-  std::string int_const;
+  int int_const;
 
   void Dump() const override {
     std::cout << "NumberAST { ";

@@ -1,6 +1,7 @@
 %code requires {
   #include <memory>
   #include <string>
+  #include "../include/ast.h"	// AST define
 }
 
 %{
@@ -31,13 +32,7 @@ using namespace std;
 %union {
   std::string *str_val;
   int int_val;
-}
-
-// AST
-%union {
-  std::string *str_val;
-  int int_val;
-  BaseAST *ast_val;
+  BaseAST *ast_val;	//AST
 }
 
 // lexer 返回的所有 token 种类的声明
@@ -88,30 +83,31 @@ FuncDef
 FuncType
   : INT {
     auto ast = new FuncTypeAST();
-    ast->func_type = unique_ptr<BaseAST>($1);
-    ast->ident = *unique_ptr<string>($2);
-    ast->block = unique_ptr<BaseAST>($5);
     $$ = ast;
   }
   ;
 
 Block
   : '{' Stmt '}' {
-    auto stmt = unique_ptr<string>($2);
-    $$ = new string("{ " + *stmt + " }");
+    auto ast = new BlockAST();
+    ast->stmt = unique_ptr<BaseAST>($2);
+    $$ = ast;
   }
   ;
 
 Stmt
   : RETURN Number ';' {
-    auto number = unique_ptr<string>($2);
-    $$ = new string("return " + *number + ";");
+    auto ast = new StmtAST();
+    ast->number = unique_ptr<BaseAST>($2);
+    $$ = ast;
   }
   ;
 
 Number
   : INT_CONST {
-    $$ = new string(to_string($1));
+    auto ast = new NumberAST();
+    ast->int_const = ($1);
+    $$ = ($1);
   }
   ;
 

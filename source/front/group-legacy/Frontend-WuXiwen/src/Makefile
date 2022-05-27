@@ -1,5 +1,5 @@
 ../compiler: lex.yy.cpp sysy.tab.cpp main.cpp
-	g++ $^ -o $@
+	g++ -std=c++17 $^ -o $@
 
 lex.yy.cpp: sysy.l
 	flex -o $@ $^

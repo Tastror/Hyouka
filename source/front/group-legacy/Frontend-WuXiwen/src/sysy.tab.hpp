@@ -48,8 +48,9 @@ extern int yydebug;
 
   #include <memory>
   #include <string>
+  #include "../include/ast.h"	// AST define
 
-#line 53 "sysy.tab.hpp"
+#line 54 "sysy.tab.hpp"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -67,17 +68,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 31 "sysy.y"
+#line 32 "sysy.y"
 
   std::string *str_val;
   int int_val;
-#line 37 "sysy.y"
+  BaseAST *ast_val;	//AST
 
-  std::string *str_val;
-  int int_val;
-  BaseAST *ast_val;
-
-#line 81 "sysy.tab.hpp"
+#line 78 "sysy.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

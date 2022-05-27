@@ -66,7 +66,7 @@
 
 
 /* First part of user prologue.  */
-#line 6 "sysy.y"
+#line 7 "sysy.y"
 
 
 #include <iostream>
@@ -128,8 +128,9 @@ extern int yydebug;
 
   #include <memory>
   #include <string>
+  #include "../include/ast.h"	// AST define
 
-#line 133 "sysy.tab.cpp"
+#line 134 "sysy.tab.cpp"
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -147,17 +148,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 31 "sysy.y"
+#line 32 "sysy.y"
 
   std::string *str_val;
   int int_val;
-#line 37 "sysy.y"
+  BaseAST *ast_val;	//AST
 
-  std::string *str_val;
-  int int_val;
-  BaseAST *ast_val;
-
-#line 161 "sysy.tab.cpp"
+#line 158 "sysy.tab.cpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -533,7 +530,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    61,    61,    79,    90,    96,   103,   110
+       0,    56,    56,    74,    84,    91,    99,   107
 };
 #endif
 
@@ -1327,17 +1324,17 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 61 "sysy.y"
+#line 56 "sysy.y"
             {
     auto comp_unit = make_unique<CompUnitAST>();
     comp_unit->func_def = unique_ptr<BaseAST>((yyvsp[0].ast_val));
     ast = move(comp_unit);
   }
-#line 1337 "sysy.tab.cpp"
+#line 1334 "sysy.tab.cpp"
     break;
 
   case 3:
-#line 79 "sysy.y"
+#line 74 "sysy.y"
                                  {
     auto ast = new FuncDefAST();
     ast->func_type = unique_ptr<BaseAST>((yyvsp[-4].ast_val));
@@ -1345,45 +1342,50 @@ yyreduce:
     ast->block = unique_ptr<BaseAST>((yyvsp[0].ast_val));
     (yyval.ast_val) = ast;
   }
-#line 1349 "sysy.tab.cpp"
+#line 1346 "sysy.tab.cpp"
     break;
 
   case 4:
-#line 90 "sysy.y"
+#line 84 "sysy.y"
         {
-    (yyval.ast_val) = new string("int");
+    auto ast = new FuncTypeAST();
+    (yyval.ast_val) = ast;
   }
-#line 1357 "sysy.tab.cpp"
+#line 1355 "sysy.tab.cpp"
     break;
 
   case 5:
-#line 96 "sysy.y"
+#line 91 "sysy.y"
                  {
-    auto stmt = unique_ptr<string>((yyvsp[-1].ast_val));
-    (yyval.ast_val) = new string("{ " + *stmt + " }");
+    auto ast = new BlockAST();
+    ast->stmt = unique_ptr<BaseAST>((yyvsp[-1].ast_val));
+    (yyval.ast_val) = ast;
   }
-#line 1366 "sysy.tab.cpp"
+#line 1365 "sysy.tab.cpp"
     break;
 
   case 6:
-#line 103 "sysy.y"
+#line 99 "sysy.y"
                       {
-    auto number = unique_ptr<string>((yyvsp[-1].int_val));
-    (yyval.ast_val) = new string("return " + *number + ";");
+    auto ast = new StmtAST();
+    ast->number = unique_ptr<BaseAST>((yyvsp[-1].int_val));
+    (yyval.ast_val) = ast;
   }
 #line 1375 "sysy.tab.cpp"
     break;
 
   case 7:
-#line 110 "sysy.y"
+#line 107 "sysy.y"
               {
-    (yyval.int_val) = new string(to_string((yyvsp[0].int_val)));
+    auto ast = new NumberAST();
+    ast->int_const = ((yyvsp[0].int_val));
+    (yyval.int_val) = ((yyvsp[0].int_val));
   }
-#line 1383 "sysy.tab.cpp"
+#line 1385 "sysy.tab.cpp"
     break;
 
 
-#line 1387 "sysy.tab.cpp"
+#line 1389 "sysy.tab.cpp"
 
       default: break;
     }
@@ -1615,7 +1617,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 115 "sysy.y"
+#line 114 "sysy.y"
 
 
 // 定义错误处理函数, 其中第二个参数是错误信息
