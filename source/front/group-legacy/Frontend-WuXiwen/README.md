@@ -5,15 +5,19 @@ WuXiwen created in 2022.5.18
 
 ## Overview
 
-Generate lexer with flex == 2.6.4 \n
+Generate lexer with flex == 2.6.4 
+
 Generate parser with bison == 3.5.1
 
 
 ## Usage
 
-cd src \n
-make \n
-cd .. \n
+cd src 
+
+make 
+
+cd .. 
+
 ./compiler <mode> <input.sysy> -o <assembly_file>
 
 
