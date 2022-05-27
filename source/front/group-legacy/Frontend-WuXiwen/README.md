@@ -18,7 +18,7 @@ make
 
 cd .. 
 
-./compiler <mode> <input.sysy> -o <assembly_file>
+./compiler mode input_file -o assembly_file
 
 
 ## Progress
