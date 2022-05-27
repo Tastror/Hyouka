@@ -98,7 +98,9 @@ Block
 Stmt
   : RETURN Number ';' {
     auto ast = new StmtAST();
-    ast->number = unique_ptr<BaseAST>($2);
+    //ast->rtn = *unique_ptr<string>($1);
+    //ast->number = unique_ptr<BaseAST>($2);
+    //ast->num = ($2);
     $$ = ast;
   }
   ;
@@ -106,7 +108,7 @@ Stmt
 Number
   : INT_CONST {
     auto ast = new NumberAST();
-    ast->int_const = ($1);
+    //ast->int_const = ($1);
     $$ = ($1);
   }
   ;
