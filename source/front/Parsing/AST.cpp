@@ -322,6 +322,7 @@ TNP DeclarationStatementAST::Parse() {
 
     // v --- sym --- v //
     symtable_node placeholder_sym_node;
+    placeholder_sym_node.is_static = head->is_static;
     // ^ --- sym --- ^ //
 
     if (token_safe::data(now_token) != "const" && token_safe::data(now_token) != "int" && token_safe::data(now_token) != "float") {
@@ -362,6 +363,7 @@ TNP DeclarationStatementAST::Parse() {
         // v --- sym --- v //
         symtable_node sym_node;
         sym_node.identifier_name = token_safe::data(now_token);
+        sym_node.is_static = placeholder_sym_node.is_static;
         sym_node.is_const = placeholder_sym_node.is_const;
         sym_node.basic_type = placeholder_sym_node.basic_type;
         // ^ --- sym --- ^ //
@@ -436,6 +438,7 @@ TNP DeclarationStatementAST::Parse() {
             // v --- sym --- v //
             symtable_node sym_node;
             sym_node.identifier_name = token_safe::data(now_token);
+            sym_node.is_static = placeholder_sym_node.is_static;
             sym_node.is_const = placeholder_sym_node.is_const;
             sym_node.basic_type = placeholder_sym_node.basic_type;
             // ^ --- sym --- ^ //
@@ -638,13 +641,19 @@ TNP FunctionFormParamAST::Parse() {
     head->type = FunctionFormParam;
 
     // v --- sym --- v //
-    symtable_node placeholder_sym_node;
+    symtable_node sym_node;
     // ^ --- sym --- ^ //
 
     if (token_safe::data(now_token) != "int" && token_safe::data(now_token) != "float") {
         RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
         return now_token;
     }
+
+    // v --- sym --- v //
+    sym_node.basic_type = token_safe::data(now_token) == "int" ? basic_int :
+                          token_safe::data(now_token) == "float" ? basic_float : basic_none;
+    // ^ --- sym --- ^ //
+
     ANP type_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, type_name);
     type_name->type = BasicType;
@@ -655,6 +664,19 @@ TNP FunctionFormParamAST::Parse() {
         RaiseError("in FunctionFormParam, identify name is not valid", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    if (!temp_only_name.empty()) {
+        RaiseError("Redefinition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // v --- sym --- v //
+    sym_node.identifier_name = token_safe::data(now_token);
+    // ^ --- sym --- ^ //
+
     ANP id_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, id_name);
     id_name->type = Identifier;
@@ -662,6 +684,7 @@ TNP FunctionFormParamAST::Parse() {
     GoNext();
 
     if (token_safe::data(now_token) == "[") {
+        sym_node.is_array_pointer = true;
         GoNext();
 
         if (token_safe::data(now_token) == "]") {
@@ -697,6 +720,14 @@ TNP FunctionFormParamAST::Parse() {
             GoNext();
         }
     }
+
+    // v --- sym append --- v //
+    symtable_ptr->append(sym_node);
+    // ^ --- sym append --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = symtable_ptr->my_tail->only_name;
 
     return now_token;
 }
@@ -844,7 +875,7 @@ TNP ProgramAST::Parse() {
                  token_safe::data(now_token) == "const") {
             DeclarationStatementAST stmt(now_token, symtable_ptr);
             AST_node::connect_child(head, stmt.head);
-            stmt.head->data = "static";
+            stmt.head->is_static = true;
             now_token = stmt.Parse();
             next_token = token_safe::next(now_token);
         }
