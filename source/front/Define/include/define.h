@@ -14,7 +14,7 @@
 // all will use
 
 enum basic_type {
-    basic_none = 0, basic_int, basic_float
+    basic_none = 0, basic_int, basic_float, basic_pointer
 };
 
 enum function_type {
@@ -22,7 +22,7 @@ enum function_type {
 };
 
 const std::string basic_type_string_name[] = {
-        "basic_none", "basic_int", "basic_float"
+        "basic_none", "basic_int", "basic_float", "basic_pointer"
 };
 
 const std::string function_type_string_name[] = {
@@ -32,6 +32,7 @@ const std::string function_type_string_name[] = {
 union int_double_storage {
     int int_value;
     double double_value = 0.0;
+    int ptr_address_value;
 };
 
 
@@ -179,16 +180,26 @@ struct AST_node {
     std::shared_ptr<AST_node> child = nullptr;
     std::shared_ptr<AST_node> parent = nullptr;
     std::shared_ptr<AST_node> last_child = nullptr;
+
+    // symtable
     std::shared_ptr<Symtable> symtable_ptr = nullptr;
 
     // attribution
+    bool using_attribute = false;
     std::string only_name;
     int basic_type = basic_none;
+    bool is_const = false;
+    bool is_static = false;
     bool is_array_pointer = false;
     bool is_function_pointer = false;
     int array_len = 0;
     int arg_num = 0;
     int function_type = function_none;
+
+    // use for Expr optimise
+    bool count_expr_ending = false;
+
+    // use for Number
     int_double_storage value;
 
     // methods
@@ -201,5 +212,3 @@ struct AST_node {
 };
 
 #define ANP std::shared_ptr<AST_node>
-
-
