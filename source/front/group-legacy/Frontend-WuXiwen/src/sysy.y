@@ -20,7 +20,7 @@ using namespace std;
 %}
 
 // 定义 parser 函数和错误处理函数的附加参数
-// 我们需要返回一个字符串作为 AST, 所以我们把附加参数定义成BaseAST的智能指针
+// 我们需要返回AST, 所以我们把附加参数定义成BaseAST的智能指针
 // 解析完成后, 我们要手动修改这个参数, 把它设置成解析得到的字符串
 %parse-param { std::unique_ptr<BaseAST> &ast }
 
@@ -32,7 +32,7 @@ using namespace std;
 %union {
   std::string *str_val;
   int int_val;
-  BaseAST *ast_val;	//AST
+  BaseAST *ast_val;	//AST node
 }
 
 // lexer 返回的所有 token 种类的声明
@@ -42,8 +42,7 @@ using namespace std;
 %token <int_val> INT_CONST
 
 // 非终结符的类型定义
-%type <ast_val> FuncDef FuncType Block Stmt
-%type <int_val> Number
+%type <ast_val> FuncDef FuncType Block Stmt Exp Primary UnaryExp UnaryOp Number
 
 %%
 
@@ -95,17 +94,56 @@ Block
   }
   ;
 
+//change below
 Stmt
-  : RETURN Number ';' {
+  : RETURN Exp ';' {
     auto ast = new StmtAST();
-    ast->number = ($2);
+    ast->exp = ($2);
     $$ = ast;
   }
   ;
 
+Exp
+  : UnaryExp {
+    auto ast = new ExpAST();
+    ast->unary_exp = ($1);
+    $$ = ast;
+  }
+  ;
+
+UnaryExp
+  : PrimaryExp | UnaryOp UnaryExp {
+    auto ast = new UnaryExpAST();
+    ast->primary_exp = ($1);
+    ast->unary_op = ($1);
+    ast->unary_exp = ($2);
+    $$ = ast;
+  }
+  ;
+
+UnaryOp
+  : '+' | '-' | '!' {
+    auto ast = new UnaryOpAST();
+    ast->unary_op = ($1);
+    $$ = ast;
+  }
+  ;
+
+PrimaryExp
+  : '(' Exp ')' | Number {
+    auto ast = new UnaryExpAST();
+    ast->primary_exp = ($1);
+    ast->unary_op = ($1);
+    ast->unary_exp = ($2);
+    $$ = ast;
+  }
+  ;
+        
 Number
   : INT_CONST {
-    $$ = ($1);
+    auto ast = new NumberAST();
+    ast->int_const = ($1);
+    $$ = ast;
   }
   ;
 
