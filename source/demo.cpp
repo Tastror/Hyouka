@@ -1,5 +1,5 @@
 int main2(int a, float b, int c[]) {
-    return 0;
+    return b;
 }
 
 int a[10][10];
@@ -17,7 +17,7 @@ int main() {
 
     main2(res[3], 2, res);
 
-    int _asdf;
+    int _asdf, main;
     int a, x;
     {
         x = 2.71828;
