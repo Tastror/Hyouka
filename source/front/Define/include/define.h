@@ -205,6 +205,8 @@ struct AST_node {
     // methods
     static void connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
     static void reverse_connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
+    std::string search_id_name(const std::string& name, const std::shared_ptr<symtable_node>& sym_head);
+    std::string search_id_name(const std::string& name);
 
     // print
     static void print_all(const std::shared_ptr<AST_node>& now, int stage);

@@ -265,7 +265,7 @@ public:
         }
     }
 
-    void get_token() {
+    void Lexicalize() {
         if (fail) return;
 
         while (!end) {

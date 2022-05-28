@@ -223,3 +223,23 @@ void AST_node::reverse_connect_child(const std::shared_ptr<AST_node>& parent, co
         child->parent = parent;
     }
 }
+
+std::string AST_node::search_id_name(const std::string& name, const std::shared_ptr<symtable_node>& sym_head) {
+    if (sym_head == nullptr) return "";
+    std::shared_ptr<symtable_node> compare_now = sym_head->next;
+    while (compare_now != nullptr) {
+        if (compare_now->identifier_name == name)
+            return compare_now->only_name;
+        compare_now = compare_now->next;
+    }
+    return "";
+}
+
+std::string AST_node::search_id_name(const std::string& name) {
+    std::string res;
+    for (int i = (int)(symtable_ptr->heads_chain.size()) - 1; i >= 0; --i) {
+        res = search_id_name(name, symtable_ptr->heads_chain[i]);
+        if (!res.empty()) return res;
+    }
+    return res;
+}
