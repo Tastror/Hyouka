@@ -1,4 +1,4 @@
-# Lexer && Parser
+# Frontend
 
 WuXiwen created in 2022.5.18
 
@@ -18,12 +18,17 @@ make
 
 cd .. 
 
-./compiler mode input_file -o assembly_file
+./compiler mode input_file -o output_file
 
 
-## Progress
+## TODO
 
-10%
+Debug
+
+Semantic Check
+
+IR Generation
+
 
 ## References
 [北京大学编译实践课程在线文档](https://pku-minic.github.io/online-doc/#/lv1-main/lexer-parser)

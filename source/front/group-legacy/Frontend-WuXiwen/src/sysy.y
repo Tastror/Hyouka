@@ -98,17 +98,13 @@ Block
 Stmt
   : RETURN Number ';' {
     auto ast = new StmtAST();
-    //ast->rtn = *unique_ptr<string>($1);
-    //ast->number = unique_ptr<BaseAST>($2);
-    //ast->num = ($2);
+    ast->number = ($2);
     $$ = ast;
   }
   ;
 
 Number
   : INT_CONST {
-    auto ast = new NumberAST();
-    //ast->int_const = ($1);
     $$ = ($1);
   }
   ;
