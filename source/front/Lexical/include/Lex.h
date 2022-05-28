@@ -79,20 +79,20 @@ public:
         now_token = now_token->next;
         now_token->data = data;
         now_token->type = type;
-        now_token->int_or_double = 0;
+        now_token->basic_type = 0;
         now_token->column = delay_column;
         now_token->line = line;
     }
 
     void save_int_node(int value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->int_or_double = 1;
+        now_token->basic_type = 1;
         now_token->value.int_value = value;
     }
 
     void save_float_node(double value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->int_or_double = 2;
+        now_token->basic_type = 2;
         now_token->value.double_value = value;
     }
 
@@ -294,7 +294,7 @@ public:
 
         }
 
-        head = next(head);
+        head = token_safe::next(head);
     }
 
 };

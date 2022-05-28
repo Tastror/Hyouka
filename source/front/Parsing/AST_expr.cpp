@@ -38,44 +38,44 @@ int compare(const std::string& op1, const std::string& op2) {
 TNP ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in ArrayUsage, identify name is not valid", now_token);
         return now_token;
     }
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "[") {
+    if (token_safe::data(now_token) != "[") {
         RaiseError("in ArrayUsage, begin punctuation should be [[]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST expr(now_token, symtable_ptr);
-    connect_child(head, expr.head);
+    AST_node::connect_child(head, expr.head);
     expr.head->data = "index";
     now_token = expr.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
-    if (data(now_token) != "]") {
+    if (token_safe::data(now_token) != "]") {
         RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
         return now_token;
     }
     GoNext();
 
-    while (data(now_token) == "[") {
+    while (token_safe::data(now_token) == "[") {
         GoNext();
 
         ExpressionAST addi_expr(now_token, symtable_ptr);
-        connect_child(head, addi_expr.head);
+        AST_node::connect_child(head, addi_expr.head);
         addi_expr.head->data = "index";
         now_token = addi_expr.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
 
-        if (data(now_token) != "]") {
+        if (token_safe::data(now_token) != "]") {
             RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
             return now_token;
         }
@@ -89,50 +89,50 @@ TNP ArrayUsageAST::Parse() {
 TNP FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in FunctionUsage, identify name is not valid", now_token);
         return now_token;
     }
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "(") {
+    if (token_safe::data(now_token) != "(") {
         RaiseError("in FunctionUsage, begin punctuation should be [(]", now_token);
         return now_token;
     }
     GoNext();
 
-    if (data(now_token) == ")") {
+    if (token_safe::data(now_token) == ")") {
         return now_token;
     }
 
     ExpressionAST expr(now_token, symtable_ptr);
-    connect_child(head, expr.head);
+    AST_node::connect_child(head, expr.head);
     expr.head->data = "argument";
     now_token = expr.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
     while (true) {
 
-        if (data(now_token) == ")") {
+        if (token_safe::data(now_token) == ")") {
             GoNext();
             break;
         }
 
-        if (data(now_token) != ",") {
+        if (token_safe::data(now_token) != ",") {
             RaiseError("in FunctionUsage, punctuation should be [,]", now_token);
             return now_token;
         }
         GoNext();
 
         ExpressionAST addi_expr(now_token, symtable_ptr);
-        connect_child(head, addi_expr.head);
+        AST_node::connect_child(head, addi_expr.head);
         addi_expr.head->data = "argument";
         now_token = addi_expr.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     return now_token;
@@ -146,7 +146,7 @@ TNP ExpressionAST::Parse() {
     std::stack<ANP> sym;
     opt.push("begin");
 
-    if (data(now_token) == "+" || data(now_token) == "-")
+    if (token_safe::data(now_token) == "+" || token_safe::data(now_token) == "-")
         now_token->data += "unary";
 
     bool quit = false;
@@ -159,7 +159,7 @@ TNP ExpressionAST::Parse() {
 
         const std::string expression_ending[] = {";", ",", ")", "}", "]"};
         for (const auto& i : expression_ending)
-            if (data(now_token) == i) {
+            if (token_safe::data(now_token) == i) {
                 quit = true;
                 break;
             }
@@ -191,13 +191,13 @@ TNP ExpressionAST::Parse() {
                 ANP tog = std::make_shared<AST_node>();
                 tog->data = opt.top(); opt.pop();
                 tog->type = Expression;
-                reverse_connect_child(tog, k1);
-                reverse_connect_child(tog, k2);
+                AST_node::reverse_connect_child(tog, k1);
+                AST_node::reverse_connect_child(tog, k2);
                 sym.push(tog);
             }
 
             if (sym.size() == 1) {
-                connect_child(head, sym.top());
+                AST_node::connect_child(head, sym.top());
                 sym.pop();
                 break;
             }
@@ -209,25 +209,25 @@ TNP ExpressionAST::Parse() {
         }
 
         // 1 function, variables and number
-        if (type(now_token) != OPERAT && type(now_token) != PUNCT) {
+        if (token_safe::type(now_token) != OPERAT && token_safe::type(now_token) != PUNCT) {
 
             // 1.1 function or variables
-            if (type(now_token) == IDENTI) {
+            if (token_safe::type(now_token) == IDENTI) {
 
                 // 1.1.1 function usage [No GoNext]
-                if (data(next_token) == "(") {
+                if (token_safe::data(next_token) == "(") {
                     FunctionUsageAST func_use(now_token, symtable_ptr);
                     sym.push(func_use.head);
                     now_token = func_use.Parse();
-                    next_token = next(now_token);
+                    next_token = token_safe::next(now_token);
                 }
 
                 // 1.1.2 array usage [No GoNext]
-                else if (data(next_token) == "[") {
+                else if (token_safe::data(next_token) == "[") {
                     ArrayUsageAST array_use(now_token, symtable_ptr);
                     sym.push(array_use.head);
                     now_token = array_use.Parse();
-                    next_token = next(now_token);
+                    next_token = token_safe::next(now_token);
                 }
 
                 // 1.1.3 normal variables
@@ -241,14 +241,14 @@ TNP ExpressionAST::Parse() {
             }
 
             // 1.2 normal numbers
-            else if (type(now_token) == NUMBER) {
+            else if (token_safe::type(now_token) == NUMBER) {
                 ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
-                token_to_AST->int_or_double = now_token->int_or_double;
-                if (token_to_AST->int_or_double == 1) {
+                token_to_AST->basic_type = now_token->basic_type;
+                if (token_to_AST->basic_type == 1) {
                     token_to_AST->value.int_value = now_token->value.int_value;
-                } else if (token_to_AST->int_or_double == 2) {
+                } else if (token_to_AST->basic_type == 2) {
                     token_to_AST->value.double_value = now_token->value.double_value;
                 }
                 sym.push(token_to_AST);
@@ -266,11 +266,11 @@ TNP ExpressionAST::Parse() {
         else {
 
             // find unary + and -
-            if (data(next_token) == "+" || data(next_token) == "-")
+            if (token_safe::data(next_token) == "+" || token_safe::data(next_token) == "-")
                 next_token->data += "unary";
 
             // unary+, unary-, ! should become unary (use a placeholder)
-            if (assign_operator(data(now_token)) == 64) {
+            if (assign_operator(token_safe::data(now_token)) == 64) {
                 ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
                 token_to_AST->type = Expression;
@@ -278,16 +278,16 @@ TNP ExpressionAST::Parse() {
             }
 
             // 2.1 use ( )
-            if (data(now_token) == "(") {
+            if (token_safe::data(now_token) == "(") {
                 GoNext();
 
                 ExpressionAST recur_expr(now_token, symtable_ptr);
                 sym.push(recur_expr.head);
                 recur_expr.head->data = "brace";
                 now_token = recur_expr.Parse();
-                next_token = next(now_token);
+                next_token = token_safe::next(now_token);
 
-                if (data(now_token) != ")") {
+                if (token_safe::data(now_token) != ")") {
                     RaiseError("in Expression, missing punctuation [)]", now_token);
                     return now_token;
                 }
@@ -296,7 +296,7 @@ TNP ExpressionAST::Parse() {
 
             // 2.2 other operator
             else {
-                std::string now_op = data(now_token);
+                std::string now_op = token_safe::data(now_token);
 
                 // 2.2.1 wrong operator
                 if (assign_operator(now_op) == -1) {
@@ -319,8 +319,8 @@ TNP ExpressionAST::Parse() {
                     ANP tog = std::make_shared<AST_node>();
                     tog->data = opt.top(); opt.pop();
                     tog->type = Expression;
-                    reverse_connect_child(tog, k1);
-                    reverse_connect_child(tog, k2);
+                    AST_node::reverse_connect_child(tog, k1);
+                    AST_node::reverse_connect_child(tog, k2);
                     sym.push(tog);
                 }
 
