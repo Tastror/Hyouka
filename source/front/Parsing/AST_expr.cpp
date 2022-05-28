@@ -35,6 +35,25 @@ int compare(const std::string& op1, const std::string& op2) {
 }
 
 
+// TBD, this should do from inner to outside, which should be done after AST and before IRGen
+basic_type implicit_conversion(int a, int b) {
+    if (a == basic_none || b == basic_none) {
+        return basic_none;
+    }
+    if (a == basic_pointer || b == basic_pointer) {
+        if (a == basic_float || b == basic_float) {
+            return basic_none;
+        }
+        return basic_pointer;
+    }
+    if (a == basic_float || b == basic_float) {
+        return basic_float;
+    }
+    return basic_int;
+}
+
+
+
 TNP ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
@@ -246,9 +265,10 @@ TNP ExpressionAST::Parse() {
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
                 token_to_AST->basic_type = now_token->basic_type;
-                if (token_to_AST->basic_type == 1) {
+                token_to_AST->count_expr_ending = true;
+                if (token_to_AST->basic_type == basic_int) {
                     token_to_AST->value.int_value = now_token->value.int_value;
-                } else if (token_to_AST->basic_type == 2) {
+                } else if (token_to_AST->basic_type == basic_float) {
                     token_to_AST->value.double_value = now_token->value.double_value;
                 }
                 sym.push(token_to_AST);
@@ -273,6 +293,7 @@ TNP ExpressionAST::Parse() {
             if (assign_operator(token_safe::data(now_token)) == 64) {
                 ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
+                token_to_AST->count_expr_ending = true;
                 token_to_AST->type = Expression;
                 sym.push(token_to_AST);
             }

@@ -45,7 +45,7 @@ public:
         symtable_ptr->my_head->table_id = temp.table_id;
         symtable_ptr->my_head->is_head = temp.is_head;
         symtable_ptr->my_head->identifier_name = temp.identifier_name;
-        symtable_ptr->my_head->next = temp.next;
+        symtable_ptr->my_head->next = nullptr;
     }
     [[nodiscard]] SNP GetBackSymtableAttribute() const {
         return symtable_ptr->my_head;

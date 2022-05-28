@@ -163,14 +163,31 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     for (int i = 0; i < stage; ++i)
         std::cout << "    ";
     std::cout << AST_type_string_name[now->type];
-    if (now->type == Number) {
-        std::cout  << ", ";
-        if (now->basic_type == 1) {
-            std::cout  << "int: " << now->value.int_value;
-        } else if (now->basic_type == 2) {
-            std::cout  << "float: " << now->value.double_value;
+    if (now->using_attribute) {
+        std::cout << ", only_name: " << now->only_name;
+        if (now->is_function_pointer) {
+            std::cout << ", is_function_pointer";
+            std::cout << ", function_type: " << function_type_string_name[now->function_type];
+            std::cout << ", arg_num: " << now->arg_num;
+        } else if (now->is_array_pointer) {
+            std::cout << ", is_array_pointer";
+            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
+            std::cout << ", array_len: " << now->array_len;
         } else {
-            std::cout << "data: " << now->data;
+            std::cout << ", is_basic_type";
+            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
+        }
+        if (now->is_const) std::cout << ", is_const";
+        if (now->is_static) std::cout << ", is_static";
+    }
+    if (now->type == Number || now->count_expr_ending) {
+        if (now->count_expr_ending) std::cout << ", count_expr_ending";
+        if (now->basic_type == 1) {
+            std::cout  << ", int: " << now->value.int_value;
+        } else if (now->basic_type == 2) {
+            std::cout  << ", float: " << now->value.double_value;
+        } else {
+            std::cout << ", data: " << now->data;
         }
     }
     std::cout << (now->data.empty() ? "" : ", " + now->data);

@@ -257,7 +257,6 @@ public:
             }
         }
         if (is_point || is_e) {
-            std::cout << "stod buff is " << buff << std::endl;
             double value = stod(buff);
             save_float_node(value, buff);
         } else {
