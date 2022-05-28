@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
                   << "\nwhether to assembly = " << to_assembly << "\nwhich optimizer = " << optimizer << std::endl;
 
     Lexical program_file(input_filename);
-    program_file.get_token();
+    program_file.Lexicalize();
     const TNP& token_head = program_file.head;
     if (debug_mode == "lex")
         token_node::print_all(token_head);

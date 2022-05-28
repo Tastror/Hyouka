@@ -61,6 +61,19 @@ TNP ArrayUsageAST::Parse() {
         RaiseError("in ArrayUsage, identify name is not valid", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
@@ -112,6 +125,19 @@ TNP FunctionUsageAST::Parse() {
         RaiseError("in FunctionUsage, identify name is not valid", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
@@ -251,10 +277,24 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.3 normal variables
                 else {
+
+                    // v --- sym search --- v //
+                    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+                    if (temp_only_name.empty()) {
+                        RaiseError("Usage without definition", now_token);
+                        return now_token;
+                    }
+                    // ^ --- sym search --- ^ //
+
                     ANP token_to_AST = std::make_shared<AST_node>();
                     token_to_AST->data = now_token->data;
                     token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
+
+                    // --attribute--
+                    token_to_AST->using_attribute = true;
+                    token_to_AST->only_name = temp_only_name;
+
                     GoNext();
                 }
             }

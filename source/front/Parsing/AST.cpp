@@ -32,6 +32,19 @@ TNP SingleAssignmentAST::Parse() {
         RaiseError("in SingleAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
@@ -67,6 +80,19 @@ TNP ArrayAssignmentAST::Parse() {
         RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
@@ -325,6 +351,14 @@ TNP DeclarationStatementAST::Parse() {
 
     if (token_safe::type(now_token) == IDENTI) {
 
+        // v --- sym search --- v //
+        std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+        if (!temp_only_name.empty()) {
+            RaiseError("Redefinition", now_token);
+            return now_token;
+        }
+        // ^ --- sym search --- ^ //
+
         // v --- sym --- v //
         symtable_node sym_node;
         sym_node.identifier_name = token_safe::data(now_token);
@@ -342,7 +376,13 @@ TNP DeclarationStatementAST::Parse() {
             now_token = array_def.Parse();
             next_token = token_safe::next(now_token);
 
+            // v --- sym append --- v //
             symtable_ptr->append(sym_node);
+            // ^ --- sym append --- ^ //
+
+            // --attribute--
+            array_def.head->using_attribute = true;
+            array_def.head->only_name = symtable_ptr->my_tail->only_name;
         }
 
         else {
@@ -352,7 +392,13 @@ TNP DeclarationStatementAST::Parse() {
             now_token = single_def.Parse();
             next_token = token_safe::next(now_token);
 
+            // v --- sym append --- v //
             symtable_ptr->append(sym_node);
+            // ^ --- sym append --- ^ //
+
+            // --attribute--
+            single_def.head->using_attribute = true;
+            single_def.head->only_name = symtable_ptr->my_tail->only_name;
         }
     }
 
@@ -379,6 +425,14 @@ TNP DeclarationStatementAST::Parse() {
 
         if (token_safe::type(now_token) == IDENTI) {
 
+            // v --- sym search --- v //
+            std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+            if (!temp_only_name.empty()) {
+                RaiseError("Redefinition", now_token);
+                return now_token;
+            }
+            // ^ --- sym search --- ^ //
+
             // v --- sym --- v //
             symtable_node sym_node;
             sym_node.identifier_name = token_safe::data(now_token);
@@ -396,7 +450,13 @@ TNP DeclarationStatementAST::Parse() {
                 now_token = array_def.Parse();
                 next_token = token_safe::next(now_token);
 
+                // v --- sym append --- v //
                 symtable_ptr->append(sym_node);
+                // ^ --- sym append --- ^ //
+
+                // --attribute--
+                array_def.head->using_attribute = true;
+                array_def.head->only_name = symtable_ptr->my_tail->only_name;
             }
 
             else {
@@ -406,7 +466,13 @@ TNP DeclarationStatementAST::Parse() {
                 now_token = single_def.Parse();
                 next_token = token_safe::next(now_token);
 
+                // v --- sym append --- v //
                 symtable_ptr->append(sym_node);
+                // ^ --- sym append --- ^ //
+
+                // --attribute--
+                single_def.head->using_attribute = true;
+                single_def.head->only_name = symtable_ptr->my_tail->only_name;
             }
         }
 
@@ -703,6 +769,15 @@ TNP FunctionDefinitionAST::Parse() {
         RaiseError("in FunctionDefinition, function name is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    if (!temp_only_name.empty()) {
+        RaiseError("Redefinition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
     ANP func_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, func_name);
     func_name->type = Identifier;
@@ -728,6 +803,10 @@ TNP FunctionDefinitionAST::Parse() {
     // v --- sym append --- v //
     symtable_ptr->append(sym_node);
     // ^ --- sym append --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = symtable_ptr->my_tail->only_name;
 
     if (token_safe::data(now_token) != ")") {
         RaiseError("in FunctionDefinition, lost punctuation [)]", now_token);
