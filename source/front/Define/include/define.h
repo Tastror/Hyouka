@@ -9,7 +9,7 @@
 
 
 
-// Lexical-WuXiwen: token_node
+// Lexical: token_node
 
 enum token_type {
     NONE, PUNCT, OPERAT, KEYWORD, NUMBER, IDENTI
