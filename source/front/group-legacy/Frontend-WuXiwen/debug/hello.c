@@ -1,7 +1,3 @@
-//test line comment
-
 int main() {
-  // hello
-  return 10;
+  return +(- -!6);  // 看起来像个颜文字
 }
-

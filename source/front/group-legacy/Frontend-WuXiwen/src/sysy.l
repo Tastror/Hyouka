@@ -32,10 +32,14 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 {WhiteSpace}    { /* 忽略, 不做任何操作 */ }
 {LineComment}   { /* 忽略, 不做任何操作 */ }
 
-"int"           { return INT; }
-"return"        { return RETURN; }
+"int"           { yylval.str_val = new string(yytext); return INT; }
+"return"        { yylval.str_val = new string(yytext); return RETURN; }
 
 {Identifier}    { yylval.str_val = new string(yytext); return IDENT; }
+
+"+"		{ yylval.str_val = new string(yytext); return ADD; }
+"-"		{ yylval.str_val = new string(yytext); return MINUS; }
+"!"		{ yylval.str_val = new string(yytext); return NOT; }
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 {Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
