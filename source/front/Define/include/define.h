@@ -9,63 +9,106 @@
 
 
 
+
+
+// all will use
+
+enum basic_type {
+    basic_none = 0, basic_int, basic_float
+};
+
+enum function_type {
+    function_none = 0, function_int, function_float, function_void
+};
+
+const std::string basic_type_string_name[] = {
+        "basic_none", "basic_int", "basic_float"
+};
+
+const std::string function_type_string_name[] = {
+        "function_none", "function_int", "function_float", "function_void"
+};
+
+union int_double_storage {
+    int int_value;
+    double double_value = 0.0;
+};
+
+
+
+
+
 // Lexical: token_node
 
 enum token_type {
     NONE, PUNCT, OPERAT, KEYWORD, NUMBER, IDENTI
 };
 
-const std::string token_show_type[] = { "NONE", "PUNCT", "OPERAT", "KEYWORD", "NUMBER", "IDENTI" };
+const std::string token_type_string_name[] = {
+    "NONE", "PUNCT", "OPERAT", "KEYWORD", "NUMBER", "IDENTI"
+};
 
 struct token_node {
+
+    // basic
     int line = 0, column = 0;
     token_type type = NONE;
     std::string data;
-    int int_or_double = 0; // 1 is int, 2 is double, 0 is not use
-    union int_double {
-        int int_value;
-        double double_value = 0.0;
-    } value;
     std::shared_ptr<token_node> next = nullptr;
+
+    // attribute
+    int basic_type = basic_none;
+    int_double_storage value;
+
+    // print
+    static void print_all(const std::shared_ptr<token_node>& head);
 };
+
+namespace token_safe {
+    std::shared_ptr<token_node> next(const std::shared_ptr<token_node> &now);
+    std::string data(const std::shared_ptr<token_node> &node);
+    token_type type(const std::shared_ptr<token_node> &now);
+    bool search_data(std::shared_ptr<token_node> now, const std::string& target, const std::string& end);
+}
 
 #define TNP std::shared_ptr<token_node>
 
-std::shared_ptr<token_node> next(const std::shared_ptr<token_node>& now);
-std::string data(const std::shared_ptr<token_node>& node);
-token_type type(const std::shared_ptr<token_node>& now);
 
-void print_all_tokens(const std::shared_ptr<token_node>& head);
-bool search_data(std::shared_ptr<token_node> now, const std::string& target, const std::string& end);
 
 
 
 // Parsing: symtable_node
 
-enum sym_id_type { _id_none_, _single_value_, _array_, _function_ };
-const std::string sym_id_show_type[] = { "id_none", "single_value", "array", "function" };
-enum sym_return_type { _value_none_, _int_, _float_, _void_ };
-const std::string sym_return_show_type[] = { "value_none", "int", "float", "void" };
-
 struct symtable_node {
-    std::string identifier_name;
-    std::string only_name;
+
+    // basic
+    int table_id = -1;
     bool is_head = false;
-    sym_id_type id_type = _id_none_;
-    sym_return_type value_type = _value_none_;
-    int arg_num = 0;
-    std::shared_ptr<symtable_node> arg_symtable_node_head = nullptr;
+    std::string identifier_name;
+    std::shared_ptr<symtable_node> next = nullptr;
+
+    // attribute
+    std::string only_name;
+    int basic_type = basic_none;
     bool is_const = false;
     bool is_static = false;
-    int table_id = -1;
-    std::shared_ptr<symtable_node> next = nullptr;
+    bool is_array_pointer = false;
+    bool is_function_pointer = false;
+    int array_len = 0;
+    int arg_num = 0;
+    int function_type = function_none;
+
+    // methods
     void rename();
     void rename(const std::string& name);
+
+    // print
+    static void print(const std::shared_ptr<symtable_node>& symtable_node_head);
 };
 
 #define SNP std::shared_ptr<symtable_node>
 
-void print_symtable(const SNP& symtable_node_head);
+
 
 
 
@@ -74,57 +117,28 @@ void print_symtable(const SNP& symtable_node_head);
 class Symtable {
 public:
     static std::vector<SNP> all_symtable_heads;
+    std::vector<SNP> heads_chain;
     static int table_counts;
     int table_id;
     SNP sym_head = nullptr;
     SNP sym_tail = nullptr;
     SNP my_head = nullptr;
     SNP my_tail = nullptr;
-    std::vector<SNP> heads_chain;
 
-    Symtable() {
-        table_id = table_counts;
-        table_counts++;
-        my_head = std::make_shared<symtable_node>();
-        my_head->table_id = table_id;
-        my_head->is_head = true;
-        my_tail = my_head;
-        heads_chain.push_back(my_head);
-        all_symtable_heads.push_back(my_head);
-    };
-
-    void extend_from(const std::shared_ptr<Symtable>& last_symtable_ptr) {
-        heads_chain = last_symtable_ptr->heads_chain;
-        heads_chain.push_back(my_head);
-        sym_tail = last_symtable_ptr->sym_tail;
-        sym_head = last_symtable_ptr->sym_head;
-    }
-
-    void append(const symtable_node& append_sym_node) {
-        SNP sym_ptr = std::make_shared<symtable_node>();
-        *sym_ptr = append_sym_node;
-        sym_ptr->table_id = table_id;
-        sym_ptr->rename();
-        my_tail->next = sym_ptr;
-        my_tail = sym_ptr;
-        my_tail->next = nullptr;
-        sym_tail = my_tail;
-    }
-
-    void print_me() const {
-        print_symtable(my_head);
-    }
-
-    void print_chain() const {
-        for (auto& i : heads_chain) {
-            print_symtable(i);
-        }
-    }
-
-    static void print_all();
-
+    Symtable();
     virtual ~Symtable() = default;
+
+    void extend_from(const std::shared_ptr<Symtable>& last_symtable_ptr);
+    void append(const symtable_node& append_sym_node);
+
+    void print() const;
+    void print_chain() const;
+    static void print_all();
 };
+
+#define SP std::shared_ptr<Symtable>
+
+
 
 
 
@@ -143,7 +157,7 @@ enum AST_type {
     FunctionParams, FunctionFormParam,
 };
 
-const std::string AST_show_type[] = {
+const std::string AST_type_string_name[] = {
     "None", "ProgramBody",
     "Number", "Identifier", "BasicType", "FunctionType",
     "Expression", "FunctionUsage", "ArrayUsage",
@@ -157,23 +171,35 @@ const std::string AST_show_type[] = {
 };
 
 struct AST_node {
+
+    // normal
     AST_type type = None;
     std::string data;
-    int int_or_double = 0; // 1 is int, 2 is double, 0 is not use
-    union int_double {
-        int int_value;
-        double double_value = 0.0;
-    } value;
     std::shared_ptr<AST_node> sister = nullptr;
     std::shared_ptr<AST_node> child = nullptr;
     std::shared_ptr<AST_node> parent = nullptr;
     std::shared_ptr<AST_node> last_child = nullptr;
     std::shared_ptr<Symtable> symtable_ptr = nullptr;
+
+    // attribution
+    std::string only_name;
+    int basic_type = basic_none;
+    bool is_array_pointer = false;
+    bool is_function_pointer = false;
+    int array_len = 0;
+    int arg_num = 0;
+    int function_type = function_none;
+    int_double_storage value;
+
+    // methods
+    static void connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
+    static void reverse_connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
+
+    // print
+    static void print_all(const std::shared_ptr<AST_node>& now, int stage);
+    static void print_all(const std::shared_ptr<AST_node>& AST_head);
 };
 
 #define ANP std::shared_ptr<AST_node>
-
-void print_all_ASTs(const ANP& now, int stage);
-void print_all_ASTs(const ANP& AST_head);
 
 
