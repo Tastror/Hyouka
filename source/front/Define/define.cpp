@@ -98,7 +98,7 @@ void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_he
         } else if (now->is_array_pointer) {
             std::cout << ", is_array_pointer";
             std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
-            std::cout << ", array_len: " << now->array_len;
+            std::cout << ", array_nest_num: " << now->array_nest_num;
         } else {
             std::cout << ", is_basic_type";
             std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
@@ -183,7 +183,7 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
         } else if (now->is_array_pointer) {
             std::cout << ", is_array_pointer";
             std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
-            std::cout << ", array_len: " << now->array_len;
+            std::cout << ", array_nest_num: " << now->array_nest_num;
         } else {
             std::cout << ", is_basic_type";
             std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
@@ -245,7 +245,7 @@ void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symt
     is_static = symtable_resource_node->is_static;
     is_array_pointer = symtable_resource_node->is_array_pointer;
     is_function_pointer = symtable_resource_node->is_function_pointer;
-    array_len = symtable_resource_node->array_len;
+    array_nest_num = symtable_resource_node->array_nest_num;
     arg_num = symtable_resource_node->arg_num;
     function_type = symtable_resource_node->function_type;
 }

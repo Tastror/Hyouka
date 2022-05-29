@@ -99,7 +99,7 @@ struct symtable_node {
     bool is_static = false;
     bool is_array_pointer = false;
     bool is_function_pointer = false;
-    int array_len = 0;
+    int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
 
@@ -198,7 +198,7 @@ struct AST_node {
     bool is_static = false;
     bool is_array_pointer = false;
     bool is_function_pointer = false;
-    int array_len = 0;
+    int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
 

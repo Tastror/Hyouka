@@ -5,8 +5,7 @@ int main2(int a, float b, int c[]) {
 int a[10][10];
 
 int main() {
-    int kadaf = 1 + 2 * (-3 - 4) + (+5 / 6) / 6 * 7 && 5;
-    int res[0400], i = 1;
+    int res[0400], i = 1, bin[4][5] = {4 * 7, 2, 3};
     float rea;
     res[0] = -.1;
     res[-1] = 1.23;
@@ -21,9 +20,9 @@ int main() {
     int _asdf, main, block;
     int a, x;
     {
-        x = 2.71828;
+        x = 0.71828 + 2;
         int x = a;
-        x = 3.14;
+        x = 3.1415926535 / 2 * 2;
     }
 
     int b;
@@ -32,9 +31,9 @@ int main() {
     x = .1e-200;
     x = -.1e+20;
 
-    //return 9;
+    // return 9;
 
     int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
-
+    int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * 7 && 5) + 1 + 2 * 8 - (1 - 1 || 0);
     return kadaf2;
 }
