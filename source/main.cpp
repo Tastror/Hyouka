@@ -15,11 +15,15 @@ int main(int argc, char** argv) {
         std::cout << "input: " << input_filename << "\noutput: " << output_filename << "\ndebug: " << debug_mode
                   << "\nwhether to assembly = " << to_assembly << "\nwhich optimizer = " << optimizer << std::endl;
 
+    if (Safe::GlobalError) return 1;
+
     Lexical program_file(input_filename);
     program_file.Lexicalize();
     const TNP& token_head = program_file.head;
     if (debug_mode == "lex")
         token_node::print_all(token_head);
+
+    if (Safe::GlobalError) return 1;
 
     Symtable symtable;
     ProgramAST program(token_head, symtable);
@@ -30,10 +34,14 @@ int main(int argc, char** argv) {
     if (debug_mode == "sym")
         Symtable::print_all();
 
+    if (Safe::GlobalError) return 1;
+
     Front::Optimiser::Optimize(program.head);
     const ANP& optimized_AST_head = program.head;
     if (debug_mode == "opt")
         AST_node::print_all(AST_head);
+
+    if (Safe::GlobalError) return 1;
 
     return 0;
 } 

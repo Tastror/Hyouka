@@ -112,17 +112,29 @@ int_double_storage calculate(
         if (type == basic_float) {
             temp_a = int_to_double(a_type, a);
             temp_b = int_to_double(b_type, b);
+            if (temp_b.double_value == 0) {
+                AST_optimize_safe::RaiseError("Divided by zero!");
+                return res;
+            }
             res.double_value = temp_a.double_value / temp_b.double_value;
         }
         else if (type == basic_int || type == basic_pointer) {
             temp_a = double_to_int(a_type, a);
             temp_b = double_to_int(b_type, b);
+            if (temp_b.int_value == 0) {
+                AST_optimize_safe::RaiseError("Divided by zero!");
+                return res;
+            }
             res.int_value = temp_a.int_value / temp_b.int_value;
         }
     }
 
     else if (binary_operator == "%") {
         int_double_storage temp_a, temp_b;
+        if (type == basic_float) {
+            AST_optimize_safe::RaiseError("Using float number between or after [%] operator!");
+            return res;
+        }
         if (type == basic_int || type == basic_pointer) {
             temp_a = double_to_int(a_type, a);
             temp_b = double_to_int(b_type, b);
