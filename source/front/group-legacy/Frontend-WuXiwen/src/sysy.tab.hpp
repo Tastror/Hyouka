@@ -57,10 +57,24 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
-    RETURN = 259,
-    IDENT = 260,
-    INT_CONST = 261
+    IDENT = 258,
+    INT = 259,
+    RETURN = 260,
+    ADD = 261,
+    SUB = 262,
+    MUL = 263,
+    DIV = 264,
+    MOD = 265,
+    NOT = 266,
+    AND = 267,
+    OR = 268,
+    LT = 269,
+    GT = 270,
+    LEQ = 271,
+    GEQ = 272,
+    EQ = 273,
+    NEQ = 274,
+    INT_CONST = 275
   };
 #endif
 
@@ -68,13 +82,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 32 "sysy.y"
+#line 30 "sysy.y"
 
   std::string *str_val;
   int int_val;
-  BaseAST *ast_val;	//AST
+  BaseAST *ast_val;	//AST node
 
-#line 78 "sysy.tab.hpp"
+#line 92 "sysy.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
