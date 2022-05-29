@@ -48,11 +48,95 @@ class FuncTypeAST : public BaseAST {
 
 class BlockAST : public BaseAST {
  public:
+  std::unique_ptr<BaseAST> block_item;
+
+  void Dump() const override {
+    std::cout << "BlockAST { " << std::endl;
+    block_item->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class BlockItemAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> decl;
   std::unique_ptr<BaseAST> stmt;
 
   void Dump() const override {
     std::cout << "BlockAST { " << std::endl;
-    stmt->Dump();
+    if(decl)
+    	decl->Dump();
+    else
+    	stmt->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class DeclAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> const_decl;
+
+  void Dump() const override {
+    std::cout << "DeclAST { " << std::endl;
+    const_decl->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class ConstDeclAST : public BaseAST {
+ public:
+  std::string const_type;
+  std::string btype;
+  std::unique_ptr<BaseAST> const_def;
+  std::string comma;
+  std::string semi;
+
+  void Dump() const override {
+    std::cout << "ConstDeclAST { " << std::endl;
+    std::cout << const_type << std::endl;
+    std::cout << btype << std::endl;
+    const_def->Dump();
+    std::cout << comma << std::endl;
+    std::cout << semi << std::endl;
+    std::cout << " }" << std::endl;
+  }
+};
+
+//typedef std::string BType;
+
+class ConstDefAST : public BaseAST {
+ public:
+  std::string ident;
+  std::string eq;
+  std::unique_ptr<BaseAST> const_initval;
+
+  void Dump() const override {
+    std::cout << "ConstDefAST { " << std::endl;
+    std::cout << ident << std::endl;
+    std::cout << eq << std::endl;
+    const_initval->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class ConstInitValAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> const_exp;
+
+  void Dump() const override {
+    std::cout << "ConstInitValAST { " << std::endl;
+    const_exp->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class ConstExp : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> exp;
+
+  void Dump() const override {
+    std::cout << "ConstExpAST { " << std::endl;
+    exp->Dump();
     std::cout << " }" << std::endl;
   }
 };
@@ -218,17 +302,27 @@ class UnaryExpAST : public BaseAST {
 class PrimaryExpAST : public BaseAST {
  public:
   std::unique_ptr<BaseAST> exp;
+  std::string lparen;
+  std::string rparen;
+  std::string lval;
   int number;
 
   void Dump() const override {
     std::cout << "PrimaryExpAST { " << std::endl;
-    if(exp)
+    if(exp){
+    	std::cout << lparen;
     	exp->Dump();
+    	std::cout << rparen;
+    }
+    else if(lval)
+    	std::cout << lval;
     else
     	std::cout << number;
     std::cout << " }" << std::endl;
   }
 };
 
-//typedef int NumberAST
+//typedef std::string LValAST;
+
+//typedef int NumberAST;
 
