@@ -62,8 +62,11 @@ extern int yydebug;
     RETURN = 260,
     ADD = 261,
     SUB = 262,
-    NOT = 263,
-    INT_CONST = 264
+    MUL = 263,
+    DIV = 264,
+    MOD = 265,
+    NOT = 266,
+    INT_CONST = 267
   };
 #endif
 
@@ -77,7 +80,7 @@ union YYSTYPE
   int int_val;
   BaseAST *ast_val;	//AST node
 
-#line 81 "sysy.tab.hpp"
+#line 84 "sysy.tab.hpp"
 
 };
 typedef union YYSTYPE YYSTYPE;

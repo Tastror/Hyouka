@@ -6,9 +6,8 @@
 
 #include <cstdlib>
 #include <string>
+#include <iostream>
 
-// 因为 Flex 会用到 Bison 中关于 token 的定义
-// 所以需要 include Bison 生成的头文件
 #include "sysy.tab.hpp"
 
 using namespace std;
@@ -39,6 +38,9 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 
 "+"		{ yylval.str_val = new string(yytext); return ADD; }
 "-"		{ yylval.str_val = new string(yytext); return SUB; }
+"*"		{ yylval.str_val = new string(yytext); return MUL; }
+"/"		{ yylval.str_val = new string(yytext); return DIV; }
+"%"		{ yylval.str_val = new string(yytext); return MOD; }
 "!"		{ yylval.str_val = new string(yytext); return NOT; }
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }

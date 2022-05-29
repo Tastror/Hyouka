@@ -34,11 +34,11 @@ using namespace std;
 }
 
 // lexer 返回的所有 token 种类的声明
-%token <str_val> IDENT INT RETURN ADD SUB NOT
+%token <str_val> IDENT INT RETURN ADD SUB MUL DIV MOD NOT
 %token <int_val> INT_CONST
 
 // 非终结符的类型定义
-%type <ast_val> FuncDef FuncType Block Stmt Exp PrimaryExp UnaryExp
+%type <ast_val> FuncDef FuncType Block Stmt Exp AddExp MulExp PrimaryExp UnaryExp
 %type <str_val> UnaryOp
 %type <int_val> Number
 
@@ -83,7 +83,6 @@ Block
   }
   ;
 
-//change below
 Stmt
   : RETURN Exp ';' {
     auto ast = new StmtAST();
@@ -94,13 +93,64 @@ Stmt
   ;
 
 Exp
-  : UnaryExp {
+  : AddExp {
     auto ast = new ExpAST();
-    ast->unary_exp = unique_ptr<BaseAST>($1);
+    ast->add_exp = unique_ptr<BaseAST>($1);
     $$ = ast;
   }
   ;
 
+AddExp
+  : MulExp {
+    auto ast = new AddExpAST();
+    ast->mul_exp = unique_ptr<BaseAST>($1);
+    $$ = ast;
+  }
+  | AddExp ADD MulExp {
+    auto ast = new AddExpAST();
+    ast->add_exp = unique_ptr<BaseAST>($1);
+    ast->unary_op = *unique_ptr<string>($2);
+    ast->mul_exp = unique_ptr<BaseAST>($3);
+    $$ = ast;
+  }
+  | AddExp SUB MulExp {
+    auto ast = new AddExpAST();
+    ast->add_exp = unique_ptr<BaseAST>($1);
+    ast->unary_op = *unique_ptr<string>($2);
+    ast->mul_exp = unique_ptr<BaseAST>($3);
+    $$ = ast;
+  }
+  ;
+
+MulExp
+  : UnaryExp {
+    auto ast = new MulExpAST();
+    ast->unary_exp = unique_ptr<BaseAST>($1);
+    $$ = ast;
+  }
+  | MulExp MUL UnaryExp {
+    auto ast = new MulExpAST();
+    ast->mul_exp = unique_ptr<BaseAST>($1);
+    ast->unary_op = *unique_ptr<string>($2);
+    ast->unary_exp = unique_ptr<BaseAST>($3);
+    $$ = ast;
+  }
+  | MulExp DIV UnaryExp {
+    auto ast = new MulExpAST();
+    ast->mul_exp = unique_ptr<BaseAST>($1);
+    ast->unary_op = *unique_ptr<string>($2);
+    ast->unary_exp = unique_ptr<BaseAST>($3);
+    $$ = ast;
+  }
+  | MulExp MOD UnaryExp {
+    auto ast = new MulExpAST();
+    ast->mul_exp = unique_ptr<BaseAST>($1);
+    ast->unary_op = *unique_ptr<string>($2);
+    ast->unary_exp = unique_ptr<BaseAST>($3);
+    $$ = ast;
+  }
+  ;
+    
 UnaryExp
   : PrimaryExp {
     auto ast = new UnaryExpAST();
