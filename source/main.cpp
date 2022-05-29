@@ -16,17 +16,17 @@ int main(int argc, char** argv) {
                   << "\nwhether to assembly = " << to_assembly << "\nwhich optimizer = " << optimizer << std::endl;
 
     Lexical program_file(input_filename);
-    program_file.get_token();
+    program_file.Lexicalize();
     const TNP& token_head = program_file.head;
     if (debug_mode == "lex")
-        print_all_tokens(token_head);
+        token_node::print_all(token_head);
 
     Symtable symtable;
     ProgramAST program(token_head, symtable);
     program.Parse();
     const ANP& AST_head = program.head;
     if (debug_mode == "parse")
-        print_all_ASTs(AST_head);
+        AST_node::print_all(AST_head);
     if (debug_mode == "sym")
         Symtable::print_all();
 

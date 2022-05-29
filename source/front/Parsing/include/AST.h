@@ -9,11 +9,7 @@
 #include "define.h"
 
 
-
 void RaiseError(const std::string& error_code, const TNP& token_node);
-
-void connect_child(const ANP& parent, const ANP& child);
-void reverse_connect_child(const ANP& parent, const ANP& child);
 
 
 class BaseAST {
@@ -25,7 +21,7 @@ public:
     std::shared_ptr<Symtable> symtable_ptr;
     void GoNext() {
         now_token = next_token;
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
     explicit BaseAST(const TNP& token_head, const Symtable& symtable) {
         error = false;
@@ -33,7 +29,7 @@ public:
         head = std::make_shared<AST_node>();
         head->symtable_ptr = symtable_ptr;
         now_token = token_head;
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
     explicit BaseAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr) {
         error = false;
@@ -41,14 +37,15 @@ public:
         head = std::make_shared<AST_node>();
         head->symtable_ptr = symtable_ptr;
         now_token = token_head;
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
     void PassDownSymtableAttribute(const SNP& symtable_node_ptr) const {
-        symtable_ptr->my_head->is_const = symtable_node_ptr->is_const;
-        symtable_ptr->my_head->is_static = symtable_node_ptr->is_static;
-        symtable_ptr->my_head->id_type = symtable_node_ptr->id_type;
-        symtable_ptr->my_head->value_type = symtable_node_ptr->value_type;
-        symtable_ptr->my_head->arg_num = symtable_node_ptr->arg_num;
+        symtable_node temp = *symtable_ptr->my_head;
+        *symtable_ptr->my_head = *symtable_node_ptr;
+        symtable_ptr->my_head->table_id = temp.table_id;
+        symtable_ptr->my_head->is_head = temp.is_head;
+        symtable_ptr->my_head->identifier_name = temp.identifier_name;
+        symtable_ptr->my_head->next = nullptr;
     }
     [[nodiscard]] SNP GetBackSymtableAttribute() const {
         return symtable_ptr->my_head;
