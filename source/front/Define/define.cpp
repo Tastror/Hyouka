@@ -216,11 +216,11 @@ void AST_node::connect_child(const std::shared_ptr<AST_node>& parent, const std:
     if (parent->child == nullptr) {
         parent->child = child;
         parent->last_child = child;
-        child->parent = parent;
+        // child->parent = parent;
     } else {
         parent->last_child->sister = child;
         parent->last_child = child;
-        child->parent = parent;
+        // child->parent = parent;
     }
 }
 
@@ -228,11 +228,11 @@ void AST_node::reverse_connect_child(const std::shared_ptr<AST_node>& parent, co
     if (parent->child == nullptr) {
         parent->child = child;
         parent->last_child = child;
-        child->parent = parent;
+        // child->parent = parent;
     } else {
         child->sister = parent->child;
         parent->child = child;
-        child->parent = parent;
+        // child->parent = parent;
     }
 }
 

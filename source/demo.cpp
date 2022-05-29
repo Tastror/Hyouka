@@ -32,6 +32,9 @@ int main() {
     x = .1e-200;
     x = -.1e+20;
 
-    return 9;
-    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 3) + 6 * 7 && 5;
+    //return 9;
+
+    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 3) + 6 * 7;
+
+    return kadaf2;
 }

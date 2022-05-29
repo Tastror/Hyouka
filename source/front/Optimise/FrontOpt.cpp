@@ -287,6 +287,11 @@ void optimize_single(const ANP& now) {
                         now->last_child->basic_type, now->last_child->value
                 );
         }
+
+        // vvv --- ! important --- vvv //
+        // let shared_ptr destroy all the child tree node.
+        if (res.judge) now->child = now->last_child = nullptr;
+        // ^^^ --- ! important --- ^^^ //
     }
     optimize_single(now->sister);
 }
