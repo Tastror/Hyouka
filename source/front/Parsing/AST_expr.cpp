@@ -35,44 +35,23 @@ int compare(const std::string& op1, const std::string& op2) {
 }
 
 
-// TBD, this should do from inner to outside, which should be done after AST and before IRGen
-basic_type implicit_conversion(int a, int b) {
-    if (a == basic_none || b == basic_none) {
-        return basic_none;
-    }
-    if (a == basic_pointer || b == basic_pointer) {
-        if (a == basic_float || b == basic_float) {
-            return basic_none;
-        }
-        return basic_pointer;
-    }
-    if (a == basic_float || b == basic_float) {
-        return basic_float;
-    }
-    return basic_int;
-}
-
-
 
 TNP ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
     if (token_safe::type(now_token) != IDENTI) {
-        RaiseError("in ArrayUsage, identify name is not valid", now_token);
+        AST_safe::RaiseError("in ArrayUsage, identify name is not valid", now_token);
         return now_token;
     }
 
-    // v --- sym search --- v //
-    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
-    if (temp_only_name.empty()) {
-        RaiseError("Usage without definition", now_token);
+    // v --- sym search & attribution --- v //
+    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    if (temp_sym_node == nullptr) {
+        AST_safe::RaiseError("Usage without definition", now_token);
         return now_token;
     }
-    // ^ --- sym search --- ^ //
-
-    // --attribute--
-    head->using_attribute = true;
-    head->only_name = temp_only_name;
+    head->absorb_sym_attribution(temp_sym_node);
+    // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
@@ -81,19 +60,20 @@ TNP ArrayUsageAST::Parse() {
     GoNext();
 
     if (token_safe::data(now_token) != "[") {
-        RaiseError("in ArrayUsage, begin punctuation should be [[]", now_token);
+        AST_safe::RaiseError("in ArrayUsage, begin punctuation should be [[]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST expr(now_token, symtable_ptr);
     AST_node::connect_child(head, expr.head);
-    expr.head->data = "index";
+    expr.head->data = "value";
+    expr.head->comment = "index";
     now_token = expr.Parse();
     next_token = token_safe::next(now_token);
 
     if (token_safe::data(now_token) != "]") {
-        RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
+        AST_safe::RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
         return now_token;
     }
     GoNext();
@@ -103,12 +83,13 @@ TNP ArrayUsageAST::Parse() {
 
         ExpressionAST addi_expr(now_token, symtable_ptr);
         AST_node::connect_child(head, addi_expr.head);
-        addi_expr.head->data = "index";
+        addi_expr.head->data = "value";
+        addi_expr.head->comment = "index";
         now_token = addi_expr.Parse();
         next_token = token_safe::next(now_token);
 
         if (token_safe::data(now_token) != "]") {
-            RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
+            AST_safe::RaiseError("in ArrayUsage, end punctuation should be []]", now_token);
             return now_token;
         }
         GoNext();
@@ -122,21 +103,18 @@ TNP FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
     if (token_safe::type(now_token) != IDENTI) {
-        RaiseError("in FunctionUsage, identify name is not valid", now_token);
+        AST_safe::RaiseError("in FunctionUsage, identify name is not valid", now_token);
         return now_token;
     }
 
-    // v --- sym search --- v //
-    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
-    if (temp_only_name.empty()) {
-        RaiseError("Usage without definition", now_token);
+    // v --- sym search & attribution --- v //
+    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    if (temp_sym_node == nullptr) {
+        AST_safe::RaiseError("Usage without definition", now_token);
         return now_token;
     }
-    // ^ --- sym search --- ^ //
-
-    // --attribute--
-    head->using_attribute = true;
-    head->only_name = temp_only_name;
+    head->absorb_sym_attribution(temp_sym_node);
+    // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
@@ -145,7 +123,7 @@ TNP FunctionUsageAST::Parse() {
     GoNext();
 
     if (token_safe::data(now_token) != "(") {
-        RaiseError("in FunctionUsage, begin punctuation should be [(]", now_token);
+        AST_safe::RaiseError("in FunctionUsage, begin punctuation should be [(]", now_token);
         return now_token;
     }
     GoNext();
@@ -156,7 +134,8 @@ TNP FunctionUsageAST::Parse() {
 
     ExpressionAST expr(now_token, symtable_ptr);
     AST_node::connect_child(head, expr.head);
-    expr.head->data = "argument";
+    expr.head->data = "value";
+    expr.head->comment = "argument";
     now_token = expr.Parse();
     next_token = token_safe::next(now_token);
 
@@ -168,14 +147,15 @@ TNP FunctionUsageAST::Parse() {
         }
 
         if (token_safe::data(now_token) != ",") {
-            RaiseError("in FunctionUsage, punctuation should be [,]", now_token);
+            AST_safe::RaiseError("in FunctionUsage, punctuation should be [,]", now_token);
             return now_token;
         }
         GoNext();
 
         ExpressionAST addi_expr(now_token, symtable_ptr);
         AST_node::connect_child(head, addi_expr.head);
-        addi_expr.head->data = "argument";
+        addi_expr.head->data = "value";
+        addi_expr.head->comment = "argument";
         now_token = addi_expr.Parse();
         next_token = token_safe::next(now_token);
     }
@@ -186,6 +166,7 @@ TNP FunctionUsageAST::Parse() {
 
 TNP ExpressionAST::Parse() {
     head->type = Expression;
+    head->using_attribute = true;
 
     std::stack<std::string> opt;
     std::stack<ANP> sym;
@@ -198,7 +179,7 @@ TNP ExpressionAST::Parse() {
     while (true) {
 
         if (now_token == nullptr) {
-            RaiseError("in Expression, lost ending", now_token);
+            AST_safe::RaiseError("in Expression, lost ending", now_token);
             return now_token;
         }
 
@@ -219,23 +200,24 @@ TNP ExpressionAST::Parse() {
                 }
 
                 if (opt.empty()) {
-                    RaiseError("in Expression, fatal error occurred", now_token);
+                    AST_safe::RaiseError("in Expression, fatal error occurred", now_token);
                     return now_token;
                 }
 
                 if (sym.empty()) {
-                    RaiseError("in Expression, number or variable is not enough", now_token);
+                    AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
                 ANP k1 = sym.top(); sym.pop();
                 if (sym.empty()) {
-                    RaiseError("in Expression, number or variable is not enough", now_token);
+                    AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
                 ANP k2 = sym.top(); sym.pop();
                 ANP tog = std::make_shared<AST_node>();
                 tog->data = opt.top(); opt.pop();
                 tog->type = Expression;
+                tog->using_attribute = true;
                 AST_node::reverse_connect_child(tog, k1);
                 AST_node::reverse_connect_child(tog, k2);
                 sym.push(tog);
@@ -248,7 +230,7 @@ TNP ExpressionAST::Parse() {
             }
 
             else {
-                RaiseError("in Expression, missing operators or numbers", now_token);
+                AST_safe::RaiseError("in Expression, missing operators or numbers", now_token);
                 return now_token;
             }
         }
@@ -277,23 +259,19 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.3 normal variables
                 else {
-
-                    // v --- sym search --- v //
-                    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
-                    if (temp_only_name.empty()) {
-                        RaiseError("Usage without definition", now_token);
-                        return now_token;
-                    }
-                    // ^ --- sym search --- ^ //
-
                     ANP token_to_AST = std::make_shared<AST_node>();
                     token_to_AST->data = now_token->data;
                     token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
 
-                    // --attribute--
-                    token_to_AST->using_attribute = true;
-                    token_to_AST->only_name = temp_only_name;
+                    // v --- sym search & attribution --- v //
+                    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+                    if (temp_sym_node == nullptr) {
+                        AST_safe::RaiseError("Usage without definition", now_token);
+                        return now_token;
+                    }
+                    token_to_AST->absorb_sym_attribution(temp_sym_node);
+                    // ^ --- sym search & attribution --- ^ //
 
                     GoNext();
                 }
@@ -306,6 +284,7 @@ TNP ExpressionAST::Parse() {
                 token_to_AST->type = Number;
                 token_to_AST->basic_type = now_token->basic_type;
                 token_to_AST->count_expr_ending = true;
+                token_to_AST->using_attribute = true;
                 if (token_to_AST->basic_type == basic_int) {
                     token_to_AST->value.int_value = now_token->value.int_value;
                 } else if (token_to_AST->basic_type == basic_float) {
@@ -317,7 +296,7 @@ TNP ExpressionAST::Parse() {
 
             // 1.3 wrong name
             else {
-                RaiseError("in Expression, members should only be identify name or number", now_token);
+                AST_safe::RaiseError("in Expression, members should only be identify name or number", now_token);
                 return now_token;
             }
         }
@@ -329,12 +308,14 @@ TNP ExpressionAST::Parse() {
             if (token_safe::data(next_token) == "+" || token_safe::data(next_token) == "-")
                 next_token->data += "unary";
 
-            // unary+, unary-, ! should become unary (use a placeholder)
+            // unary+, unary-, ! should become unary (use a placeholder, which is basic_int)
             if (assign_operator(token_safe::data(now_token)) == 64) {
                 ANP token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
+                token_to_AST->basic_type = basic_int;
                 token_to_AST->count_expr_ending = true;
                 token_to_AST->type = Expression;
+                token_to_AST->using_attribute = true;
                 sym.push(token_to_AST);
             }
 
@@ -349,7 +330,7 @@ TNP ExpressionAST::Parse() {
                 next_token = token_safe::next(now_token);
 
                 if (token_safe::data(now_token) != ")") {
-                    RaiseError("in Expression, missing punctuation [)]", now_token);
+                    AST_safe::RaiseError("in Expression, missing punctuation [)]", now_token);
                     return now_token;
                 }
                 GoNext();
@@ -361,25 +342,26 @@ TNP ExpressionAST::Parse() {
 
                 // 2.2.1 wrong operator
                 if (assign_operator(now_op) == -1) {
-                    RaiseError("in Expression, unexpected operator found", now_token);
+                    AST_safe::RaiseError("in Expression, unexpected operator found", now_token);
                     return now_token;
                 }
 
                 // 2.2.2 now_token - top <= 0  means you can reduce it
                 while (compare(now_op, opt.top()) <= 0) {
                     if (sym.empty()) {
-                        RaiseError("in Expression, number or variable is not enough", now_token);
+                        AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
                     ANP k1 = sym.top(); sym.pop();
                     if (sym.empty()) {
-                        RaiseError("in Expression, number or variable is not enough", now_token);
+                        AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
                     ANP k2 = sym.top(); sym.pop();
                     ANP tog = std::make_shared<AST_node>();
                     tog->data = opt.top(); opt.pop();
                     tog->type = Expression;
+                    tog->using_attribute = true;
                     AST_node::reverse_connect_child(tog, k1);
                     AST_node::reverse_connect_child(tog, k2);
                     sym.push(tog);

@@ -11,13 +11,14 @@ int main() {
     res[0] = -.1;
     res[-1] = 1.23;
     while (i < 20) {
+        float block;
         i = i + 1;
         res[i] = res[i - 1] + res[i - 2];
     }
 
     main2(res[3], 2, res);
 
-    int _asdf, main;
+    int _asdf, main, block;
     int a, x;
     {
         x = 2.71828;
@@ -32,4 +33,5 @@ int main() {
     x = -.1e+20;
 
     return 9;
+    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 3) + 6 * 7 && 5;
 }

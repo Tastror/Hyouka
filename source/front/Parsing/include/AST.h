@@ -3,13 +3,10 @@
 //
 
 #pragma once
-#include <iostream>
-#include <utility>
 
 #include "define.h"
 
-
-void RaiseError(const std::string& error_code, const TNP& token_node);
+#include <utility>
 
 
 class BaseAST {
@@ -17,14 +14,12 @@ public:
     ANP head;
     TNP now_token;
     TNP next_token;
-    bool error;
     std::shared_ptr<Symtable> symtable_ptr;
     void GoNext() {
         now_token = next_token;
         next_token = token_safe::next(now_token);
     }
     explicit BaseAST(const TNP& token_head, const Symtable& symtable) {
-        error = false;
         symtable_ptr = std::make_shared<Symtable>(symtable);
         head = std::make_shared<AST_node>();
         head->symtable_ptr = symtable_ptr;
@@ -32,7 +27,6 @@ public:
         next_token = token_safe::next(now_token);
     }
     explicit BaseAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr) {
-        error = false;
         this->symtable_ptr = symtable_ptr;
         head = std::make_shared<AST_node>();
         head->symtable_ptr = symtable_ptr;
@@ -50,7 +44,6 @@ public:
     [[nodiscard]] SNP GetBackSymtableAttribute() const {
         return symtable_ptr->my_head;
     }
-    bool UpdateError();
     virtual ~BaseAST() = default;
 };
 
