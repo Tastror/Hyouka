@@ -42,6 +42,14 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 "/"		{ yylval.str_val = new string(yytext); return DIV; }
 "%"		{ yylval.str_val = new string(yytext); return MOD; }
 "!"		{ yylval.str_val = new string(yytext); return NOT; }
+"&&"		{ yylval.str_val = new string(yytext); return AND; }
+"||"		{ yylval.str_val = new string(yytext); return OR; }
+"<"		{ yylval.str_val = new string(yytext); return LT; }
+">"		{ yylval.str_val = new string(yytext); return GT; }
+"<="		{ yylval.str_val = new string(yytext); return LEQ; }
+">="		{ yylval.str_val = new string(yytext); return GEQ; }
+"=="		{ yylval.str_val = new string(yytext); return EQ; }
+"!="		{ yylval.str_val = new string(yytext); return NEQ; }
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 {Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
