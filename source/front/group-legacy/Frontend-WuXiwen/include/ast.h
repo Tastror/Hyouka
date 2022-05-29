@@ -33,7 +33,7 @@ class FuncDefAST : public BaseAST {
     func_type->Dump();
     std::cout << "IDENT: " << ident << std::endl;
     block->Dump();
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -53,7 +53,7 @@ class BlockAST : public BaseAST {
   void Dump() const override {
     std::cout << "BlockAST { " << std::endl;
     stmt->Dump();
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -66,18 +66,94 @@ class StmtAST : public BaseAST {
     std::cout << "StmtAST { " << std::endl;
     std::cout << rtn << " ";
     exp->Dump();
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
 class ExpAST : public BaseAST {
  public:
-  std::unique_ptr<BaseAST> add_exp;
+  std::unique_ptr<BaseAST> lor_exp;
 
   void Dump() const override {
     std::cout << "ExpAST { " << std::endl;
-    add_exp->Dump();
-    std::cout << " }";
+    lor_exp->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class LOrExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> land_exp;
+  std::unique_ptr<BaseAST> lor_exp;
+  std::string op;
+
+  void Dump() const override {
+    std::cout << "LOrExpAST { " << std::endl;
+    if(lor_exp){
+    	lor_exp->Dump();
+    	std::cout << op;
+    	land_exp->Dump();
+    }
+    else
+    	land_exp->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class LAndExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> eq_exp;
+  std::unique_ptr<BaseAST> land_exp;
+  std::string op;
+
+  void Dump() const override {
+    std::cout << "LAndExpAST { " << std::endl;
+    if(land_exp){
+    	land_exp->Dump();
+    	std::cout << op;
+    	eq_exp->Dump();
+    }
+    else
+    	eq_exp->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class EqExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> rel_exp;
+  std::unique_ptr<BaseAST> eq_exp;
+  std::string op;
+
+  void Dump() const override {
+    std::cout << "EqExpAST { " << std::endl;
+    if(eq_exp){
+    	eq_exp->Dump();
+    	std::cout << op;
+    	rel_exp->Dump();
+    }
+    else
+    	rel_exp->Dump();
+    std::cout << " }" << std::endl;
+  }
+};
+
+class RelExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> add_exp;
+  std::unique_ptr<BaseAST> rel_exp;
+  std::string op;
+
+  void Dump() const override {
+    std::cout << "RelExpAST { " << std::endl;
+    if(rel_exp){
+    	rel_exp->Dump();
+    	std::cout << op;
+    	add_exp->Dump();
+    }
+    else
+    	add_exp->Dump();
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -96,7 +172,7 @@ class AddExpAST : public BaseAST {
     }
     else
     	mul_exp->Dump();
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -115,7 +191,7 @@ class MulExpAST : public BaseAST {
     }
     else
     	unary_exp->Dump();
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -133,7 +209,7 @@ class UnaryExpAST : public BaseAST {
     	std::cout << unary_op;
     	unary_exp->Dump();
     }
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
@@ -150,11 +226,9 @@ class PrimaryExpAST : public BaseAST {
     	exp->Dump();
     else
     	std::cout << number;
-    std::cout << " }";
+    std::cout << " }" << std::endl;
   }
 };
 
 //typedef int NumberAST
-
-
 
