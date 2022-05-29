@@ -33,6 +33,7 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 
 "int"           { yylval.str_val = new string(yytext); return INT; }
 "return"        { yylval.str_val = new string(yytext); return RETURN; }
+"const"        { yylval.str_val = new string(yytext); return CONST; }
 
 {Identifier}    { yylval.str_val = new string(yytext); return IDENT; }
 
@@ -50,6 +51,13 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 ">="		{ yylval.str_val = new string(yytext); return GEQ; }
 "=="		{ yylval.str_val = new string(yytext); return EQ; }
 "!="		{ yylval.str_val = new string(yytext); return NEQ; }
+"="		{ yylval.str_val = new string(yytext); return ASSIGN; }
+"{"		{ yylval.str_val = new string(yytext); return LBRACE; }
+"}"		{ yylval.str_val = new string(yytext); return RBRACE; }
+"("		{ yylval.str_val = new string(yytext); return LPAREN; }
+")"		{ yylval.str_val = new string(yytext); return RPAREN; }
+","		{ yylval.str_val = new string(yytext); return COMMA; }
+";"		{ yylval.str_val = new string(yytext); return SEMI; }
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 {Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
