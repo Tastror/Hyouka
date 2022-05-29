@@ -12,15 +12,13 @@
 
 using namespace std;
 
-// 声明 lexer 的输入, 以及 parser 函数
 extern FILE *yyin;
 extern int yyparse(unique_ptr<BaseAST> &ast);
 
 int main(int argc, const char *argv[]) {
-    /* usage below*/
-    // ./compiler 模式 输入文件 -o 输出文件
+    // ./compiler mode input_file -o output_file
     assert(argc == 5);
-    auto mode = argv[1];
+    std::string mode = argv[1];
     auto input = argv[2];
     auto output = argv[4];
 
@@ -28,18 +26,27 @@ int main(int argc, const char *argv[]) {
     yyin = fopen(input, "r");
     assert(yyin);
 	
-	//cout << "lexer ok" << endl;	//debug
     // parse input file
     unique_ptr<BaseAST> ast;
     auto ret = yyparse(ast);
     assert(!ret);
 	
-	//cout << "parser ok" << endl;	//debug
-    // print AST 
-    ast->Dump();
-    cout << endl;
-	
-	//cout << "ast ok" << endl;	//debug
+    if(mode == "AST"){
+	    std::cout << "--------print AST--------" << std::endl;
+	    ast->Dump();
+	    std::cout << std::endl;
+	    return 0;
+    }
+    
+    // Ignore Semantic Check
+    
+    // TODO: IR generation
+    if(mode == "IR"){
+	    std::cout << "--------print IR--------" << std::endl;
+	    std::cout << "TODO: IR generation!!!" << std::endl;
+	    std::cout << std::endl;
+	    return 0;
+    }
 	
     return 0;
 

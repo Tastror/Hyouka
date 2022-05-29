@@ -57,7 +57,6 @@ class BlockAST : public BaseAST {
   }
 };
 
-//change below
 class StmtAST : public BaseAST {
  public:
   std::unique_ptr<BaseAST> exp;
@@ -73,11 +72,49 @@ class StmtAST : public BaseAST {
 
 class ExpAST : public BaseAST {
  public:
-  std::unique_ptr<BaseAST> unary_exp;
+  std::unique_ptr<BaseAST> add_exp;
 
   void Dump() const override {
     std::cout << "ExpAST { " << std::endl;
-    unary_exp->Dump();
+    add_exp->Dump();
+    std::cout << " }";
+  }
+};
+
+class AddExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> add_exp;
+  std::unique_ptr<BaseAST> mul_exp;
+  std::string unary_op;
+
+  void Dump() const override {
+    std::cout << "AddExpAST { " << std::endl;
+    if(add_exp){
+    	add_exp->Dump();
+    	std::cout << unary_op;
+    	mul_exp->Dump();
+    }
+    else
+    	mul_exp->Dump();
+    std::cout << " }";
+  }
+};
+
+class MulExpAST : public BaseAST {
+ public:
+  std::unique_ptr<BaseAST> unary_exp;
+  std::unique_ptr<BaseAST> mul_exp;
+  std::string unary_op;
+
+  void Dump() const override {
+    std::cout << "MulExpAST { " << std::endl;
+    if(mul_exp){
+    	mul_exp->Dump();
+    	std::cout << unary_op;
+    	unary_exp->Dump();
+    }
+    else
+    	unary_exp->Dump();
     std::cout << " }";
   }
 };
