@@ -5,7 +5,6 @@
 #pragma once
 #include "AST.h"
 #include "AST_expr.h"
-#include "define.h"
 
 // examples:
 // if (x == 3) x = 2;

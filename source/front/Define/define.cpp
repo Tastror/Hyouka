@@ -9,6 +9,14 @@
 
 
 
+// all will use
+
+bool Safe::GlobalError = false;
+
+
+
+
+
 // Lexical: token_node
 
 std::shared_ptr<token_node> token_safe::next(const std::shared_ptr<token_node>& now) {
@@ -66,13 +74,15 @@ void token_node::print_all(const std::shared_ptr<token_node>& head) {
 
 void symtable_node::rename() {
     std::string name_pre = std::to_string(table_id);
-    only_name = "__" + name_pre + "_" + identifier_name;
+    if (is_head) only_name = "__[head]_" + name_pre + "_" + identifier_name;
+    else only_name = "__" + name_pre + "_" + identifier_name;
 }
 
 void symtable_node::rename(const std::string& name) {
     identifier_name = name;
     std::string name_pre = std::to_string(table_id);
-    only_name = "__" + name_pre + "_" + identifier_name;
+    if (is_head) only_name = "__[head]_" + name_pre + "_" + identifier_name;
+    else only_name = "__" + name_pre + "_" + identifier_name;
 }
 
 void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_head) {
@@ -164,7 +174,8 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
         std::cout << "    ";
     std::cout << AST_type_string_name[now->type];
     if (now->using_attribute) {
-        std::cout << ", only_name: " << now->only_name;
+        if (!now->only_name.empty())
+            std::cout << ", only_name: " << now->only_name;
         if (now->is_function_pointer) {
             std::cout << ", is_function_pointer";
             std::cout << ", function_type: " << function_type_string_name[now->function_type];
@@ -191,6 +202,7 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
         }
     }
     std::cout << (now->data.empty() ? "" : ", " + now->data);
+    std::cout << (now->comment.empty() ? "" : " (" + now->comment + ")");
     std::cout << std::endl;
     print_all(now->child, stage + 1);
     print_all(now->sister, stage);
@@ -224,22 +236,47 @@ void AST_node::reverse_connect_child(const std::shared_ptr<AST_node>& parent, co
     }
 }
 
-std::string AST_node::search_id_name(const std::string& name, const std::shared_ptr<symtable_node>& sym_head) {
-    if (sym_head == nullptr) return "";
-    std::shared_ptr<symtable_node> compare_now = sym_head->next;
-    while (compare_now != nullptr) {
-        if (compare_now->identifier_name == name)
-            return compare_now->only_name;
-        compare_now = compare_now->next;
-    }
-    return "";
+void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symtable_resource_node) {
+    using_attribute = true;
+    name = symtable_resource_node->identifier_name;
+    only_name = symtable_resource_node->only_name;
+    basic_type = symtable_resource_node->basic_type;
+    is_const = symtable_resource_node->is_const;
+    is_static = symtable_resource_node->is_static;
+    is_array_pointer = symtable_resource_node->is_array_pointer;
+    is_function_pointer = symtable_resource_node->is_function_pointer;
+    array_len = symtable_resource_node->array_len;
+    arg_num = symtable_resource_node->arg_num;
+    function_type = symtable_resource_node->function_type;
 }
 
-std::string AST_node::search_id_name(const std::string& name) {
-    std::string res;
+std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head) {
+    if (sym_head == nullptr) return nullptr;
+    std::shared_ptr<symtable_node> compare_now = sym_head->next;
+    while (compare_now != nullptr) {
+        if (compare_now->identifier_name == search_name)
+            return compare_now;
+        compare_now = compare_now->next;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& search_name) {
+    std::shared_ptr<symtable_node> res = nullptr;
     for (int i = (int)(symtable_ptr->heads_chain.size()) - 1; i >= 0; --i) {
-        res = search_id_name(name, symtable_ptr->heads_chain[i]);
-        if (!res.empty()) return res;
+        res = search_id_name(search_name, symtable_ptr->heads_chain[i]);
+        if (res != nullptr) return res;
     }
     return res;
+}
+
+void AST_safe::RaiseError(const std::string& error_code, const TNP& token_node) {
+    std::cout << "ERROR: " << error_code << std::endl;
+    if (token_node != nullptr)
+        std::cout << "    where: " << token_node->data
+                  << " at line " << token_node->line << ", column "
+                  << token_node->column << std::endl;
+    else
+        std::cout << "    where: reach the end of the file" << std::endl;
+    Safe::GlobalError = true;
 }

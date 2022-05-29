@@ -11,6 +11,7 @@
 #include <iostream>
 #include <algorithm>
 
+
 class Lexical {
 protected:
     std::ifstream ifs;
@@ -72,6 +73,7 @@ public:
     void RaiseError(const std::string& buff) const {
         std::cout << "Error occurred. where: [" << buff << "] line " << line << ", "
                   << "column " << delay_column << "." << std::endl;
+        Safe::GlobalError = true;
     }
 
     void save_node(token_type type, const std::string& data) {

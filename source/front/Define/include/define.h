@@ -35,6 +35,10 @@ union int_double_storage {
     int ptr_address_value;
 };
 
+namespace Safe {
+    extern bool GlobalError;
+}
+
 
 
 
@@ -175,7 +179,8 @@ struct AST_node {
 
     // normal
     AST_type type = None;
-    std::string data;
+    std::string data;  // normally raw data; ExpressionAST use it for operator
+    std::string comment;
     std::shared_ptr<AST_node> sister = nullptr;
     std::shared_ptr<AST_node> child = nullptr;
     std::shared_ptr<AST_node> parent = nullptr;
@@ -184,8 +189,9 @@ struct AST_node {
     // symtable
     std::shared_ptr<Symtable> symtable_ptr = nullptr;
 
-    // attribution
+    // attribution (same as symtable node)
     bool using_attribute = false;
+    std::string name;
     std::string only_name;
     int basic_type = basic_none;
     bool is_const = false;
@@ -199,18 +205,23 @@ struct AST_node {
     // use for Expr optimise
     bool count_expr_ending = false;
 
-    // use for Number
+    // use for Number (same as token node)
     int_double_storage value;
 
     // methods
     static void connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
     static void reverse_connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
-    std::string search_id_name(const std::string& name, const std::shared_ptr<symtable_node>& sym_head);
-    std::string search_id_name(const std::string& name);
+    void absorb_sym_attribution(const std::shared_ptr<symtable_node>& symtable_resource_node);
+    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head);
+    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name);
 
     // print
     static void print_all(const std::shared_ptr<AST_node>& now, int stage);
     static void print_all(const std::shared_ptr<AST_node>& AST_head);
 };
+
+namespace AST_safe {
+    void RaiseError(const std::string& error_code, const TNP& token_node);
+}
 
 #define ANP std::shared_ptr<AST_node>
