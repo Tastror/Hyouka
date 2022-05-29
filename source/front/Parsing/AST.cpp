@@ -25,57 +25,46 @@ void RaiseError(const std::string& error_code, const TNP& token_node) {
     GlobalError = true;
 }
 
-void connect_child(const ANP& parent, const ANP& child) {
-    if (parent->child == nullptr) {
-        parent->child = child;
-        parent->last_child = child;
-        child->parent = parent;
-    } else {
-        parent->last_child->sister = child;
-        parent->last_child = child;
-        child->parent = parent;
-    }
-}
-
-void reverse_connect_child(const ANP& parent, const ANP& child) {
-    if (parent->child == nullptr) {
-        parent->child = child;
-        parent->last_child = child;
-        child->parent = parent;
-    } else {
-        child->sister = parent->child;
-        parent->child = child;
-        child->parent = parent;
-    }
-}
-
 TNP SingleAssignmentAST::Parse() {
     head->type = SingleAssignment;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in SingleAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "=") {
+    if (token_safe::data(now_token) != "=") {
         RaiseError("in SingleAssignment, lost punctuation [=]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST expr(now_token, symtable_ptr);
-    connect_child(head, expr.head);
+    AST_node::connect_child(head, expr.head);
     expr.head->data = "value";
     now_token = expr.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
     // meddle check, may cause error, could be removed
-    if (data(now_token) != "," && data(now_token) != ";") {
+    if (token_safe::data(now_token) != "," && token_safe::data(now_token) != ";") {
         RaiseError("in SingleAssignment, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
@@ -87,64 +76,77 @@ TNP SingleAssignmentAST::Parse() {
 TNP ArrayAssignmentAST::Parse() {
     head->type = ArrayAssignment;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token));
+    if (temp_only_name.empty()) {
+        RaiseError("Usage without definition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = temp_only_name;
+
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "[") {
+    if (token_safe::data(now_token) != "[") {
         RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST index(now_token, symtable_ptr);
-    connect_child(head, index.head);
+    AST_node::connect_child(head, index.head);
     index.head->data = "index";
     now_token = index.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
-    if (data(now_token) != "]") {
+    if (token_safe::data(now_token) != "]") {
         RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
         return now_token;
     }
     GoNext();
 
-    while (data(now_token) == "[") {
+    while (token_safe::data(now_token) == "[") {
         GoNext();
 
         ExpressionAST index_addi(now_token, symtable_ptr);
-        connect_child(head, index_addi.head);
+        AST_node::connect_child(head, index_addi.head);
         index_addi.head->data = "index";
         now_token = index_addi.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
 
-        if (data(now_token) != "]") {
+        if (token_safe::data(now_token) != "]") {
             RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
             return now_token;
         }
         GoNext();
     }
 
-    if (data(now_token) != "=") {
+    if (token_safe::data(now_token) != "=") {
         RaiseError("in ArrayAssignment, lost punctuation [=]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST expr(now_token, symtable_ptr);
-    connect_child(head, expr.head);
+    AST_node::connect_child(head, expr.head);
     expr.head->data = "value";
     now_token = expr.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
     // meddle check, may cause error, could be removed
-    if (data(now_token) != "," && data(now_token) != ";") {
+    if (token_safe::data(now_token) != "," && token_safe::data(now_token) != ";") {
         RaiseError("in ArrayAssignment, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
@@ -156,28 +158,28 @@ TNP ArrayAssignmentAST::Parse() {
 TNP SingleDefinitionAST::Parse() {
     head->type = SingleDefinition;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in SingleDefinition, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) == "=") {
+    if (token_safe::data(now_token) == "=") {
         GoNext();
 
         ExpressionAST expr(now_token, symtable_ptr);
-        connect_child(head, expr.head);
+        AST_node::connect_child(head, expr.head);
         expr.head->data = "value";
         now_token = expr.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     // meddle check, may cause error, could be removed
-    if (data(now_token) != "," && data(now_token) != ";") {
+    if (token_safe::data(now_token) != "," && token_safe::data(now_token) != ";") {
         RaiseError("in SingleDefinition, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
@@ -189,58 +191,58 @@ TNP SingleDefinitionAST::Parse() {
 TNP ArrayInitialBlockAST::Parse() {
     head->type = ArrayInitialBlock;
 
-    if (data(now_token) != "{") {
+    if (token_safe::data(now_token) != "{") {
         RaiseError("in ArrayInitialBlock, lost punctuation [{]", now_token);
         return now_token;
     }
     GoNext();
 
-    if (data(now_token) == "}") {
+    if (token_safe::data(now_token) == "}") {
         GoNext();
         return now_token;
     }
 
-    else if (data(now_token) == "{") {
+    else if (token_safe::data(now_token) == "{") {
         ArrayInitialBlockAST recur_array_init(now_token, symtable_ptr);
-        connect_child(head, recur_array_init.head);
+        AST_node::connect_child(head, recur_array_init.head);
         now_token = recur_array_init.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     else {
         ExpressionAST index(now_token, symtable_ptr);
-        connect_child(head, index.head);
+        AST_node::connect_child(head, index.head);
         index.head->data = "value";
         now_token = index.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     while (true) {
 
-        if (data(now_token) == "}") {
+        if (token_safe::data(now_token) == "}") {
             GoNext();
             break;
         }
 
-        else if (data(now_token) != ",") {
+        else if (token_safe::data(now_token) != ",") {
             RaiseError("in ArrayInitialBlock, punctuation should be [{] or [,]", now_token);
             return now_token;
         }
         GoNext();
 
-        if (data(now_token) == "{") {
+        if (token_safe::data(now_token) == "{") {
             ArrayInitialBlockAST recur_array_init(now_token, symtable_ptr);
-            connect_child(head, recur_array_init.head);
+            AST_node::connect_child(head, recur_array_init.head);
             now_token = recur_array_init.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
         else {
             ExpressionAST index(now_token, symtable_ptr);
-            connect_child(head, index.head);
+            AST_node::connect_child(head, index.head);
             index.head->data = "value";
             now_token = index.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
     }
@@ -252,61 +254,61 @@ TNP ArrayInitialBlockAST::Parse() {
 TNP ArrayDefinitionAST::Parse() {
     head->type = ArrayDefinition;
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
     ANP var_name = std::make_shared<AST_node>();
-    connect_child(head, var_name);
+    AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) != "[") {
+    if (token_safe::data(now_token) != "[") {
         RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
         return now_token;
     }
     GoNext();
 
     ExpressionAST index(now_token, symtable_ptr);
-    connect_child(head, index.head);
+    AST_node::connect_child(head, index.head);
     index.head->data = "index";
     now_token = index.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
-    if (data(now_token) != "]") {
+    if (token_safe::data(now_token) != "]") {
         RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
         return now_token;
     }
     GoNext();
 
-    while (data(now_token) == "[") {
+    while (token_safe::data(now_token) == "[") {
         GoNext();
 
         ExpressionAST index_addi(now_token, symtable_ptr);
-        connect_child(head, index_addi.head);
+        AST_node::connect_child(head, index_addi.head);
         index_addi.head->data = "index";
         now_token = index_addi.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
 
-        if (data(now_token) != "]") {
+        if (token_safe::data(now_token) != "]") {
             RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
             return now_token;
         }
         GoNext();
     }
 
-    if (data(now_token) == "=") {
+    if (token_safe::data(now_token) == "=") {
         GoNext();
 
         ArrayInitialBlockAST array_init(now_token, symtable_ptr);
-        connect_child(head, array_init.head);
+        AST_node::connect_child(head, array_init.head);
         now_token = array_init.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     // meddle check, may cause error, could be removed
-    if (data(now_token) != "," && data(now_token) != ";") {
+    if (token_safe::data(now_token) != "," && token_safe::data(now_token) != ";") {
         RaiseError("in SingleDefinition, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
@@ -320,64 +322,85 @@ TNP DeclarationStatementAST::Parse() {
 
     // v --- sym --- v //
     symtable_node placeholder_sym_node;
+    placeholder_sym_node.is_static = head->is_static;
     // ^ --- sym --- ^ //
 
-    if (data(now_token) != "const" && data(now_token) != "int" && data(now_token) != "float") {
+    if (token_safe::data(now_token) != "const" && token_safe::data(now_token) != "int" && token_safe::data(now_token) != "float") {
         RaiseError("in DeclarationStatement, beginning is not [const] [int] or [float]", now_token);
         return now_token;
     }
 
     head->type = VariableDeclarationStatement;
-    if (data(now_token) == "const") {
+    if (token_safe::data(now_token) == "const") {
         head->type = ConstDeclarationStatement;
         placeholder_sym_node.is_const = true;
         GoNext();
     }
 
-    if (data(now_token) != "int" && data(now_token) != "float") {
+    if (token_safe::data(now_token) != "int" && token_safe::data(now_token) != "float") {
         RaiseError("in DeclarationStatement, type is not [int] or [float]", now_token);
         return now_token;
     }
     ANP var_type = std::make_shared<AST_node>();
-    connect_child(head, var_type);
+    AST_node::connect_child(head, var_type);
     var_type->type = BasicType;
     var_type->data = now_token->data;
-    placeholder_sym_node.value_type =
-            data(now_token) == "int" ? _int_ :
-            data(now_token) == "float" ? _float_ : _value_none_;
+    placeholder_sym_node.basic_type =
+            token_safe::data(now_token) == "int" ? basic_int :
+            token_safe::data(now_token) == "float" ? basic_float : basic_none;
     GoNext();
 
-    if (type(now_token) == IDENTI) {
+    if (token_safe::type(now_token) == IDENTI) {
+
+        // v --- sym search --- v //
+        std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+        if (!temp_only_name.empty()) {
+            RaiseError("Redefinition", now_token);
+            return now_token;
+        }
+        // ^ --- sym search --- ^ //
 
         // v --- sym --- v //
         symtable_node sym_node;
-        sym_node.identifier_name = data(now_token);
+        sym_node.identifier_name = token_safe::data(now_token);
+        sym_node.is_static = placeholder_sym_node.is_static;
         sym_node.is_const = placeholder_sym_node.is_const;
-        sym_node.value_type = placeholder_sym_node.value_type;
+        sym_node.basic_type = placeholder_sym_node.basic_type;
         // ^ --- sym --- ^ //
 
-        if (data(next_token) == "[") {
+        if (token_safe::data(next_token) == "[") {
 
-            sym_node.id_type = _array_;
+            sym_node.is_array_pointer = true;
+            sym_node.array_len = 4;
 
             ArrayDefinitionAST array_def(now_token, symtable_ptr);
-            connect_child(head, array_def.head);
+            AST_node::connect_child(head, array_def.head);
             now_token = array_def.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
+            // v --- sym append --- v //
             symtable_ptr->append(sym_node);
+            // ^ --- sym append --- ^ //
+
+            // --attribute--
+            array_def.head->using_attribute = true;
+            array_def.head->only_name = symtable_ptr->my_tail->only_name;
         }
 
         else {
 
-            sym_node.id_type = _single_value_;
-
             SingleDefinitionAST single_def(now_token, symtable_ptr);
-            connect_child(head, single_def.head);
+            AST_node::connect_child(head, single_def.head);
             now_token = single_def.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
+            // v --- sym append --- v //
             symtable_ptr->append(sym_node);
+            // ^ --- sym append --- ^ //
+
+            // --attribute--
+            single_def.head->using_attribute = true;
+            single_def.head->only_name = symtable_ptr->my_tail->only_name;
         }
     }
 
@@ -388,12 +411,12 @@ TNP DeclarationStatementAST::Parse() {
 
     while (true) {
 
-        if (data(now_token) == ";") {
+        if (token_safe::data(now_token) == ";") {
             GoNext();
             break;
         }
 
-        else if (data(now_token) == ",") {
+        else if (token_safe::data(now_token) == ",") {
             GoNext();
         }
 
@@ -402,37 +425,57 @@ TNP DeclarationStatementAST::Parse() {
             return now_token;
         }
 
-        if (type(now_token) == IDENTI) {
+        if (token_safe::type(now_token) == IDENTI) {
+
+            // v --- sym search --- v //
+            std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+            if (!temp_only_name.empty()) {
+                RaiseError("Redefinition", now_token);
+                return now_token;
+            }
+            // ^ --- sym search --- ^ //
 
             // v --- sym --- v //
             symtable_node sym_node;
-            sym_node.identifier_name = data(now_token);
+            sym_node.identifier_name = token_safe::data(now_token);
+            sym_node.is_static = placeholder_sym_node.is_static;
             sym_node.is_const = placeholder_sym_node.is_const;
-            sym_node.value_type = placeholder_sym_node.value_type;
+            sym_node.basic_type = placeholder_sym_node.basic_type;
             // ^ --- sym --- ^ //
 
-            if (data(next_token) == "[") {
+            if (token_safe::data(next_token) == "[") {
 
-                sym_node.id_type = _array_;
+                sym_node.is_array_pointer = true;
+                sym_node.array_len = 4;
 
                 ArrayDefinitionAST array_def(now_token, symtable_ptr);
-                connect_child(head, array_def.head);
+                AST_node::connect_child(head, array_def.head);
                 now_token = array_def.Parse();
-                next_token = next(now_token);
+                next_token = token_safe::next(now_token);
 
+                // v --- sym append --- v //
                 symtable_ptr->append(sym_node);
+                // ^ --- sym append --- ^ //
+
+                // --attribute--
+                array_def.head->using_attribute = true;
+                array_def.head->only_name = symtable_ptr->my_tail->only_name;
             }
 
             else {
 
-                sym_node.id_type = _single_value_;
-
                 SingleDefinitionAST single_def(now_token, symtable_ptr);
-                connect_child(head, single_def.head);
+                AST_node::connect_child(head, single_def.head);
                 now_token = single_def.Parse();
-                next_token = next(now_token);
+                next_token = token_safe::next(now_token);
 
+                // v --- sym append --- v //
                 symtable_ptr->append(sym_node);
+                // ^ --- sym append --- ^ //
+
+                // --attribute--
+                single_def.head->using_attribute = true;
+                single_def.head->only_name = symtable_ptr->my_tail->only_name;
             }
         }
 
@@ -449,15 +492,15 @@ TNP DeclarationStatementAST::Parse() {
 TNP NormalStatementAST::Parse() {
     head->type = NormalStatement;
 
-    if (type(now_token) == IDENTI && search_data(next_token, "=", ";")) {
+    if (token_safe::type(now_token) == IDENTI && token_safe::search_data(next_token, "=", ";")) {
 
-        if (data(next_token) == "[") {
+        if (token_safe::data(next_token) == "[") {
             ArrayAssignmentAST assi(now_token, symtable_ptr);
-            connect_child(head, assi.head);
+            AST_node::connect_child(head, assi.head);
             now_token = assi.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
-            if (data(now_token) != ";") {
+            if (token_safe::data(now_token) != ";") {
                 RaiseError("in NormalStatement, lost punctuation [;]", now_token);
                 return now_token;
             }
@@ -466,11 +509,11 @@ TNP NormalStatementAST::Parse() {
 
         else {
             SingleAssignmentAST assi(now_token, symtable_ptr);
-            connect_child(head, assi.head);
+            AST_node::connect_child(head, assi.head);
             now_token = assi.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
-            if (data(now_token) != ";") {
+            if (token_safe::data(now_token) != ";") {
                 RaiseError("in NormalStatement, lost punctuation [;]", now_token);
                 return now_token;
             }
@@ -478,7 +521,7 @@ TNP NormalStatementAST::Parse() {
         }
     }
 
-    else if (data(now_token) == "{") {
+    else if (token_safe::data(now_token) == "{") {
 
         // v --- sym block --- v //
         Symtable block_symtable;
@@ -487,20 +530,20 @@ TNP NormalStatementAST::Parse() {
         // ^ --- sym block --- ^ //
 
         BlockStatementAST block(now_token, block_symtable);
-        connect_child(head, block.head);
+        AST_node::connect_child(head, block.head);
         now_token = block.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
-    else if (type(now_token) == KEYWORD) {
+    else if (token_safe::type(now_token) == KEYWORD) {
 
-        std::string now_data = data(now_token);
+        std::string now_data = token_safe::data(now_token);
         if (now_data == "if" || now_data == "while" || now_data == "break" ||
             now_data == "continue" || now_data == "return") {
             KeywordStatementAST key_stmt(now_token, symtable_ptr);
-            connect_child(head, key_stmt.head);
+            AST_node::connect_child(head, key_stmt.head);
             now_token = key_stmt.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
         else {
@@ -511,22 +554,22 @@ TNP NormalStatementAST::Parse() {
 
     }
 
-    else if (type(now_token) == NUMBER || type(now_token) == IDENTI) {
+    else if (token_safe::type(now_token) == NUMBER || token_safe::type(now_token) == IDENTI) {
 
         ExpressionAST expr(now_token, symtable_ptr);
-        connect_child(head, expr.head);
+        AST_node::connect_child(head, expr.head);
         expr.head->data = "statement";
         now_token = expr.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
 
-        if (data(now_token) != ";") {
+        if (token_safe::data(now_token) != ";") {
             RaiseError("in NormalStatement, lost punctuation [;]", now_token);
             return now_token;
         }
         GoNext();
     }
 
-    else if (data(now_token) == ";") {
+    else if (token_safe::data(now_token) == ";") {
         GoNext();
     }
 
@@ -543,18 +586,18 @@ TNP NormalStatementAST::Parse() {
 TNP StatementAST::Parse() {
     head->type = Statement;
 
-    if (data(now_token) == "int" || data(now_token) == "float" || data(now_token) == "const") {
+    if (token_safe::data(now_token) == "int" || token_safe::data(now_token) == "float" || token_safe::data(now_token) == "const") {
         DeclarationStatementAST decl_stmt(now_token, symtable_ptr);
-        connect_child(head, decl_stmt.head);
+        AST_node::connect_child(head, decl_stmt.head);
         now_token = decl_stmt.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
-    else if (data(now_token) != "}" && now_token != nullptr) {
+    else if (token_safe::data(now_token) != "}" && now_token != nullptr) {
         NormalStatementAST norm_stmt(now_token, symtable_ptr);
-        connect_child(head, norm_stmt.head);
+        AST_node::connect_child(head, norm_stmt.head);
         now_token = norm_stmt.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
     }
 
     return now_token;
@@ -564,7 +607,7 @@ TNP StatementAST::Parse() {
 TNP BlockStatementAST::Parse() {
     head->type = BlockStatement;
 
-    if (data(now_token) != "{") {
+    if (token_safe::data(now_token) != "{") {
         RaiseError("in BlockStatement, beginning is not [{]", now_token);
         return now_token;
     }
@@ -572,14 +615,14 @@ TNP BlockStatementAST::Parse() {
 
     while (true) {
 
-        if (data(now_token) != "}" && now_token != nullptr) {
+        if (token_safe::data(now_token) != "}" && now_token != nullptr) {
             StatementAST stmt(now_token, symtable_ptr);
-            connect_child(head, stmt.head);
+            AST_node::connect_child(head, stmt.head);
             now_token = stmt.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
-        else if (data(now_token) == "}") {
+        else if (token_safe::data(now_token) == "}") {
             GoNext();
             break;
         }
@@ -598,65 +641,93 @@ TNP FunctionFormParamAST::Parse() {
     head->type = FunctionFormParam;
 
     // v --- sym --- v //
-    symtable_node placeholder_sym_node;
+    symtable_node sym_node;
     // ^ --- sym --- ^ //
 
-    if (data(now_token) != "int" && data(now_token) != "float") {
+    if (token_safe::data(now_token) != "int" && token_safe::data(now_token) != "float") {
         RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
         return now_token;
     }
+
+    // v --- sym --- v //
+    sym_node.basic_type = token_safe::data(now_token) == "int" ? basic_int :
+                          token_safe::data(now_token) == "float" ? basic_float : basic_none;
+    // ^ --- sym --- ^ //
+
     ANP type_name = std::make_shared<AST_node>();
-    connect_child(head, type_name);
+    AST_node::connect_child(head, type_name);
     type_name->type = BasicType;
     type_name->data = now_token->data;
     GoNext();
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in FunctionFormParam, identify name is not valid", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    if (!temp_only_name.empty()) {
+        RaiseError("Redefinition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
+    // v --- sym --- v //
+    sym_node.identifier_name = token_safe::data(now_token);
+    // ^ --- sym --- ^ //
+
     ANP id_name = std::make_shared<AST_node>();
-    connect_child(head, id_name);
+    AST_node::connect_child(head, id_name);
     id_name->type = Identifier;
     id_name->data = now_token->data;
     GoNext();
 
-    if (data(now_token) == "[") {
+    if (token_safe::data(now_token) == "[") {
+        sym_node.is_array_pointer = true;
         GoNext();
 
-        if (data(now_token) == "]") {
+        if (token_safe::data(now_token) == "]") {
             GoNext();
         }
         else {
             ExpressionAST index(now_token, symtable_ptr);
-            connect_child(head, index.head);
+            AST_node::connect_child(head, index.head);
             index.head->data = "index";
             now_token = index.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
-            if (data(now_token) != "]") {
+            if (token_safe::data(now_token) != "]") {
                 RaiseError("in FunctionFormParam, lost punctuation []]", now_token);
                 return now_token;
             }
             GoNext();
         }
 
-        while (data(now_token) == "[") {
+        while (token_safe::data(now_token) == "[") {
             GoNext();
 
             ExpressionAST index_addi(now_token, symtable_ptr);
-            connect_child(head, index_addi.head);
+            AST_node::connect_child(head, index_addi.head);
             index_addi.head->data = "index";
             now_token = index_addi.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
 
-            if (data(now_token) != "]") {
+            if (token_safe::data(now_token) != "]") {
                 RaiseError("in FunctionFormParam, lost punctuation []]", now_token);
                 return now_token;
             }
             GoNext();
         }
     }
+
+    // v --- sym append --- v //
+    symtable_ptr->append(sym_node);
+    // ^ --- sym append --- ^ //
+
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = symtable_ptr->my_tail->only_name;
 
     return now_token;
 }
@@ -665,32 +736,32 @@ TNP FunctionFormParamAST::Parse() {
 TNP FunctionParamsAST::Parse() {
     head->type = FunctionParams;
 
-    if (data(now_token) == ")") {
+    if (token_safe::data(now_token) == ")") {
         return now_token;
     }
 
     FunctionFormParamAST func_param(now_token, symtable_ptr);
-    connect_child(head, func_param.head);
+    AST_node::connect_child(head, func_param.head);
     now_token = func_param.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
     symtable_ptr->my_head->arg_num++;
 
     while (true) {
 
-        if (data(now_token) == ")") {
+        if (token_safe::data(now_token) == ")") {
             break;
         }
 
-        if (data(now_token) != ",") {
+        if (token_safe::data(now_token) != ",") {
             RaiseError("in FunctionParams, punctuation should be [,] or [)]", now_token);
             return now_token;
         }
         GoNext();
 
         FunctionFormParamAST addi_func_param(now_token, symtable_ptr);
-        connect_child(head, addi_func_param.head);
+        AST_node::connect_child(head, addi_func_param.head);
         now_token = addi_func_param.Parse();
-        next_token = next(now_token);
+        next_token = token_safe::next(now_token);
         symtable_ptr->my_head->arg_num++;
     }
 
@@ -703,7 +774,7 @@ TNP FunctionDefinitionAST::Parse() {
 
     // v --- sym --- v //
     symtable_node sym_node;
-    sym_node.id_type = _function_;
+    sym_node.is_function_pointer = true;
     // ^ --- sym --- ^ //
 
     // v --- sym block --- v //
@@ -711,42 +782,51 @@ TNP FunctionDefinitionAST::Parse() {
     func_block_symtable.extend_from(symtable_ptr);
     // ^ --- sym block --- ^ //
 
-    if (data(now_token) != "int" && data(now_token) != "void" && data(now_token) != "float") {
+    if (token_safe::data(now_token) != "int" && token_safe::data(now_token) != "void" && token_safe::data(now_token) != "float") {
         RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
         return now_token;
     }
     ANP func_type = std::make_shared<AST_node>();
-    connect_child(head, func_type);
+    AST_node::connect_child(head, func_type);
     func_type->type = FunctionType;
-    func_type->data = data(now_token);
-    sym_node.value_type =
-            data(now_token) == "int" ? _int_ :
-            data(now_token) == "float" ? _float_ :
-            data(now_token) == "void" ? _void_ : _value_none_;
+    func_type->data = token_safe::data(now_token);
+    sym_node.function_type =
+            token_safe::data(now_token) == "int" ? function_int :
+            token_safe::data(now_token) == "float" ? function_float :
+            token_safe::data(now_token) == "void" ? function_void : function_none;
     GoNext();
 
-    if (type(now_token) != IDENTI) {
+    if (token_safe::type(now_token) != IDENTI) {
         RaiseError("in FunctionDefinition, function name is not a valid name", now_token);
         return now_token;
     }
+
+    // v --- sym search --- v //
+    std::string temp_only_name = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    if (!temp_only_name.empty()) {
+        RaiseError("Redefinition", now_token);
+        return now_token;
+    }
+    // ^ --- sym search --- ^ //
+
     ANP func_name = std::make_shared<AST_node>();
-    connect_child(head, func_name);
+    AST_node::connect_child(head, func_name);
     func_name->type = Identifier;
-    func_name->data = data(now_token);
-    sym_node.identifier_name = data(now_token);
+    func_name->data = token_safe::data(now_token);
+    sym_node.identifier_name = token_safe::data(now_token);
     func_block_symtable.my_head->rename("function_block");
     GoNext();
 
-    if (data(now_token) != "(") {
+    if (token_safe::data(now_token) != "(") {
         RaiseError("in FunctionDefinition, lost punctuation [(]", now_token);
         return now_token;
     }
     GoNext();
 
     FunctionParamsAST func_para(now_token, func_block_symtable);
-    connect_child(head, func_para.head);
+    AST_node::connect_child(head, func_para.head);
     now_token = func_para.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
     SNP daughter_node_attribute_ptr = func_para.GetBackSymtableAttribute();
     sym_node.arg_num = daughter_node_attribute_ptr->arg_num;
@@ -755,17 +835,21 @@ TNP FunctionDefinitionAST::Parse() {
     symtable_ptr->append(sym_node);
     // ^ --- sym append --- ^ //
 
-    if (data(now_token) != ")") {
+    // --attribute--
+    head->using_attribute = true;
+    head->only_name = symtable_ptr->my_tail->only_name;
+
+    if (token_safe::data(now_token) != ")") {
         RaiseError("in FunctionDefinition, lost punctuation [)]", now_token);
         return now_token;
     }
     GoNext();
 
     BlockStatementAST func_block(now_token, func_block_symtable);
-    connect_child(head, func_block.head);
+    AST_node::connect_child(head, func_block.head);
     func_block.head->data = "FunctionBlock";
     now_token = func_block.Parse();
-    next_token = next(now_token);
+    next_token = token_safe::next(now_token);
 
     return now_token;
 }
@@ -777,23 +861,23 @@ TNP ProgramAST::Parse() {
     symtable_ptr->my_head->rename("this_program");
 
     while (now_token != nullptr) {
-        TNP look_next = next(next_token);
+        TNP look_next = token_safe::next(next_token);
 
-        if (data(now_token) == "void" ||
-           ((data(now_token) == "int" || data(now_token) == "float") && data(look_next) == "(") ) {
+        if (token_safe::data(now_token) == "void" ||
+           ((token_safe::data(now_token) == "int" || token_safe::data(now_token) == "float") && token_safe::data(look_next) == "(") ) {
             FunctionDefinitionAST func_def(now_token, symtable_ptr);
-            connect_child(head, func_def.head);
+            AST_node::connect_child(head, func_def.head);
             now_token = func_def.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
-        else if (data(now_token) == "int" || data(now_token) == "float" ||
-                 data(now_token) == "const") {
+        else if (token_safe::data(now_token) == "int" || token_safe::data(now_token) == "float" ||
+                 token_safe::data(now_token) == "const") {
             DeclarationStatementAST stmt(now_token, symtable_ptr);
-            connect_child(head, stmt.head);
-            stmt.head->data = "static";
+            AST_node::connect_child(head, stmt.head);
+            stmt.head->is_static = true;
             now_token = stmt.Parse();
-            next_token = next(now_token);
+            next_token = token_safe::next(now_token);
         }
 
         else {

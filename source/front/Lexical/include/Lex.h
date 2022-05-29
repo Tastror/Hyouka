@@ -79,20 +79,20 @@ public:
         now_token = now_token->next;
         now_token->data = data;
         now_token->type = type;
-        now_token->int_or_double = 0;
+        now_token->basic_type = 0;
         now_token->column = delay_column;
         now_token->line = line;
     }
 
     void save_int_node(int value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->int_or_double = 1;
+        now_token->basic_type = 1;
         now_token->value.int_value = value;
     }
 
     void save_float_node(double value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->int_or_double = 2;
+        now_token->basic_type = 2;
         now_token->value.double_value = value;
     }
 
@@ -200,10 +200,11 @@ public:
 
     void match_number() {
         std::string buff;
-        buff.push_back((char)current_char);
-        bool is_float = false;
+        bool is_point = false;
+        bool is_e = false;
         if ((char)(current_char) == '0' && ((char)(look_ahead) == 'x' || (char)(look_ahead) == 'X' || is_number((char)look_ahead))) {
             if ((char)(look_ahead) == 'x' || (char)(look_ahead) == 'X') {
+                buff.push_back((char)current_char);
                 GetNext(false);
                 buff.push_back((char)current_char);
                 while (is_hex_number((char)(look_ahead))) {
@@ -211,34 +212,51 @@ public:
                     buff.push_back((char)current_char);
                 }
             } else {
+                buff.push_back((char)current_char);
                 while (is_oct_number((char)(look_ahead))) {
                     GetNext(false);
                     buff.push_back((char)current_char);
                 }
             }
         } else {
+            while (true) {
+                if ((char)current_char == '.' && !is_point) {
+                    buff.push_back((char)current_char);
+                    is_point = true;
+                    if (!is_number((char)(look_ahead))) {
+                        RaiseError(buff);
+                        return;
+                    }
+                    while (is_number((char)(look_ahead))) {
+                        GetNext(false);
+                        buff.push_back((char)current_char);
+                    }
+                }
+                else if (is_number((char)current_char)) {
+                    buff.push_back((char)current_char);
+                }
+                else
+                    break;
+                if ((!is_number((char)look_ahead) && (char)look_ahead != '.') || ((char)look_ahead == '.' && is_point))
+                    break;
+                GetNext(false);
+            }
+
+        }
+        if ((char)look_ahead == 'e' || (char)current_char == 'E') {
+            is_e = true;
+            GetNext(false);
+            buff.push_back((char)current_char);
+            if ((char)look_ahead == '-' || (char)look_ahead == '+') {
+                GetNext(false);
+                buff.push_back((char)current_char);
+            }
             while (is_number((char)(look_ahead))) {
                 GetNext(false);
                 buff.push_back((char)current_char);
             }
-            if ((char)look_ahead == '.') {
-                GetNext(false);
-                buff.push_back((char)current_char);
-
-                is_float = true;
-
-                if (!is_number((char)(look_ahead))) {
-                    RaiseError(buff);
-                    return;
-                }
-
-                while (is_number((char)(look_ahead))) {
-                    GetNext(false);
-                    buff.push_back((char)current_char);
-                }
-            }
         }
-        if (is_float) {
+        if (is_point || is_e) {
             double value = stod(buff);
             save_float_node(value, buff);
         } else {
@@ -247,7 +265,7 @@ public:
         }
     }
 
-    void get_token() {
+    void Lexicalize() {
         if (fail) return;
 
         while (!end) {
@@ -267,7 +285,7 @@ public:
                 match_keyword_or_id();
             }
 
-            else if (is_number((char)current_char)) {
+            else if (is_number((char)current_char) || (char)current_char == '.') {
                 match_number();
             }
 
@@ -275,7 +293,7 @@ public:
 
         }
 
-        head = next(head);
+        head = token_safe::next(head);
     }
 
 };
