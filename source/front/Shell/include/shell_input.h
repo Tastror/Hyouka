@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "define.h"
+
 #include "cmdline.h"
 #include <string>
 #include <iostream>
@@ -38,4 +40,5 @@ void shell_input(int argc, char** argv, std::string& input_filename, std::string
     debug_mode = cmd_parser.get<std::string>("debug");
     to_assembly = cmd_parser.exist("only-to-assembly");
     optimizer = cmd_parser.get<std::string>("optimizer");
+    if (input_filename.empty()) Safe::GlobalError = true;
 }

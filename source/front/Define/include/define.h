@@ -225,3 +225,13 @@ namespace AST_safe {
 }
 
 #define ANP std::shared_ptr<AST_node>
+
+
+
+
+
+// Optimise
+
+namespace AST_optimize_safe {
+    void RaiseError(const std::string& error_code);
+}

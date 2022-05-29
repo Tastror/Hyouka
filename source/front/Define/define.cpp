@@ -280,3 +280,12 @@ void AST_safe::RaiseError(const std::string& error_code, const TNP& token_node) 
         std::cout << "    where: reach the end of the file" << std::endl;
     Safe::GlobalError = true;
 }
+
+
+
+
+
+void AST_optimize_safe::RaiseError(const std::string& error_code) {
+    std::cout << "AST Optimize ERROR: " << error_code << std::endl;
+    Safe::GlobalError = true;
+}

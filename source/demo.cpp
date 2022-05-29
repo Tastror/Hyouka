@@ -34,7 +34,7 @@ int main() {
 
     //return 9;
 
-    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 3) + 6 * 7;
+    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
 
     return kadaf2;
 }
