@@ -137,10 +137,13 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
-    RETURN = 259,
-    IDENT = 260,
-    INT_CONST = 261
+    IDENT = 258,
+    INT = 259,
+    RETURN = 260,
+    ADD = 261,
+    SUB = 262,
+    NOT = 263,
+    INT_CONST = 264
   };
 #endif
 
@@ -148,13 +151,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 32 "sysy.y"
+#line 30 "sysy.y"
 
   std::string *str_val;
   int int_val;
-  BaseAST *ast_val;	//AST
+  BaseAST *ast_val;	//AST node
 
-#line 158 "sysy.tab.cpp"
+#line 161 "sysy.tab.cpp"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -473,19 +476,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   10
+#define YYLAST   22
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  12
+#define YYNTOKENS  15
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  11
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  7
+#define YYNRULES  15
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  17
+#define YYNSTATES  28
 
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   261
+#define YYMAXUTOK   264
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -501,15 +504,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       7,     8,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    11,
+      10,    11,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    14,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     9,     2,    10,     2,     2,     2,     2,
+       2,     2,     2,    12,     2,    13,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -523,14 +526,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6
+       5,     6,     7,     8,     9
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    56,    56,    74,    84,    91,    99,   107
+       0,    50,    50,    61,    71,    79,    88,    97,   105,   110,
+     119,   122,   125,   131,   136,   144
 };
 #endif
 
@@ -539,9 +543,10 @@ static const yytype_int8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "INT", "RETURN", "IDENT", "INT_CONST",
-  "'('", "')'", "'{'", "'}'", "';'", "$accept", "CompUnit", "FuncDef",
-  "FuncType", "Block", "Stmt", "Number", YY_NULLPTR
+  "$end", "error", "$undefined", "IDENT", "INT", "RETURN", "ADD", "SUB",
+  "NOT", "INT_CONST", "'('", "')'", "'{'", "'}'", "';'", "$accept",
+  "CompUnit", "FuncDef", "FuncType", "Block", "Stmt", "Exp", "UnaryExp",
+  "UnaryOp", "PrimaryExp", "Number", YY_NULLPTR
 };
 #endif
 
@@ -550,12 +555,12 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_int16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,    40,    41,   123,
-     125,    59
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+      40,    41,   123,   125,    59
 };
 # endif
 
-#define YYPACT_NINF (-7)
+#define YYPACT_NINF (-10)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -569,8 +574,9 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -3,    -7,     1,    -7,    -2,    -7,    -5,    -4,    -1,     2,
-      -7,     3,     0,    -7,    -6,    -7,    -7
+       1,   -10,     6,   -10,     4,   -10,    -2,    -1,    -3,     7,
+     -10,    -6,     0,   -10,   -10,   -10,   -10,    -6,     2,   -10,
+      -6,   -10,   -10,   -10,     3,   -10,   -10,   -10
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -579,19 +585,22 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     4,     0,     2,     0,     1,     0,     0,     0,     0,
-       3,     0,     0,     7,     0,     5,     6
+       3,     0,     0,    10,    11,    12,    15,     0,     0,     7,
+       0,     8,    14,     5,     0,     6,     9,    13
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -7,    -7,    -7,    -7,    -7,    -7,    -7
+     -10,   -10,   -10,   -10,   -10,   -10,     5,    -9,   -10,   -10,
+     -10
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4,    10,    12,    14
+      -1,     2,     3,     4,    10,    12,    18,    19,    20,    21,
+      22
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -599,34 +608,39 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-       1,     5,     7,     6,     8,    16,    11,     0,     9,    13,
-      15
+      13,    14,    15,    16,    17,     1,     5,     6,     7,     9,
+       8,    26,    11,    23,    27,     0,    25,     0,     0,     0,
+       0,     0,    24
 };
 
 static const yytype_int8 yycheck[] =
 {
-       3,     0,     7,     5,     8,    11,     4,    -1,     9,     6,
-      10
+       6,     7,     8,     9,    10,     4,     0,     3,    10,    12,
+      11,    20,     5,    13,    11,    -1,    14,    -1,    -1,    -1,
+      -1,    -1,    17
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,    13,    14,    15,     0,     5,     7,     8,     9,
-      16,     4,    17,     6,    18,    10,    11
+       0,     4,    16,    17,    18,     0,     3,    10,    11,    12,
+      19,     5,    20,     6,     7,     8,     9,    10,    21,    22,
+      23,    24,    25,    13,    21,    14,    22,    11
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    12,    13,    14,    15,    16,    17,    18
+       0,    15,    16,    17,    18,    19,    20,    21,    22,    22,
+      23,    23,    23,    24,    24,    25
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     1,     5,     1,     3,     3,     1
+       0,     2,     1,     5,     1,     3,     3,     1,     1,     2,
+       1,     1,     1,     3,     1,     1
 };
 
 
@@ -1324,17 +1338,17 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 56 "sysy.y"
+#line 50 "sysy.y"
             {
     auto comp_unit = make_unique<CompUnitAST>();
     comp_unit->func_def = unique_ptr<BaseAST>((yyvsp[0].ast_val));
     ast = move(comp_unit);
   }
-#line 1334 "sysy.tab.cpp"
+#line 1348 "sysy.tab.cpp"
     break;
 
   case 3:
-#line 74 "sysy.y"
+#line 61 "sysy.y"
                                  {
     auto ast = new FuncDefAST();
     ast->func_type = unique_ptr<BaseAST>((yyvsp[-4].ast_val));
@@ -1342,48 +1356,125 @@ yyreduce:
     ast->block = unique_ptr<BaseAST>((yyvsp[0].ast_val));
     (yyval.ast_val) = ast;
   }
-#line 1346 "sysy.tab.cpp"
+#line 1360 "sysy.tab.cpp"
     break;
 
   case 4:
-#line 84 "sysy.y"
+#line 71 "sysy.y"
         {
     auto ast = new FuncTypeAST();
+    ast->func_type = *unique_ptr<string>((yyvsp[0].str_val));
     (yyval.ast_val) = ast;
   }
-#line 1355 "sysy.tab.cpp"
+#line 1370 "sysy.tab.cpp"
     break;
 
   case 5:
-#line 91 "sysy.y"
+#line 79 "sysy.y"
                  {
     auto ast = new BlockAST();
     ast->stmt = unique_ptr<BaseAST>((yyvsp[-1].ast_val));
     (yyval.ast_val) = ast;
   }
-#line 1365 "sysy.tab.cpp"
+#line 1380 "sysy.tab.cpp"
     break;
 
   case 6:
-#line 99 "sysy.y"
-                      {
+#line 88 "sysy.y"
+                   {
     auto ast = new StmtAST();
-    ast->number = ((yyvsp[-1].int_val));
+    ast->rtn = *unique_ptr<string>((yyvsp[-2].str_val));
+    ast->exp = unique_ptr<BaseAST>((yyvsp[-1].ast_val));
     (yyval.ast_val) = ast;
   }
-#line 1375 "sysy.tab.cpp"
+#line 1391 "sysy.tab.cpp"
     break;
 
   case 7:
-#line 107 "sysy.y"
+#line 97 "sysy.y"
+             {
+    auto ast = new ExpAST();
+    ast->unary_exp = unique_ptr<BaseAST>((yyvsp[0].ast_val));
+    (yyval.ast_val) = ast;
+  }
+#line 1401 "sysy.tab.cpp"
+    break;
+
+  case 8:
+#line 105 "sysy.y"
+               {
+    auto ast = new UnaryExpAST();
+    ast->primary_exp = unique_ptr<BaseAST>((yyvsp[0].ast_val));
+    (yyval.ast_val) = ast;
+  }
+#line 1411 "sysy.tab.cpp"
+    break;
+
+  case 9:
+#line 110 "sysy.y"
+                     {
+    auto ast = new UnaryExpAST();
+    ast->unary_op = *unique_ptr<string>((yyvsp[-1].str_val));
+    ast->unary_exp = unique_ptr<BaseAST>((yyvsp[0].ast_val));
+    (yyval.ast_val) = ast;
+  }
+#line 1422 "sysy.tab.cpp"
+    break;
+
+  case 10:
+#line 119 "sysy.y"
+        {
+    (yyval.str_val) = ((yyvsp[0].str_val));
+  }
+#line 1430 "sysy.tab.cpp"
+    break;
+
+  case 11:
+#line 122 "sysy.y"
+        {
+    (yyval.str_val) = ((yyvsp[0].str_val));
+  }
+#line 1438 "sysy.tab.cpp"
+    break;
+
+  case 12:
+#line 125 "sysy.y"
+        {
+    (yyval.str_val) = ((yyvsp[0].str_val));
+  }
+#line 1446 "sysy.tab.cpp"
+    break;
+
+  case 13:
+#line 131 "sysy.y"
+                {
+    auto ast = new PrimaryExpAST();
+    ast->exp = unique_ptr<BaseAST>((yyvsp[-1].ast_val));
+    (yyval.ast_val) = ast;
+  }
+#line 1456 "sysy.tab.cpp"
+    break;
+
+  case 14:
+#line 136 "sysy.y"
+           {
+    auto ast = new PrimaryExpAST();
+    ast->number = ((yyvsp[0].int_val));
+    (yyval.ast_val) = ast;
+  }
+#line 1466 "sysy.tab.cpp"
+    break;
+
+  case 15:
+#line 144 "sysy.y"
               {
     (yyval.int_val) = ((yyvsp[0].int_val));
   }
-#line 1383 "sysy.tab.cpp"
+#line 1474 "sysy.tab.cpp"
     break;
 
 
-#line 1387 "sysy.tab.cpp"
+#line 1478 "sysy.tab.cpp"
 
       default: break;
     }
@@ -1615,7 +1706,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 112 "sysy.y"
+#line 149 "sysy.y"
 
 
 // 定义错误处理函数, 其中第二个参数是错误信息

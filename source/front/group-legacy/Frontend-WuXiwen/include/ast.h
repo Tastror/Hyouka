@@ -16,7 +16,7 @@ class CompUnitAST : public BaseAST {
   std::unique_ptr<BaseAST> func_def;
 
   void Dump() const override {
-    std::cout << "CompUnitAST { ";
+    std::cout << "CompUnitAST { " << std::endl;
     func_def->Dump();
     std::cout << " }";
   }
@@ -29,21 +29,20 @@ class FuncDefAST : public BaseAST {
   std::unique_ptr<BaseAST> block;
 
   void Dump() const override {
-    std::cout << "FuncDefAST { ";
+    std::cout << "FuncDefAST { " << std::endl;
     func_type->Dump();
-    std::cout << ", " << ident << ", ";
+    std::cout << "IDENT: " << ident << std::endl;
     block->Dump();
     std::cout << " }";
   }
 };
 
 class FuncTypeAST : public BaseAST {
- //public:
+ public:
+  std::string func_type;
 
   void Dump() const override {
-    std::cout << "FuncTypeAST { ";
-    std::cout << "int";
-    std::cout << " }";
+    std::cout << "FuncTypeAST: " << func_type << std::endl;
   }
 };
 
@@ -52,7 +51,7 @@ class BlockAST : public BaseAST {
   std::unique_ptr<BaseAST> stmt;
 
   void Dump() const override {
-    std::cout << "BlockAST { ";
+    std::cout << "BlockAST { " << std::endl;
     stmt->Dump();
     std::cout << " }";
   }
@@ -62,9 +61,11 @@ class BlockAST : public BaseAST {
 class StmtAST : public BaseAST {
  public:
   std::unique_ptr<BaseAST> exp;
+  std::string rtn;
 
   void Dump() const override {
-    std::cout << "StmtAST { ";
+    std::cout << "StmtAST { " << std::endl;
+    std::cout << rtn << " ";
     exp->Dump();
     std::cout << " }";
   }
@@ -75,7 +76,7 @@ class ExpAST : public BaseAST {
   std::unique_ptr<BaseAST> unary_exp;
 
   void Dump() const override {
-    std::cout << "ExpAST { ";
+    std::cout << "ExpAST { " << std::endl;
     unary_exp->Dump();
     std::cout << " }";
   }
@@ -84,28 +85,22 @@ class ExpAST : public BaseAST {
 class UnaryExpAST : public BaseAST {
  public:
   std::unique_ptr<BaseAST> primary_exp;
-  std::unique_ptr<BaseAST> unary_op;
+  std::string unary_op;
   std::unique_ptr<BaseAST> unary_exp;
 
   void Dump() const override {
-    std::cout << "UnaryExpAST { ";
-    primary_exp->Dump();
-    unary_op->Dump();
-    unary_exp->Dump();
+    std::cout << "UnaryExpAST { " << std::endl;
+    if (primary_exp)
+    	primary_exp->Dump();
+    else{
+    	std::cout << unary_op;
+    	unary_exp->Dump();
+    }
     std::cout << " }";
   }
 };
 
-class UnaryOpAST : public BaseAST {
- public:
-  std::string unary_op;
-
-  void Dump() const override {
-    std::cout << "UnaryExpAST { ";
-    std::cout << unary_op;
-    std::cout << " }";
-  }
-};
+//typedef std::string UnaryOpAST
 
 class PrimaryExpAST : public BaseAST {
  public:
@@ -113,22 +108,16 @@ class PrimaryExpAST : public BaseAST {
   int number;
 
   void Dump() const override {
-    std::cout << "UnaryExpAST { ";
-    exp->Dump();
-    std::cout << number;
+    std::cout << "PrimaryExpAST { " << std::endl;
+    if(exp)
+    	exp->Dump();
+    else
+    	std::cout << number;
     std::cout << " }";
   }
 };
 
-class NumberAST : public BaseAST {
- public:
-  int int_const;
+//typedef int NumberAST
 
-  void Dump() const override {
-    std::cout << "NumberExpAST { ";
-    std::cout << int_const;
-    std::cout << " }";
-  }
-};
 
 

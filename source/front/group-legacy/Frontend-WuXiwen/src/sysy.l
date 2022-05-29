@@ -38,7 +38,7 @@ Hexadecimal   0[xX][0-9a-fA-F]+
 {Identifier}    { yylval.str_val = new string(yytext); return IDENT; }
 
 "+"		{ yylval.str_val = new string(yytext); return ADD; }
-"-"		{ yylval.str_val = new string(yytext); return MINUS; }
+"-"		{ yylval.str_val = new string(yytext); return SUB; }
 "!"		{ yylval.str_val = new string(yytext); return NOT; }
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
