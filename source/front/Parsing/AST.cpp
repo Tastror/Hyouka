@@ -248,6 +248,11 @@ TNP ArrayDefinitionAST::Parse() {
         AST_safe::RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
         return now_token;
     }
+
+    // v --- sym change --- v //
+    symtable_ptr->my_tail->array_nest_num++;
+    // ^ --- sym change --- ^//
+
     GoNext();
 
     ExpressionAST index(now_token, symtable_ptr);
@@ -264,6 +269,11 @@ TNP ArrayDefinitionAST::Parse() {
     GoNext();
 
     while (token_safe::data(now_token) == "[") {
+
+        // v --- sym change --- v //
+        symtable_ptr->my_tail->array_nest_num++;
+        // ^ --- sym change --- ^//
+
         GoNext();
 
         ExpressionAST index_addi(now_token, symtable_ptr);
@@ -362,18 +372,20 @@ TNP DeclarationStatementAST::Parse() {
 
             // v --- sym change --- v //
             sym_node.is_array_pointer = true;
-            sym_node.array_len = 4;
             // ^ --- sym change --- ^ //
+
+            // v --- sym append --- v //
+            symtable_ptr->append(sym_node);
+            // ^ --- sym append --- ^ //
 
             ArrayDefinitionAST array_def(now_token, symtable_ptr);
             AST_node::connect_child(head, array_def.head);
             now_token = array_def.Parse();
             next_token = token_safe::next(now_token);
 
-            // v --- sym append & attribute --- v //
-            symtable_ptr->append(sym_node);
+            // v --- sym attribute --- v //
             array_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
-            // ^ --- sym append & attribute --- ^ //
+            // ^ --- sym attribute --- ^ //
         }
 
         else {
@@ -433,18 +445,20 @@ TNP DeclarationStatementAST::Parse() {
 
                 // v --- sym change --- v //
                 sym_node.is_array_pointer = true;
-                sym_node.array_len = 4;
                 // ^ --- sym change --- ^ //
+
+                // v --- sym append --- v //
+                symtable_ptr->append(sym_node);
+                // ^ --- sym append --- ^ //
 
                 ArrayDefinitionAST array_def(now_token, symtable_ptr);
                 AST_node::connect_child(head, array_def.head);
                 now_token = array_def.Parse();
                 next_token = token_safe::next(now_token);
 
-                // v --- sym append & attribute --- v //
-                symtable_ptr->append(sym_node);
+                // v --- sym attribute --- v //
                 array_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
-                // ^ --- sym append & attribute --- ^ //
+                // ^ --- sym attribute --- ^ //
             }
 
             else {
@@ -666,10 +680,15 @@ TNP FunctionFormParamAST::Parse() {
     id_name->data = now_token->data;
     GoNext();
 
+    // v --- sym append --- v //
+    symtable_ptr->append(sym_node);
+    // ^ --- sym append --- ^ //
+
     if (token_safe::data(now_token) == "[") {
 
         // v --- sym change --- v //
-        sym_node.is_array_pointer = true;
+        symtable_ptr->my_tail->is_array_pointer = true;
+        symtable_ptr->my_tail->array_nest_num++;
         // ^ --- sym change --- ^ //
 
         GoNext();
@@ -693,6 +712,11 @@ TNP FunctionFormParamAST::Parse() {
         }
 
         while (token_safe::data(now_token) == "[") {
+
+            // v --- sym change --- v //
+            symtable_ptr->my_tail->array_nest_num++;
+            // ^ --- sym change --- ^ //
+
             GoNext();
 
             ExpressionAST index_addi(now_token, symtable_ptr);
@@ -711,7 +735,6 @@ TNP FunctionFormParamAST::Parse() {
     }
 
     // v --- sym append & attribute --- v //
-    symtable_ptr->append(sym_node);
     head->absorb_sym_attribution(symtable_ptr->my_tail);
     // ^ --- sym append & attribute --- ^ //
 
