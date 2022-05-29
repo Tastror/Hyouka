@@ -183,7 +183,7 @@ struct AST_node {
     std::string comment;
     std::shared_ptr<AST_node> sister = nullptr;
     std::shared_ptr<AST_node> child = nullptr;
-    std::shared_ptr<AST_node> parent = nullptr;
+    // std::shared_ptr<AST_node> parent = nullptr; // don't use parent, or the pointer will form a loop
     std::shared_ptr<AST_node> last_child = nullptr;
 
     // symtable
