@@ -266,10 +266,10 @@ int_double_storage calculate(
 }
 
 
-tuple count_child_number(const ANP& now_node) {
+tuple count_child_number(const AST_PTR& now_node) {
     if (now_node == nullptr) return (tuple){0, false};
     tuple res = {0, true};
-    ANP temp = now_node->child;
+    AST_PTR temp = now_node->child;
     while (temp != nullptr) {
         res.count++;
         if (!temp->count_expr_ending)
@@ -286,11 +286,11 @@ tuple count_child_number(const ANP& now_node) {
     return res;
 }
 
-void optimize_single(const ANP& now) {
+void optimize_single(const AST_PTR& now) {
     if (now == nullptr) return;
     optimize_single(now->child);
     if (now->type == DeclarationStatement && now->data == "const") {
-        ANP child = now->child;
+        AST_PTR child = now->child;
         while (child != nullptr && child->type == SingleDefinition) {
             if (child->last_child->count_expr_ending) {
                 if (child->basic_type == basic_int || child->basic_type == basic_pointer)
@@ -329,7 +329,7 @@ void optimize_single(const ANP& now) {
     optimize_single(now->sister);
 }
 
-void Front::Optimiser::Optimize(const ANP& source_AST_head) {
+void Front::Optimiser::Optimize(const AST_PTR& source_AST_head) {
     optimize_single(source_AST_head);
 }
 

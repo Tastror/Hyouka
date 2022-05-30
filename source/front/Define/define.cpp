@@ -13,6 +13,15 @@
 
 bool Safe::GlobalError = false;
 
+std::string value_tuple::to_string() {
+    if (type == basic_int || type == basic_pointer)
+        return std::to_string(value.int_value);
+    else if (type == basic_float)
+        return std::to_string(value.double_value);
+    else
+        return "";
+}
+
 
 
 
@@ -74,19 +83,19 @@ void token_node::print_all(const std::shared_ptr<token_node>& head) {
 
 void symtable_node::rename() {
     std::string name_pre = std::to_string(table_id);
-    if (is_head) only_name = "__[head]_" + name_pre + "_" + identifier_name;
-    else only_name = "__" + name_pre + "_" + identifier_name;
+    if (is_head) only_name = "_[head]_" + name_pre + "_" + identifier_name;
+    else only_name = "@" + name_pre + "_" + identifier_name;
 }
 
 void symtable_node::rename(const std::string& name) {
     identifier_name = name;
     std::string name_pre = std::to_string(table_id);
-    if (is_head) only_name = "__[head]_" + name_pre + "_" + identifier_name;
-    else only_name = "__" + name_pre + "_" + identifier_name;
+    if (is_head) only_name = "_[head]_" + name_pre + "_" + identifier_name;
+    else only_name = "@" + name_pre + "_" + identifier_name;
 }
 
 void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_head) {
-    SNP now = symtable_node_head;
+    SYM_PTR now = symtable_node_head;
     while (now != nullptr) {
         if (now->is_head) std::cout << "[head] ";
         std::cout << "name: " << now->identifier_name;
@@ -140,7 +149,7 @@ void Symtable::extend_from(const std::shared_ptr<Symtable>& last_symtable_ptr) {
 }
 
 void Symtable::append(const symtable_node& append_sym_node) {
-    SNP sym_ptr = std::make_shared<symtable_node>();
+    SYM_PTR sym_ptr = std::make_shared<symtable_node>();
     *sym_ptr = append_sym_node;
     sym_ptr->table_id = table_id;
     sym_ptr->rename();
@@ -275,7 +284,7 @@ std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& searc
     return res;
 }
 
-void AST_safe::RaiseError(const std::string& error_code, const TNP& token_node) {
+void AST_safe::RaiseError(const std::string& error_code, const TOKEN_PTR& token_node) {
     std::cout << "ERROR: " << error_code << std::endl;
     if (token_node != nullptr)
         std::cout << "    where: " << token_node->data
@@ -290,7 +299,49 @@ void AST_safe::RaiseError(const std::string& error_code, const TNP& token_node) 
 
 
 
+// Optimise
+
 void AST_optimize_safe::RaiseError(const std::string& error_code) {
     std::cout << "AST Optimize ERROR: " << error_code << std::endl;
     Safe::GlobalError = true;
+}
+
+
+
+
+
+// IRGen
+
+void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
+    std::shared_ptr<IR_node> now = IR_head;
+    if (now == nullptr) return;
+    now = now->next;
+    while (now != nullptr) {
+        if (now->ir_type == ir_calculate) {
+            if (now->calculate_nums == 1)
+                std::cout << now->name << " = "
+                          << now->opera << " "
+                          << now->type << " "
+                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1) << std::endl;
+            else if (now->calculate_nums == 2)
+                std::cout << now->name << " = "
+                          << now->opera << " "
+                          << now->type << " "
+                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1) << ", "
+                          << now->org_2 << std::endl;
+        }
+        else if (now->ir_type == ir_function_define)
+            std::cout << "define "
+                      << now->type << " "
+                      << now->name << " "
+                      << "; " << now->args_num << std::endl;
+        else if (now->ir_type == ir_function_para)
+            std::cout << now->type << " "
+                      << now->name << std::endl;
+        else if (now->ir_type == ir_punct)
+            std::cout << now->punct << std::endl;
+        else if (now->ir_type == ir_label)
+            std::cout << now->name << ":" << std::endl;
+        now = now->next;
+    }
 }

@@ -36,7 +36,7 @@ int compare(const std::string& op1, const std::string& op2) {
 
 
 
-TNP ArrayUsageAST::Parse() {
+TOKEN_PTR ArrayUsageAST::Parse() {
     head->type = ArrayUsage;
 
     if (token_safe::type(now_token) != IDENTI) {
@@ -45,7 +45,7 @@ TNP ArrayUsageAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -55,7 +55,7 @@ TNP ArrayUsageAST::Parse() {
     head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -101,7 +101,7 @@ TNP ArrayUsageAST::Parse() {
 }
 
 
-TNP FunctionUsageAST::Parse() {
+TOKEN_PTR FunctionUsageAST::Parse() {
     head->type = FunctionUsage;
 
     if (token_safe::type(now_token) != IDENTI) {
@@ -110,7 +110,7 @@ TNP FunctionUsageAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -120,7 +120,7 @@ TNP FunctionUsageAST::Parse() {
     head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -168,12 +168,12 @@ TNP FunctionUsageAST::Parse() {
 }
 
 
-TNP ExpressionAST::Parse() {
+TOKEN_PTR ExpressionAST::Parse() {
     head->type = Expression;
     head->using_attribute = true;
 
     std::stack<std::string> opt;
-    std::stack<ANP> sym;
+    std::stack<AST_PTR> sym;
     opt.push("begin");
 
     if (token_safe::data(now_token) == "+" || token_safe::data(now_token) == "-")
@@ -212,13 +212,13 @@ TNP ExpressionAST::Parse() {
                     AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
-                ANP k1 = sym.top(); sym.pop();
+                AST_PTR k1 = sym.top(); sym.pop();
                 if (sym.empty()) {
                     AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                     return now_token;
                 }
-                ANP k2 = sym.top(); sym.pop();
-                ANP tog = std::make_shared<AST_node>();
+                AST_PTR k2 = sym.top(); sym.pop();
+                AST_PTR tog = std::make_shared<AST_node>();
                 tog->data = opt.top(); opt.pop();
                 tog->type = Expression;
                 tog->using_attribute = true;
@@ -263,13 +263,13 @@ TNP ExpressionAST::Parse() {
 
                 // 1.1.3 normal variables
                 else {
-                    ANP token_to_AST = std::make_shared<AST_node>();
+                    AST_PTR token_to_AST = std::make_shared<AST_node>();
                     token_to_AST->data = now_token->data;
                     token_to_AST->type = Identifier;
                     sym.push(token_to_AST);
 
                     // v --- sym search & attribution --- v //
-                    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+                    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
                     if (temp_sym_node == nullptr) {
                         AST_safe::RaiseError("Usage without definition", now_token);
                         GoNext(); // ! important
@@ -285,7 +285,7 @@ TNP ExpressionAST::Parse() {
 
             // 1.2 normal numbers
             else if (token_safe::type(now_token) == NUMBER) {
-                ANP token_to_AST = std::make_shared<AST_node>();
+                AST_PTR token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
                 token_to_AST->basic_type = now_token->basic_type;
@@ -316,7 +316,7 @@ TNP ExpressionAST::Parse() {
 
             // unary+, unary-, ! should become unary (use a placeholder, which is basic_int)
             if (assign_operator(token_safe::data(now_token)) == 64) {
-                ANP token_to_AST = std::make_shared<AST_node>();
+                AST_PTR token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
                 token_to_AST->basic_type = basic_int;
                 token_to_AST->count_expr_ending = true;
@@ -358,13 +358,13 @@ TNP ExpressionAST::Parse() {
                         AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
-                    ANP k1 = sym.top(); sym.pop();
+                    AST_PTR k1 = sym.top(); sym.pop();
                     if (sym.empty()) {
                         AST_safe::RaiseError("in Expression, number or variable is not enough", now_token);
                         return now_token;
                     }
-                    ANP k2 = sym.top(); sym.pop();
-                    ANP tog = std::make_shared<AST_node>();
+                    AST_PTR k2 = sym.top(); sym.pop();
+                    AST_PTR tog = std::make_shared<AST_node>();
                     tog->data = opt.top(); opt.pop();
                     tog->type = Expression;
                     tog->using_attribute = true;

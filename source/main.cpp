@@ -2,6 +2,7 @@
 #include "Lex.h"
 #include "AST.h"
 #include "FrontOpt.h"
+#include "IRGen.h"
 
 #include <string>
 #include <iostream>
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
 
     Lexical program_file(input_filename);
     program_file.Lexicalize();
-    const TNP& token_head = program_file.head;
+    const TOKEN_PTR& token_head = program_file.head;
     if (debug_mode == "lex")
         token_node::print_all(token_head);
 
@@ -28,7 +29,7 @@ int main(int argc, char** argv) {
     Symtable symtable;
     ProgramAST program(token_head, symtable);
     program.Parse();
-    const ANP& AST_head = program.head;
+    const AST_PTR& AST_head = program.head;
     if (debug_mode == "parse")
         AST_node::print_all(AST_head);
     if (debug_mode == "sym")
@@ -36,12 +37,20 @@ int main(int argc, char** argv) {
 
     if (Safe::GlobalError) return 1;
 
-    Front::Optimiser::Optimize(program.head);
-    const ANP& optimized_AST_head = program.head;
+    Front::Optimiser::Optimize(AST_head);
+    const AST_PTR& optimized_AST_head = AST_head;
     if (debug_mode == "opt")
-        AST_node::print_all(AST_head);
+        AST_node::print_all(optimized_AST_head);
     if (debug_mode == "optsym")
         Symtable::print_all();
+
+    if (Safe::GlobalError) return 1;
+
+    IRGen ir_gen(optimized_AST_head);
+    ir_gen.Generate();
+    const IR_PTR& IR_head = ir_gen.head;
+    if (debug_mode == "ir")
+        IR_node::print_all(IR_head);
 
     if (Safe::GlobalError) return 1;
 

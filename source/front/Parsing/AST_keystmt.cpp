@@ -4,7 +4,7 @@
 
 #include "AST_keystmt.h"
 
-TNP KeywordStatementAST::Parse() {
+TOKEN_PTR KeywordStatementAST::Parse() {
     head->type = KeywordStatement;
 
     if (token_safe::data(now_token) == "if") {
