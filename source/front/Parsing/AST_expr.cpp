@@ -48,9 +48,11 @@ TNP ArrayUsageAST::Parse() {
     SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
+        GoNext(); // ! important
         return now_token;
     }
     head->absorb_sym_attribution(temp_sym_node);
+    head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
@@ -111,9 +113,11 @@ TNP FunctionUsageAST::Parse() {
     SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
+        GoNext(); // ! important
         return now_token;
     }
     head->absorb_sym_attribution(temp_sym_node);
+    head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
@@ -268,9 +272,11 @@ TNP ExpressionAST::Parse() {
                     SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
                     if (temp_sym_node == nullptr) {
                         AST_safe::RaiseError("Usage without definition", now_token);
+                        GoNext(); // ! important
                         return now_token;
                     }
                     token_to_AST->absorb_sym_attribution(temp_sym_node);
+                    token_to_AST->declaration_bound_sym_node = temp_sym_node;
                     // ^ --- sym search & attribution --- ^ //
 
                     GoNext();

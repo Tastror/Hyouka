@@ -105,6 +105,11 @@ void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_he
         }
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
+        if (now->treat_as_constexpr) std::cout << ", treat_as_constexpr, value = " << (
+                    now->basic_type == basic_float ? std::to_string(now->value.double_value) :
+                    now->basic_type == basic_int || now->basic_type == basic_pointer ? std::to_string(now->value.int_value) :
+                    "NaN"
+                );
         std::cout << std::endl;
         now = now->next;
     }

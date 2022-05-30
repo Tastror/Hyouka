@@ -21,9 +21,11 @@ TNP SingleAssignmentAST::Parse() {
     SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
+        GoNext(); // ! important
         return now_token;
     }
     head->absorb_sym_attribution(temp_sym_node);
+    head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
@@ -66,9 +68,11 @@ TNP ArrayAssignmentAST::Parse() {
     SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
+        GoNext(); // ! important
         return now_token;
     }
     head->absorb_sym_attribution(temp_sym_node);
+    head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
     ANP var_name = std::make_shared<AST_node>();
@@ -322,9 +326,8 @@ TNP DeclarationStatementAST::Parse() {
         return now_token;
     }
 
-    head->type = VariableDeclarationStatement;
     if (token_safe::data(now_token) == "const") {
-        head->type = ConstDeclarationStatement;
+        head->data = "const";
 
         // v --- sym change --- v //
         placeholder_sym_node.is_const = true;
@@ -337,10 +340,11 @@ TNP DeclarationStatementAST::Parse() {
         AST_safe::RaiseError("in DeclarationStatement, type is not [int] or [float]", now_token);
         return now_token;
     }
-    ANP var_type = std::make_shared<AST_node>();
-    AST_node::connect_child(head, var_type);
-    var_type->type = BasicType;
-    var_type->data = now_token->data;
+    // v --- useless, since placeholder_sym_node take place of its work --- v //
+    // ANP var_type = std::make_shared<AST_node>();
+    // AST_node::connect_child(head, var_type);
+    // var_type->type = BasicType;
+    // var_type->data = now_token->data;
 
     // v --- sym change --- v //
     placeholder_sym_node.basic_type =
@@ -385,6 +389,7 @@ TNP DeclarationStatementAST::Parse() {
 
             // v --- sym attribute --- v //
             array_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
+            array_def.head->declaration_bound_sym_node = symtable_ptr->my_tail;
             // ^ --- sym attribute --- ^ //
         }
 
@@ -398,6 +403,7 @@ TNP DeclarationStatementAST::Parse() {
             // v --- sym append & attribute --- v //
             symtable_ptr->append(sym_node);
             single_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
+            single_def.head->declaration_bound_sym_node = symtable_ptr->my_tail;
             // ^ --- sym append & attribute --- ^ //
         }
     }
@@ -458,6 +464,7 @@ TNP DeclarationStatementAST::Parse() {
 
                 // v --- sym attribute --- v //
                 array_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
+                array_def.head->declaration_bound_sym_node = symtable_ptr->my_tail;
                 // ^ --- sym attribute --- ^ //
             }
 
@@ -471,6 +478,7 @@ TNP DeclarationStatementAST::Parse() {
                 // v --- sym append & attribute --- v //
                 symtable_ptr->append(sym_node);
                 single_def.head->absorb_sym_attribution(symtable_ptr->my_tail);
+                single_def.head->declaration_bound_sym_node = symtable_ptr->my_tail;
                 // ^ --- sym append & attribute --- ^ //
             }
         }
@@ -645,16 +653,17 @@ TNP FunctionFormParamAST::Parse() {
         AST_safe::RaiseError("in FunctionFormParam, type is not [int] or [float]", now_token);
         return now_token;
     }
+    // v --- useless, since placeholder_sym_node take place of its work --- v //
+    // ANP type_name = std::make_shared<AST_node>();
+    // AST_node::connect_child(head, type_name);
+    // type_name->type = BasicType;
+    // type_name->data = now_token->data;
 
     // v --- sym --- v //
     sym_node.basic_type = token_safe::data(now_token) == "int" ? basic_int :
                           token_safe::data(now_token) == "float" ? basic_float : basic_none;
     // ^ --- sym --- ^ //
 
-    ANP type_name = std::make_shared<AST_node>();
-    AST_node::connect_child(head, type_name);
-    type_name->type = BasicType;
-    type_name->data = now_token->data;
     GoNext();
 
     if (token_safe::type(now_token) != IDENTI) {
@@ -736,6 +745,7 @@ TNP FunctionFormParamAST::Parse() {
 
     // v --- sym append & attribute --- v //
     head->absorb_sym_attribution(symtable_ptr->my_tail);
+    head->declaration_bound_sym_node = symtable_ptr->my_tail;
     // ^ --- sym append & attribute --- ^ //
 
     return now_token;
@@ -858,6 +868,7 @@ TNP FunctionDefinitionAST::Parse() {
     // v --- sym append & attribute --- v //
     symtable_ptr->append(sym_node);
     head->absorb_sym_attribution(symtable_ptr->my_tail);
+    head->declaration_bound_sym_node = symtable_ptr->my_tail;
     // ^ --- sym append & attribute --- ^ //
 
     if (token_safe::data(now_token) != ")") {
