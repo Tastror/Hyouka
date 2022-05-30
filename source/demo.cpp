@@ -1,4 +1,4 @@
-int main2(int a, float b, int c[]) {
+int main2(int a, float b, int c[][5]) {
     return b;
 }
 
@@ -11,11 +11,11 @@ int main() {
     res[-1] = 1.23;
     while (i < 20) {
         float block;
-        i = i + 1;
+        i = i + 1;;
         res[i] = res[i - 1] + res[i - 2];
     }
 
-    main2(res[3], 2, res);
+    main2(res[3], 2, bin);
 
     int _asdf, main, block;
     int a, x;
@@ -34,6 +34,9 @@ int main() {
     // return 9;
 
     int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
-    int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * 7 && 5) + 1 + 2 * 8 - (1 - 1 || 0);
-    return kadaf2;
+    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * 7 && 5) + 1 + 2 * 8 - (1 - 1 || 0);
+    const int k = test_optimizer * 2 + 5;
+    const int k2 = test_optimizer * 2 + kadaf2;
+    const float hello[k][k] = {0, 1, 2};
+    return k;
 }

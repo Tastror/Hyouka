@@ -35,6 +35,11 @@ union int_double_storage {
     int ptr_address_value;
 };
 
+struct value_tuple {
+    basic_type type = basic_none;
+    int_double_storage value;
+};
+
 namespace Safe {
     extern bool GlobalError;
 }
@@ -103,6 +108,10 @@ struct symtable_node {
     int arg_num = 0;
     int function_type = function_none;
 
+    // field, use for const
+    int_double_storage value;
+    bool treat_as_constexpr = false;
+
     // methods
     void rename();
     void rename(const std::string& name);
@@ -155,7 +164,6 @@ enum AST_type {
     Expression, FunctionUsage, ArrayUsage,
     BlockStatement, Statement, KeywordStatement,
     NormalStatement, DeclarationStatement,
-    ConstDeclarationStatement, VariableDeclarationStatement,
     SingleAssignment, ArrayAssignment, ArrayInitialBlock,
     SingleDefinition, ArrayDefinition,
     FunctionDefinition,
@@ -168,7 +176,6 @@ const std::string AST_type_string_name[] = {
     "Expression", "FunctionUsage", "ArrayUsage",
     "BlockStatement", "Statement", "KeywordStatement",
     "NormalStatement", "DeclarationStatement",
-    "ConstDeclarationStatement", "VariableDeclarationStatement",
     "SingleAssignment", "ArrayAssignment", "ArrayInitialBlock",
     "SingleDefinition", "ArrayDefinition",
     "FunctionDefinition",
@@ -205,8 +212,11 @@ struct AST_node {
     // use for Expr optimise
     bool count_expr_ending = false;
 
-    // use for Number (same as token node)
+    // field, use for Number (same as token node)
     int_double_storage value;
+
+    // declaration bound sym node
+    std::shared_ptr<symtable_node> declaration_bound_sym_node = nullptr;
 
     // methods
     static void connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);

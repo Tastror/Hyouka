@@ -40,6 +40,8 @@ int main(int argc, char** argv) {
     const ANP& optimized_AST_head = program.head;
     if (debug_mode == "opt")
         AST_node::print_all(AST_head);
+    if (debug_mode == "optsym")
+        Symtable::print_all();
 
     if (Safe::GlobalError) return 1;
 

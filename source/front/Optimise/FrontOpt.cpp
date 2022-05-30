@@ -274,6 +274,13 @@ tuple count_child_number(const ANP& now_node) {
         res.count++;
         if (!temp->count_expr_ending)
             res.judge = false;
+        if (temp->declaration_bound_sym_node != nullptr) {
+            if (temp->declaration_bound_sym_node->treat_as_constexpr) {
+                res.judge = true;
+                temp->value = temp->declaration_bound_sym_node->value;
+                temp->basic_type = temp->declaration_bound_sym_node->basic_type;
+            }
+        }
         temp = temp->sister;
     }
     return res;
@@ -282,6 +289,20 @@ tuple count_child_number(const ANP& now_node) {
 void optimize_single(const ANP& now) {
     if (now == nullptr) return;
     optimize_single(now->child);
+    if (now->type == DeclarationStatement && now->data == "const") {
+        ANP child = now->child;
+        while (child != nullptr && child->type == SingleDefinition) {
+            if (child->last_child->count_expr_ending) {
+                if (child->basic_type == basic_int || child->basic_type == basic_pointer)
+                    child->value = double_to_int(child->last_child->basic_type, child->last_child->value);
+                else if (child->basic_type == basic_pointer)
+                    child->value = int_to_double(child->last_child->basic_type, child->last_child->value);
+                child->declaration_bound_sym_node->treat_as_constexpr = true;
+                child->declaration_bound_sym_node->value = child->value;
+            }
+            child = child->sister;
+        }
+    }
     if (now->type == Expression) {
         tuple res = count_child_number(now);
         if (res.judge) now->count_expr_ending = true;
