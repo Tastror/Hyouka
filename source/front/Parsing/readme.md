@@ -65,15 +65,15 @@ Tastror updated in 2022.5.30
 构建语法树的工厂查看 `AST.h`。它们是 BaseAST 和派生出的各种 AST 类，是用来生成 AST 树的工厂。每个 AST 工厂类负责生成一种类型的 AST 节点，通过互相调用把 AST 节点串联成树。
 
 ```c++
-    ANP head;
-    TNP now_token;
-    TNP next_token;
+    AST_PTR head;
+    TOKEN_PTR now_token;
+    TOKEN_PTR next_token;
     std::shared_ptr<Symtable> symtable_ptr;
     void GoNext();
-    explicit BaseAST(const TNP& token_head, const Symtable& symtable);
-    explicit BaseAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr);
-    void PassDownSymtableAttribute(const SNP& symtable_node_ptr) const;
-    [[nodiscard]] SNP GetBackSymtableAttribute() const;
+    explicit BaseAST(const TOKEN_PTR& token_head, const Symtable& symtable);
+    explicit BaseAST(const TOKEN_PTR& token_head, const std::shared_ptr<Symtable>& symtable_ptr);
+    void PassDownSymtableAttribute(const SYM_PTR& symtable_node_ptr) const;
+    [[nodiscard]] SYM_PTR GetBackSymtableAttribute() const;
     virtual ~BaseAST() = default;
 ```
 
@@ -104,14 +104,14 @@ Tastror updated in 2022.5.30
 如果需要插入一个符号节点，使用 `Symtable.append()` 会自动插入，并更新这个符号节点的 `table_id` 和 `only_name`。
 
 ```c++
-    static std::vector<SNP> all_symtable_heads;
-    std::vector<SNP> heads_chain;
+    static std::vector<SYM_PTR> all_symtable_heads;
+    std::vector<SYM_PTR> heads_chain;
     static int table_counts;
     int table_id;
-    SNP sym_head = nullptr;
-    SNP sym_tail = nullptr;
-    SNP my_head = nullptr;
-    SNP my_tail = nullptr;
+    SYM_PTR sym_head = nullptr;
+    SYM_PTR sym_tail = nullptr;
+    SYM_PTR my_head = nullptr;
+    SYM_PTR my_tail = nullptr;
 
     Symtable();
     virtual ~Symtable() = default;

@@ -38,6 +38,7 @@ union int_double_storage {
 struct value_tuple {
     basic_type type = basic_none;
     int_double_storage value;
+    std::string to_string();
 };
 
 namespace Safe {
@@ -81,7 +82,7 @@ namespace token_safe {
     bool search_data(std::shared_ptr<token_node> now, const std::string& target, const std::string& end);
 }
 
-#define TNP std::shared_ptr<token_node>
+#define TOKEN_PTR std::shared_ptr<token_node>
 
 
 
@@ -120,7 +121,7 @@ struct symtable_node {
     static void print(const std::shared_ptr<symtable_node>& symtable_node_head);
 };
 
-#define SNP std::shared_ptr<symtable_node>
+#define SYM_PTR std::shared_ptr<symtable_node>
 
 
 
@@ -130,14 +131,14 @@ struct symtable_node {
 
 class Symtable {
 public:
-    static std::vector<SNP> all_symtable_heads;
-    std::vector<SNP> heads_chain;
+    static std::vector<SYM_PTR> all_symtable_heads;
+    std::vector<SYM_PTR> heads_chain;
     static int table_counts;
     int table_id;
-    SNP sym_head = nullptr;
-    SNP sym_tail = nullptr;
-    SNP my_head = nullptr;
-    SNP my_tail = nullptr;
+    SYM_PTR sym_head = nullptr;
+    SYM_PTR sym_tail = nullptr;
+    SYM_PTR my_head = nullptr;
+    SYM_PTR my_tail = nullptr;
 
     Symtable();
     virtual ~Symtable() = default;
@@ -150,7 +151,7 @@ public:
     static void print_all();
 };
 
-#define SP std::shared_ptr<Symtable>
+#define SYMTABLE_PTR std::shared_ptr<Symtable>
 
 
 
@@ -231,10 +232,10 @@ struct AST_node {
 };
 
 namespace AST_safe {
-    void RaiseError(const std::string& error_code, const TNP& token_node);
+    void RaiseError(const std::string& error_code, const TOKEN_PTR& token_node);
 }
 
-#define ANP std::shared_ptr<AST_node>
+#define AST_PTR std::shared_ptr<AST_node>
 
 
 
@@ -245,3 +246,44 @@ namespace AST_safe {
 namespace AST_optimize_safe {
     void RaiseError(const std::string& error_code);
 }
+
+
+
+
+
+// IRGen
+
+enum IR_type {
+    ir_calculate,
+    ir_function_define, ir_function_para, ir_function_call,
+    ir_punct, ir_label
+};
+
+struct IR_node {
+
+    // basic
+    IR_type ir_type = ir_label;
+    std::shared_ptr<IR_node> next = nullptr;
+
+    // common
+    std::string name;
+    std::string type;  // "void" "i32" "float"
+    bool org_1_using_value = false;
+    std::string org_1;
+    value_tuple value_1;
+    std::string org_2;  // 1 may be value, 2 must be name
+
+    // calculate
+    std::string opera;
+    int calculate_nums;
+
+    // function define
+    int args_num;
+
+    // punct
+    std::string punct;
+
+    static void print_all(const std::shared_ptr<IR_node>& IR_head);
+};
+
+#define IR_PTR std::shared_ptr<IR_node>

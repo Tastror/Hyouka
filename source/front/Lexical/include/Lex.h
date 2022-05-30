@@ -20,7 +20,7 @@ protected:
     int line = 1;
     int column = 0;
     int delay_column = 0;
-    TNP now_token;
+    TOKEN_PTR now_token;
 
     // begin list and true list
 
@@ -38,7 +38,7 @@ protected:
 public:
     bool fail = false;
     bool end = false;
-    TNP head;
+    TOKEN_PTR head;
 
     explicit Lexical(const std::string& input_filename) {
         head = std::make_shared<token_node>();

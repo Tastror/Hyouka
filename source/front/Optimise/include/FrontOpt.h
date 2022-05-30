@@ -7,5 +7,5 @@
 #include "define.h"
 
 namespace Front::Optimiser {
-    void Optimize(const ANP& source_AST_head);
+    void Optimize(const AST_PTR& source_AST_head);
 }

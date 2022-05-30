@@ -14,9 +14,9 @@
 // - self return at ]::after
 class ArrayUsageAST: public BaseAST {
 public:
-    TNP Parse();
-    explicit ArrayUsageAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
-    explicit ArrayUsageAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
+    TOKEN_PTR Parse();
+    explicit ArrayUsageAST(const TOKEN_PTR& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ArrayUsageAST(const TOKEN_PTR& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ArrayUsageAST() override = default;
 };
 
@@ -30,9 +30,9 @@ public:
 // - self return at )::after
 class FunctionUsageAST: public BaseAST {
 public:
-    TNP Parse();
-    explicit FunctionUsageAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
-    explicit FunctionUsageAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
+    TOKEN_PTR Parse();
+    explicit FunctionUsageAST(const TOKEN_PTR& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit FunctionUsageAST(const TOKEN_PTR& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~FunctionUsageAST() override = default;
 };
 
@@ -46,9 +46,9 @@ public:
 // - self return at ; , ) } ]
 class ExpressionAST: public BaseAST {
 public:
-    TNP Parse();
-    explicit ExpressionAST(const TNP& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
-    explicit ExpressionAST(const TNP& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
+    TOKEN_PTR Parse();
+    explicit ExpressionAST(const TOKEN_PTR& token_head, const Symtable& symtable): BaseAST(token_head, symtable) {}
+    explicit ExpressionAST(const TOKEN_PTR& token_head, const std::shared_ptr<Symtable>& symtable_ptr): BaseAST(token_head, symtable_ptr) {}
     ~ExpressionAST() override = default;
 };
 

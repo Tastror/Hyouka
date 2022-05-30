@@ -6,10 +6,10 @@
 #include "AST_expr.h"
 #include "AST_keystmt.h"
 
-std::vector<SNP> Symtable::all_symtable_heads;
+std::vector<SYM_PTR> Symtable::all_symtable_heads;
 int Symtable::table_counts = 0;
 
-TNP SingleAssignmentAST::Parse() {
+TOKEN_PTR SingleAssignmentAST::Parse() {
     head->type = SingleAssignment;
 
     if (token_safe::type(now_token) != IDENTI) {
@@ -18,7 +18,7 @@ TNP SingleAssignmentAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -28,7 +28,7 @@ TNP SingleAssignmentAST::Parse() {
     head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -56,7 +56,7 @@ TNP SingleAssignmentAST::Parse() {
 }
 
 
-TNP ArrayAssignmentAST::Parse() {
+TOKEN_PTR ArrayAssignmentAST::Parse() {
     head->type = ArrayAssignment;
 
     if (token_safe::type(now_token) != IDENTI) {
@@ -65,7 +65,7 @@ TNP ArrayAssignmentAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -75,7 +75,7 @@ TNP ArrayAssignmentAST::Parse() {
     head->declaration_bound_sym_node = temp_sym_node;
     // ^ --- sym search & attribution--- ^ //
 
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -139,14 +139,14 @@ TNP ArrayAssignmentAST::Parse() {
 }
 
 
-TNP SingleDefinitionAST::Parse() {
+TOKEN_PTR SingleDefinitionAST::Parse() {
     head->type = SingleDefinition;
 
     if (token_safe::type(now_token) != IDENTI) {
         AST_safe::RaiseError("in SingleDefinition, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -172,7 +172,7 @@ TNP SingleDefinitionAST::Parse() {
 }
 
 
-TNP ArrayInitialBlockAST::Parse() {
+TOKEN_PTR ArrayInitialBlockAST::Parse() {
     head->type = ArrayInitialBlock;
 
     if (token_safe::data(now_token) != "{") {
@@ -235,14 +235,14 @@ TNP ArrayInitialBlockAST::Parse() {
 }
 
 
-TNP ArrayDefinitionAST::Parse() {
+TOKEN_PTR ArrayDefinitionAST::Parse() {
     head->type = ArrayDefinition;
 
     if (token_safe::type(now_token) != IDENTI) {
         AST_safe::RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
         return now_token;
     }
-    ANP var_name = std::make_shared<AST_node>();
+    AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
     var_name->data = now_token->data;
@@ -313,7 +313,7 @@ TNP ArrayDefinitionAST::Parse() {
 }
 
 
-TNP DeclarationStatementAST::Parse() {
+TOKEN_PTR DeclarationStatementAST::Parse() {
     head->type = DeclarationStatement;
 
     // v --- sym --- v //
@@ -341,7 +341,7 @@ TNP DeclarationStatementAST::Parse() {
         return now_token;
     }
     // v --- useless, since placeholder_sym_node take place of its work --- v //
-    // ANP var_type = std::make_shared<AST_node>();
+    // AST_PTR var_type = std::make_shared<AST_node>();
     // AST_node::connect_child(head, var_type);
     // var_type->type = BasicType;
     // var_type->data = now_token->data;
@@ -357,7 +357,7 @@ TNP DeclarationStatementAST::Parse() {
     if (token_safe::type(now_token) == IDENTI) {
 
         // v --- sym search --- v //
-        SNP temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+        SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
         if (temp_sym_node != nullptr) {
             AST_safe::RaiseError("Redefinition", now_token);
             return now_token;
@@ -432,7 +432,7 @@ TNP DeclarationStatementAST::Parse() {
         if (token_safe::type(now_token) == IDENTI) {
 
             // v --- sym search --- v //
-            SNP temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+            SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
             if (temp_sym_node != nullptr) {
                 AST_safe::RaiseError("Redefinition", now_token);
                 return now_token;
@@ -493,7 +493,7 @@ TNP DeclarationStatementAST::Parse() {
 }
 
 
-TNP NormalStatementAST::Parse() {
+TOKEN_PTR NormalStatementAST::Parse() {
     head->type = NormalStatement;
 
     if (token_safe::type(now_token) == IDENTI && token_safe::search_data(next_token, "=", ";")) {
@@ -588,7 +588,7 @@ TNP NormalStatementAST::Parse() {
 }
 
 
-TNP StatementAST::Parse() {
+TOKEN_PTR StatementAST::Parse() {
     head->type = Statement;
 
     if (token_safe::data(now_token) == "int" || token_safe::data(now_token) == "float" || token_safe::data(now_token) == "const") {
@@ -609,7 +609,7 @@ TNP StatementAST::Parse() {
 }
 
 
-TNP BlockStatementAST::Parse() {
+TOKEN_PTR BlockStatementAST::Parse() {
     head->type = BlockStatement;
 
     if (token_safe::data(now_token) != "{") {
@@ -642,7 +642,7 @@ TNP BlockStatementAST::Parse() {
 }
 
 
-TNP FunctionFormParamAST::Parse() {
+TOKEN_PTR FunctionFormParamAST::Parse() {
     head->type = FunctionFormParam;
 
     // v --- sym --- v //
@@ -654,7 +654,7 @@ TNP FunctionFormParamAST::Parse() {
         return now_token;
     }
     // v --- useless, since placeholder_sym_node take place of its work --- v //
-    // ANP type_name = std::make_shared<AST_node>();
+    // AST_PTR type_name = std::make_shared<AST_node>();
     // AST_node::connect_child(head, type_name);
     // type_name->type = BasicType;
     // type_name->data = now_token->data;
@@ -672,7 +672,7 @@ TNP FunctionFormParamAST::Parse() {
     }
 
     // v --- sym search --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
     if (temp_sym_node != nullptr) {
         AST_safe::RaiseError("Redefinition", now_token);
         return now_token;
@@ -683,7 +683,7 @@ TNP FunctionFormParamAST::Parse() {
     sym_node.identifier_name = token_safe::data(now_token);
     // ^ --- sym change --- ^ //
 
-    ANP id_name = std::make_shared<AST_node>();
+    AST_PTR id_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, id_name);
     id_name->type = Identifier;
     id_name->data = now_token->data;
@@ -752,7 +752,7 @@ TNP FunctionFormParamAST::Parse() {
 }
 
 
-TNP FunctionParamsAST::Parse() {
+TOKEN_PTR FunctionParamsAST::Parse() {
     head->type = FunctionParams;
 
     if (token_safe::data(now_token) == ")") {
@@ -794,7 +794,7 @@ TNP FunctionParamsAST::Parse() {
 }
 
 
-TNP FunctionDefinitionAST::Parse() {
+TOKEN_PTR FunctionDefinitionAST::Parse() {
     head->type = FunctionDefinition;
 
     // v --- sym --- v //
@@ -811,7 +811,7 @@ TNP FunctionDefinitionAST::Parse() {
         AST_safe::RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
         return now_token;
     }
-    ANP func_type = std::make_shared<AST_node>();
+    AST_PTR func_type = std::make_shared<AST_node>();
     AST_node::connect_child(head, func_type);
     func_type->type = FunctionType;
     func_type->data = token_safe::data(now_token);
@@ -831,14 +831,14 @@ TNP FunctionDefinitionAST::Parse() {
     }
 
     // v --- sym search --- v //
-    SNP temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
     if (temp_sym_node != nullptr) {
         AST_safe::RaiseError("Redefinition", now_token);
         return now_token;
     }
     // ^ --- sym search --- ^ //
 
-    ANP func_name = std::make_shared<AST_node>();
+    AST_PTR func_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, func_name);
     func_name->type = Identifier;
     func_name->data = token_safe::data(now_token);
@@ -887,7 +887,7 @@ TNP FunctionDefinitionAST::Parse() {
 }
 
 
-TNP ProgramAST::Parse() {
+TOKEN_PTR ProgramAST::Parse() {
     head->type = ProgramBody;
 
     symtable_ptr->my_head->rename("this_program");
@@ -897,7 +897,7 @@ TNP ProgramAST::Parse() {
         // in all ASTs, GlobalError only use here
         if (Safe::GlobalError) { break; }
 
-        TNP look_next = token_safe::next(next_token);
+        TOKEN_PTR look_next = token_safe::next(next_token);
 
         if (token_safe::data(now_token) == "void" ||
            ((token_safe::data(now_token) == "int" || token_safe::data(now_token) == "float") && token_safe::data(look_next) == "(") ) {
