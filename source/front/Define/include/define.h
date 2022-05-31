@@ -292,8 +292,9 @@ struct IR_node {
     std::string type_tar;
     IR_tuple target;
 
-    // single: "alloca", "cast-float", "cast-int", "assign", "jump"
-    // double: "jumpe", "jumpn", "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
+    // single: "jump"
+    // double: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn"
+    // triple: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
     std::string opera;
 
     std::string type_1;  // "void" "i32" "i32*" "float" "float*"

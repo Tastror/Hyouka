@@ -1,8 +1,10 @@
 int main2(int a, float b, int c[][5]) {
     return b;
+    int k = 123;
 }
 
 int a[10][10];
+const int Maxn = 10005;
 
 int main() {
     int res[0400], i = 1, bin[4][5] = {4 * 7, 2, 3};
@@ -51,7 +53,7 @@ int main() {
     // return 9;
 
     int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
-    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * +-i && 5) + 1 + 2.4 * 8 - (1 - 1 || 0);
+    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 % 6) + -6 * -Maxn - 5) + 1 + 2.4 * 8 - (1 - 1 || 0);
     const int k = test_optimizer * 2 + 5;
     const int k2 = test_optimizer * 2 + kadaf2;
     const float hello[k][k] = {0, 1, 2};

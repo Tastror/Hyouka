@@ -421,11 +421,7 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
         std::cout << now->index << "\t";
         if (now->ir_type == ir_forth) {
             std::cout << "    ";
-            if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float")
-                std::cout << now->target.to_string() << " = "
-                          << now->opera << ", "
-                          << now->org_1.to_string();
-            else if (now->opera == "jump")
+            if (now->opera == "jump")
                 std::cout << now->opera << " -> "
                           << now->target.to_string();
             else if (now->opera == "jumpe")
@@ -435,6 +431,10 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
             else if (now->opera == "jumpn")
                 std::cout << now->opera << " -> "
                           << now->target.to_string() << " if-not "
+                          << now->org_1.to_string();
+            else if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float")
+                std::cout << now->target.to_string() << " = "
+                          << now->opera << ", "
                           << now->org_1.to_string();
             else
                 std::cout << now->target.to_string() << " = "
