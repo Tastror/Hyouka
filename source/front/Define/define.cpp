@@ -288,14 +288,9 @@ void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
     value = AST_resource_node->value;
 
     declaration_bound_sym_node = AST_resource_node->declaration_bound_sym_node;
-
-//    sister = AST_resource_node->sister;
-//    child = AST_resource_node->child;
-//    last_child = AST_resource_node->last_child;
-
 }
 
-std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head) {
+std::shared_ptr<symtable_node> AST_safe::search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head) {
     if (sym_head == nullptr) return nullptr;
     std::shared_ptr<symtable_node> compare_now = sym_head->next;
     while (compare_now != nullptr) {
@@ -306,16 +301,19 @@ std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& searc
     return nullptr;
 }
 
-std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& search_name) {
+std::shared_ptr<symtable_node> AST_safe::search_id_name(const std::string& search_name, const std::shared_ptr<Symtable>& symtable_ptr, bool without_chain) {
     std::shared_ptr<symtable_node> res = nullptr;
-    for (int i = (int)(symtable_ptr->heads_chain.size()) - 1; i >= 0; --i) {
-        res = search_id_name(search_name, symtable_ptr->heads_chain[i]);
-        if (res != nullptr) return res;
-    }
+    if (without_chain)
+        res = search_id_name(search_name, symtable_ptr->my_head);
+    else
+        for (int i = (int)(symtable_ptr->heads_chain.size()) - 1; i >= 0; --i) {
+            res = search_id_name(search_name, symtable_ptr->heads_chain[i]);
+            if (res != nullptr) return res;
+        }
     return res;
 }
 
-void AST_safe::RaiseError(const std::string& error_code, const TOKEN_PTR& token_node) {
+void AST_safe::RaiseError(const std::string& error_code, const std::shared_ptr<token_node>& token_node) {
     std::cout << "ERROR: " << error_code << std::endl;
     if (token_node != nullptr)
         std::cout << "    where: " << token_node->data
@@ -324,6 +322,40 @@ void AST_safe::RaiseError(const std::string& error_code, const TOKEN_PTR& token_
     else
         std::cout << "    where: reach the end of the file" << std::endl;
     Safe::GlobalError = true;
+}
+
+AST_tuple AST_safe::count_child_number(const std::shared_ptr<AST_node>& now_node) {
+    if (now_node == nullptr) return (AST_tuple){0, false};
+    AST_tuple res = {0, true};
+    AST_PTR temp = now_node->child;
+    while (temp != nullptr) {
+        res.count++;
+        if (!temp->count_expr_ending)
+            res.judge = false;
+        if (temp->declaration_bound_sym_node != nullptr) {
+            if (temp->declaration_bound_sym_node->treat_as_constexpr) {
+                res.judge = true;
+                temp->value = temp->declaration_bound_sym_node->value;
+                temp->basic_type = temp->declaration_bound_sym_node->basic_type;
+            }
+        }
+        temp = temp->sister;
+    }
+    return res;
+}
+
+std::shared_ptr<symtable_node> AST_safe::search_only_name(const std::string& only_name) {
+    for (int i = (int)(Symtable::all_symtable_heads.size()) - 1; i >= 0; --i) {
+        std::shared_ptr<symtable_node> sym_head = Symtable::all_symtable_heads[i];
+        if (sym_head == nullptr) continue;
+        std::shared_ptr<symtable_node> compare_now = sym_head->next;
+        while (compare_now != nullptr) {
+            if (compare_now->only_name == only_name)
+                return compare_now;
+            compare_now = compare_now->next;
+        }
+    }
+    return nullptr;
 }
 
 
@@ -343,6 +375,44 @@ void AST_optimize_safe::RaiseError(const std::string& error_code) {
 
 // IRGen
 
+std::string IR_tuple::to_string() {
+    if (is_str) {
+        if (str_type == basic_float)
+            return "[float] " + str;
+        else if (str_type == basic_int || str_type == basic_pointer)
+            return "[int] " + str;
+        else
+            return "[none] " + str;
+    }
+    else if (value.type == basic_float) return "[float] " + value.to_string();
+    else if (value.type == basic_int || value.type == basic_pointer) return "[int] " + value.to_string();
+    else return "[none]";
+}
+
+IR_tuple::IR_tuple() {
+    is_str = true;
+    str_type = basic_none;
+    str = "";
+}
+
+IR_tuple::IR_tuple(const std::string& str) {
+    is_str = true;
+    str_type = basic_none;
+    this->str = str;
+}
+
+IR_tuple::IR_tuple(int int_num) {
+    is_str = false;
+    value.type = basic_int;
+    value.value.int_value = int_num;
+}
+
+IR_tuple::IR_tuple(double double_num) {
+    is_str = false;
+    value.type = basic_float;
+    value.value.double_value = double_num;
+}
+
 void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
     std::shared_ptr<IR_node> now = IR_head;
     if (now == nullptr) return;
@@ -351,29 +421,29 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
         std::cout << now->index << "\t";
         if (now->ir_type == ir_forth) {
             std::cout << "    ";
-            if (now->opera == "jump")
+            if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float")
+                std::cout << now->target.to_string() << " = "
+                          << now->opera << ", "
+                          << now->org_1.to_string();
+            else if (now->opera == "jump")
                 std::cout << now->opera << " -> "
-                          << now->target;
+                          << now->target.to_string();
             else if (now->opera == "jumpe")
                 std::cout << now->opera << " -> "
-                          << now->target << " if "
-                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
+                          << now->target.to_string() << " if "
+                          << now->org_1.to_string();
             else if (now->opera == "jumpn")
                 std::cout << now->opera << " -> "
-                          << now->target << " if-not "
-                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
-            else if (now->opera == "assign" || now->opera == "alias")
-                std::cout << now->target << " = "
-                          << now->opera << ", "
-                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
+                          << now->target.to_string() << " if-not "
+                          << now->org_1.to_string();
             else
-                std::cout << now->target << " = "
+                std::cout << now->target.to_string() << " = "
                           << now->opera << ", "
-                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1) << ", "
-                          << (now->org_2_using_value ? now->value_2.to_string() : now->org_2);
+                          << now->org_1.to_string() << ", "
+                          << now->org_2.to_string();
         }
         else if (now->ir_type == ir_label) {
-            std::cout << now->target << ":";
+            std::cout << now->target.to_string() << ":";
         }
         std::cout << (now->comment.empty() ? "" : "\t# " + now->comment)  << std::endl;
         now = now->next;

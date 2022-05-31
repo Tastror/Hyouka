@@ -18,7 +18,7 @@ TOKEN_PTR SingleAssignmentAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -65,7 +65,7 @@ TOKEN_PTR ArrayAssignmentAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -357,7 +357,7 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
     if (token_safe::type(now_token) == IDENTI) {
 
         // v --- sym search --- v //
-        SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+        SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr, true);
         if (temp_sym_node != nullptr) {
             AST_safe::RaiseError("Redefinition", now_token);
             return now_token;
@@ -432,7 +432,7 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
         if (token_safe::type(now_token) == IDENTI) {
 
             // v --- sym search --- v //
-            SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+            SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr, true);
             if (temp_sym_node != nullptr) {
                 AST_safe::RaiseError("Redefinition", now_token);
                 return now_token;
@@ -672,7 +672,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     }
 
     // v --- sym search --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr, true);
     if (temp_sym_node != nullptr) {
         AST_safe::RaiseError("Redefinition", now_token);
         return now_token;
@@ -831,7 +831,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
     }
 
     // v --- sym search --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token), symtable_ptr->my_head);
+    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr, true);
     if (temp_sym_node != nullptr) {
         AST_safe::RaiseError("Redefinition", now_token);
         return now_token;

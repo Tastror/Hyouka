@@ -68,7 +68,7 @@ struct token_node {
     std::shared_ptr<token_node> next = nullptr;
 
     // attribute
-    int basic_type = basic_none;
+    basic_type basic_type = basic_none;
     int_double_storage value;
 
     // print
@@ -100,7 +100,7 @@ struct symtable_node {
 
     // attribute
     std::string only_name;
-    int basic_type = basic_none;
+    basic_type basic_type = basic_none;
     bool is_const = false;
     bool is_static = false;
     bool is_array_pointer = false;
@@ -201,7 +201,7 @@ struct AST_node {
     bool using_attribute = false;
     std::string name;
     std::string only_name;
-    int basic_type = basic_none;
+    basic_type basic_type = basic_none;
     bool is_const = false;
     bool is_static = false;
     bool is_array_pointer = false;
@@ -224,16 +224,23 @@ struct AST_node {
     static void reverse_connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
     void absorb_sym_attribution(const std::shared_ptr<symtable_node>& symtable_resource_node);
     void copy(const std::shared_ptr<AST_node>& AST_resource_node);
-    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head);
-    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name);
 
     // print
     static void print_all(const std::shared_ptr<AST_node>& now, int stage);
     static void print_all(const std::shared_ptr<AST_node>& AST_head);
 };
 
+struct AST_tuple {
+    int count;
+    bool judge;
+};
+
 namespace AST_safe {
-    void RaiseError(const std::string& error_code, const TOKEN_PTR& token_node);
+    void RaiseError(const std::string& error_code, const std::shared_ptr<token_node>& token_node);
+    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head);
+    std::shared_ptr<symtable_node> search_id_name(const std::string& search_name, const std::shared_ptr<Symtable>& symtable_ptr, bool without_chain = false);
+    std::shared_ptr<symtable_node> search_only_name(const std::string& only_name);
+    AST_tuple count_child_number(const std::shared_ptr<AST_node>& now_node);
 }
 
 #define AST_PTR std::shared_ptr<AST_node>
@@ -258,6 +265,22 @@ enum IR_type {
     ir_forth, ir_label
 };
 
+struct IR_tuple {
+
+    bool is_str;
+    basic_type str_type;
+    std::string str;
+    value_tuple value;
+
+    std::string to_string();
+
+    IR_tuple();
+    IR_tuple(const std::string& str);
+    IR_tuple(int int_num);
+    IR_tuple(double double_num);
+
+};
+
 struct IR_node {
 
     // basic
@@ -266,22 +289,18 @@ struct IR_node {
     std::shared_ptr<IR_node> next = nullptr;
 
     // normal
-    std::string target;
     std::string type_tar;
+    IR_tuple target;
 
-    // single: "alloca", "cast-double", "cast-int", "assign", "alias"
-    // double: "jump", "jumpe", "jumpn", "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
+    // single: "alloca", "cast-float", "cast-int", "assign", "jump"
+    // double: "jumpe", "jumpn", "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
     std::string opera;
 
     std::string type_1;  // "void" "i32" "i32*" "float" "float*"
-    bool org_1_using_value = false;
-    std::string org_1;
-    value_tuple value_1;
+    IR_tuple org_1;
 
     std::string type_2;  // "void" "i32" "i32*" "float" "float*"
-    bool org_2_using_value = false;
-    std::string org_2;
-    value_tuple value_2;
+    IR_tuple org_2;
 
     // comment
     std::string comment;
