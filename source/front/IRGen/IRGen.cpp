@@ -46,39 +46,55 @@ IR_PTR IRGen::create_label(const std::string& comment, const std::string& target
     return now_ir;
 }
 
+
+
 void IRGen::Generate() {
-    basic_generate(AST);
+    program_generate(AST);
 }
+
+
+
+void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
+    AST_PTR now = now_AST->child;
+    while (now != nullptr) {
+        basic_generate(now);
+        now = now->sister;
+    }
+}
+
+
 
 void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
     if (now_AST == nullptr) return;
-    if (now_AST->type == ProgramBody)
-        program_generate(now_AST);
     else if (now_AST->type == FunctionDefinition)
         function_generate(now_AST);
     else if (now_AST->type == SingleDefinition)
         single_define_generate(now_AST);
-}
-
-void IRGen::program_generate(std::shared_ptr<AST_node> now_AST) {
-    now_AST = now_AST->child;
-    while (now_AST != nullptr) {
-        basic_generate(now_AST);
-        now_AST = now_AST->sister;
+    else if (now_AST->type == BlockStatement) {
+        AST_PTR now = now_AST->child;
+        while (now != nullptr) {
+            basic_generate(now);
+            now = now->sister;
+        }
     }
 }
 
-void IRGen::function_generate(std::shared_ptr<AST_node> now_AST) {
-    create_label("args num = " + std::to_string(now_AST->arg_num), now_AST->only_name);
+
+
+void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
+    create_label("", now_AST->only_name);
     auto func_type = (function_type) now_AST->function_type;
     AST_PTR para = now_AST->child->sister->sister->child;
+
     create_forth("", (std::string)"$paranum", "assign", now_AST->arg_num, 0);
+
     for (int i = 0; i < now_AST->arg_num; ++i) {
         IR_tuple assign_target = para->only_name;
         assign_target.str_type = para->basic_type;
         create_forth("", assign_target, "assign", "$par" + std::to_string(i), 0);
         para = para->sister;
     }
+
     AST_PTR block = now_AST->child->sister->sister->sister;
     AST_PTR block_child = block->child;
     while (block_child != nullptr) {
@@ -87,28 +103,54 @@ void IRGen::function_generate(std::shared_ptr<AST_node> now_AST) {
                 IR_tuple res = expr_generate(block_child->child);
                 create_forth("", (std::string)"$ret", "assign", res);
             }
+            create_forth("", (std::string)"$ra", "jump");
+
+            // ! important
+            // this break is an optimizer, can be removed
+            break;
         }
         else
             basic_generate(block_child);
         block_child = block_child->sister;
     }
+
 }
 
-void IRGen::single_define_generate(std::shared_ptr<AST_node> now_AST) {
+
+
+void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
+
     IR_tuple assign_target = now_AST->only_name;
     assign_target.str_type = now_AST->basic_type;
+
     if (now_AST->last_child->type != Expression) {
         create_forth("", assign_target, "assign", 0);
-    } else {
-        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
-        if (now_AST->only_name != res.str)
-            create_forth("", assign_target, "assign", res);
     }
+
+    else {
+        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
+        if (assign_target.str != res.str) {
+            if ((res.is_str && res.str_type != assign_target.str_type) || (!res.is_str && res.value.type != assign_target.str_type))
+                if (assign_target.str_type == basic_int || assign_target.str_type == basic_pointer)
+                    create_forth("", assign_target, "cast-int", res);
+                else if (assign_target.str_type == basic_float)
+                    create_forth("", assign_target, "cast-float", res);
+                else
+                    create_forth("", assign_target, "assign", res);
+            else
+                create_forth("", assign_target, "assign", res);
+        }
+    }
+
 }
 
-IR_tuple IRGen::expr_generate(std::shared_ptr<AST_node> now_AST, const IR_tuple& passing_down) {
+
+
+IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down) {
+
     AST_tuple res = AST_safe::count_child_number(now_AST);
     IR_tuple ans;
+
     if (res.count == 0) {
         if (now_AST->count_expr_ending) {
             ans.is_str = false;
@@ -120,9 +162,11 @@ IR_tuple IRGen::expr_generate(std::shared_ptr<AST_node> now_AST, const IR_tuple&
             ans.str_type = now_AST->basic_type;
         }
     }
+
     else if (res.count == 1) {
         ans = expr_generate(now_AST->child, passing_down);
     }
+
     else if (res.count == 2) {
         IR_tuple ans_1 = expr_generate(now_AST->child);
         IR_tuple ans_2 = expr_generate(now_AST->last_child);
@@ -153,17 +197,6 @@ IR_tuple IRGen::expr_generate(std::shared_ptr<AST_node> now_AST, const IR_tuple&
             create_forth("", ans, "sub" + end_f, 0, ans_2);
         else if (now_AST->data == "+unary")
             now_register--;
-
-        if (ans.is_str && !passing_down.str.empty()) {
-            if (ans.str_type != passing_down.str_type) {
-                IR_tuple old_ans = ans;
-                ans.str_type = passing_down.str_type;
-                if (ans.str_type == basic_int || ans.str_type == basic_pointer)
-                    create_forth("", ans, "cast-int", old_ans);
-                else if (ans.str_type == basic_float)
-                    create_forth("", ans, "cast-float", old_ans);
-            }
-        }
     }
 
     return ans;
