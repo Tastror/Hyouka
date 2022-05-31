@@ -4,24 +4,19 @@
 
 #include "FrontOpt.h"
 
-struct tuple {
-    int count;
-    bool judge;
-};
-
-int_double_storage int_to_double(int x_type, int_double_storage x) {
+int_double_storage int_to_double(basic_type x_type, int_double_storage x) {
     if (x_type == basic_int || x_type == basic_pointer)
         x.double_value = (double) x.int_value;
     return x;
 }
 
-int_double_storage double_to_int(int x_type, int_double_storage x) {
+int_double_storage double_to_int(basic_type x_type, int_double_storage x) {
     if (x_type == basic_float)
         x.int_value = (int) x.double_value;
     return x;
 }
 
-basic_type implicit_conversion(int a, int b) {
+basic_type implicit_conversion(basic_type a, basic_type b) {
     if (a == basic_none || b == basic_none) {
         return basic_none;
     }
@@ -38,10 +33,10 @@ basic_type implicit_conversion(int a, int b) {
 }
 
 int_double_storage calculate(
-        int& type,
+        basic_type& type,
         const std::string& binary_operator,
-        int a_type, int_double_storage a,
-        int b_type, int_double_storage b
+        basic_type a_type, int_double_storage a,
+        basic_type b_type, int_double_storage b
 ) {
     int_double_storage res;
     if (type == basic_none) return res;
@@ -265,27 +260,6 @@ int_double_storage calculate(
     return res;
 }
 
-
-tuple count_child_number(const AST_PTR& now_node) {
-    if (now_node == nullptr) return (tuple){0, false};
-    tuple res = {0, true};
-    AST_PTR temp = now_node->child;
-    while (temp != nullptr) {
-        res.count++;
-        if (!temp->count_expr_ending)
-            res.judge = false;
-        if (temp->declaration_bound_sym_node != nullptr) {
-            if (temp->declaration_bound_sym_node->treat_as_constexpr) {
-                res.judge = true;
-                temp->value = temp->declaration_bound_sym_node->value;
-                temp->basic_type = temp->declaration_bound_sym_node->basic_type;
-            }
-        }
-        temp = temp->sister;
-    }
-    return res;
-}
-
 void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     if (now == nullptr) return;
     optimize_single(now->child, now);
@@ -306,7 +280,7 @@ void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     }
 
     if (now->type == Expression) {
-        tuple res = count_child_number(now);
+        AST_tuple res = AST_safe::count_child_number(now);
         if (res.judge) now->count_expr_ending = true;
         if (res.count == 1) {
             now->basic_type = now->child->basic_type;

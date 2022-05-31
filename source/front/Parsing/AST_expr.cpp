@@ -45,7 +45,7 @@ TOKEN_PTR ArrayUsageAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node =AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -110,7 +110,7 @@ TOKEN_PTR FunctionUsageAST::Parse() {
     }
 
     // v --- sym search & attribution --- v //
-    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
+    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
     if (temp_sym_node == nullptr) {
         AST_safe::RaiseError("Usage without definition", now_token);
         GoNext(); // ! important
@@ -269,7 +269,7 @@ TOKEN_PTR ExpressionAST::Parse() {
                     sym.push(token_to_AST);
 
                     // v --- sym search & attribution --- v //
-                    SYM_PTR temp_sym_node = head->search_id_name(token_safe::data(now_token));
+                    SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
                     if (temp_sym_node == nullptr) {
                         AST_safe::RaiseError("Usage without definition", now_token);
                         GoNext(); // ! important
