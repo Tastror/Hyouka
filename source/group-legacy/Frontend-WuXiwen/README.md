@@ -1,57 +1,30 @@
 # Frontend
-
 WuXiwen created in 2022.5.18
 
 
 ## Overview
 
-Generate lexer with flex == 2.6.4 
+### lexer 
+tool:flex == 2.6.4 
 
-Generate parser with bison == 3.5.1
+### parser 
+tool:bison == 3.5.1
 
 
 ## Usage
-
+```shell
 cd src 
-
 make 
-
 cd .. 
-
-./compiler mode input_file -o output_file
+./compiler AST debug/test.sysy -o test.txt
+```
 
 
 ## TODO
 
-Debug
-
-Semantic Check
-
-IR Generation
+Symbol_table
+More AST node
 
 
 ## References
 [北京大学编译实践课程在线文档](https://pku-minic.github.io/online-doc/#/lv1-main/lexer-parser)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
