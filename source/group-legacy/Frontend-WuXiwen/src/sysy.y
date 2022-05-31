@@ -9,6 +9,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
+#include <optional>
 #include "../include/ast.h"	// AST define
 
 // 声明 lexer 函数和错误处理函数
@@ -31,6 +33,8 @@ using namespace std;
   std::string *str_val;
   int int_val;
   BaseAST *ast_val;	//AST node
+  std::vector<BaseAST> vec_val; //vector 0~N
+  std::optional<BaseAST> opt_val; //optional 0/1
 }
 
 // lexer 返回的所有 token 种类的声明
@@ -41,6 +45,7 @@ using namespace std;
 %type <ast_val> FuncDef FuncType Block BlockItem Decl ConstDecl ConstDef ConstInitVal Stmt ConstExp Exp LOrExp LAndExp EqExp RelExp AddExp MulExp PrimaryExp UnaryExp
 %type <str_val> UnaryOp BType LVal 
 %type <int_val> Number
+%type <vec_val> BlockItemVector ConstDefVector
 
 %%
 
@@ -76,11 +81,31 @@ FuncType
   ;
 
 Block
-  : LBRACE BlockItem RBRACE {
+  : LBRACE RBRACE {
     auto ast = new BlockAST();
     ast->lbrace = *unique_ptr<string>($1);
-    ast->block_item = unique_ptr<BaseAST>($2);
+    ast->rbrace = *unique_ptr<string>($2);
+    $$ = ast;
+  }
+  | LBRACE BlockItemVector RBRACE {
+    auto ast = new BlockAST();
+    ast->lbrace = *unique_ptr<string>($1);
+    ast->block_item_vector = std::vector<std::unique_ptr<BaseAST>>($2);
     ast->rbrace = *unique_ptr<string>($3);
+    $$ = ast;
+  }
+  ;
+
+BlockItemVector
+  : BlockItem {
+    auto ast = new BlockAST();
+    ast->lbrace = *unique_ptr<string>($1);
+    $$ = ast;
+  }
+  | BlockItemVector BlockItem {
+    auto ast = new BlockAST();
+    ast->lbrace = *unique_ptr<string>($1);
+    ast->block_item_vector = std::vector<std::unique_ptr<BaseAST>>($2);
     $$ = ast;
   }
   ;
@@ -107,7 +132,19 @@ Decl
   ;
 
 ConstDecl
-  : CONST BType ConstDef {COMMA ConstDef} SEMI {
+  : CONST BType ConstDef SEMI {
+    auto ast = new ConstDeclAST();
+    ast->const_type = *unique_ptr<string>($1);
+    ast->btype = unique_ptr<BaseAST>($2);
+    ast->const_def = unique_ptr<BaseAST>($3);
+    
+    ast->comma = *unique_ptr<string>($4);
+    ast->const_def = unique_ptr<BaseAST>($5);
+    
+    ast->semi = *unique_ptr<string>($5);
+    $$ = ast;
+  }
+  | CONST BType ConstDef ConstDefVector SEMI {
     auto ast = new ConstDeclAST();
     ast->const_type = *unique_ptr<string>($1);
     ast->btype = unique_ptr<BaseAST>($2);
@@ -124,6 +161,19 @@ ConstDecl
 BType
   : INT {
     $$ = ($1);
+  }
+  ;
+
+ConstDefVector
+  : ConstDef {
+    auto ast = new DeclAST();
+    ast->const_decl = unique_ptr<BaseAST>($1);
+    $$ = ast;
+  }
+  | ConstDefVector ConstDef {
+    auto ast = new DeclAST();
+    ast->const_decl = unique_ptr<BaseAST>($1);
+    $$ = ast;
   }
   ;
 
