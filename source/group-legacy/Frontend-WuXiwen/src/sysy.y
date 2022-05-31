@@ -58,7 +58,7 @@ CompUnit
 // 解析完成后, 把这些符号的结果收集起来, 然后拼成一个新的字符串, 作为结果返回
 // $$ 表示非终结符的返回值, 我们可以通过给这个符号赋值的方法来返回结果
 FuncDef
-  : FuncType IDENT '(' ')' Block {
+  : FuncType IDENT LPAREN RPAREN Block {
     auto ast = new FuncDefAST();
     ast->func_type = unique_ptr<BaseAST>($1);
     ast->ident = *unique_ptr<string>($2);
@@ -128,7 +128,7 @@ BType
   ;
 
 ConstDef
-  : IDENT EQ ConstInitVal {
+  : IDENT ASSIGN ConstInitVal {
     auto ast = new ConstDefAST();
     ast->ident = *unique_ptr<string>($1);
     ast->eq = *unique_ptr<string>($2);
@@ -154,7 +154,7 @@ ConstExp
   ;
             
 Stmt
-  : RETURN Exp ';' {
+  : RETURN Exp SEMI {
     auto ast = new StmtAST();
     ast->rtn = *unique_ptr<string>($1);
     ast->exp = unique_ptr<BaseAST>($2);
@@ -356,7 +356,7 @@ PrimaryExp
   ;
 
 LVal
-  : INDENT {
+  : IDENT {
     $$ = ($1);
   }
   ;

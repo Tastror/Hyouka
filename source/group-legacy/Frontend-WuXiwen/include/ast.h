@@ -3,6 +3,8 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+#include <optional>
 
 class BaseAST {
  public:
@@ -116,6 +118,23 @@ class ConstDefAST : public BaseAST {
     std::cout << eq << std::endl;
     const_initval->Dump();
     std::cout << " }" << std::endl;
+  }
+};
+
+struct add_const_def_ast
+{
+  std::string comma;
+  ConstDefAST const_def;
+};
+
+class AddConstDefAST : public BaseAST {
+ public:
+  std::vector<add_const_def_ast> vec;
+  
+
+  void Dump() const override {
+    std::cout << vec.at << std::endl;
+    const_initval->Dump();
   }
 };
 
@@ -314,7 +333,7 @@ class PrimaryExpAST : public BaseAST {
     	exp->Dump();
     	std::cout << rparen;
     }
-    else if(lval)
+    else if(!lval.empty())
     	std::cout << lval;
     else
     	std::cout << number;
