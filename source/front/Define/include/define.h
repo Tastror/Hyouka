@@ -223,6 +223,7 @@ struct AST_node {
     static void connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
     static void reverse_connect_child(const std::shared_ptr<AST_node>& parent, const std::shared_ptr<AST_node>& child);
     void absorb_sym_attribution(const std::shared_ptr<symtable_node>& symtable_resource_node);
+    void copy(const std::shared_ptr<AST_node>& AST_resource_node);
     std::shared_ptr<symtable_node> search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head);
     std::shared_ptr<symtable_node> search_id_name(const std::string& search_name);
 
@@ -254,34 +255,36 @@ namespace AST_optimize_safe {
 // IRGen
 
 enum IR_type {
-    ir_calculate,
-    ir_function_define, ir_function_para, ir_function_call,
-    ir_punct, ir_label
+    ir_forth, ir_label
 };
 
 struct IR_node {
 
     // basic
+    int index = -1;
     IR_type ir_type = ir_label;
     std::shared_ptr<IR_node> next = nullptr;
 
-    // common
-    std::string name;
-    std::string type;  // "void" "i32" "float"
+    // normal
+    std::string target;
+    std::string type_tar;
+
+    // single: "alloca", "cast-double", "cast-int", "assign", "alias"
+    // double: "jump", "jumpe", "jumpn", "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
+    std::string opera;
+
+    std::string type_1;  // "void" "i32" "i32*" "float" "float*"
     bool org_1_using_value = false;
     std::string org_1;
     value_tuple value_1;
-    std::string org_2;  // 1 may be value, 2 must be name
 
-    // calculate
-    std::string opera;
-    int calculate_nums;
+    std::string type_2;  // "void" "i32" "i32*" "float" "float*"
+    bool org_2_using_value = false;
+    std::string org_2;
+    value_tuple value_2;
 
-    // function define
-    int args_num;
-
-    // punct
-    std::string punct;
+    // comment
+    std::string comment;
 
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
 };

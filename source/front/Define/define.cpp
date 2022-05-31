@@ -217,6 +217,7 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     }
     std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << (now->comment.empty() ? "" : " (" + now->comment + ")");
+    // std::cout << "\t" << now << ", " << now->child << ", " << now->sister << ", " << now->last_child;
     std::cout << std::endl;
     print_all(now->child, stage + 1);
     print_all(now->sister, stage);
@@ -262,6 +263,36 @@ void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symt
     array_nest_num = symtable_resource_node->array_nest_num;
     arg_num = symtable_resource_node->arg_num;
     function_type = symtable_resource_node->function_type;
+}
+
+void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
+    type = AST_resource_node->type;
+    data = AST_resource_node->data;
+    comment = AST_resource_node->comment;
+    symtable_ptr = AST_resource_node->symtable_ptr;
+
+    using_attribute = AST_resource_node->using_attribute;
+    name = AST_resource_node->name;
+    only_name = AST_resource_node->only_name;
+    basic_type = AST_resource_node->basic_type;
+    is_const = AST_resource_node->is_const;
+    is_static = AST_resource_node->is_static;
+    is_array_pointer = AST_resource_node->is_array_pointer;
+    is_function_pointer = AST_resource_node->is_function_pointer;
+    array_nest_num = AST_resource_node->array_nest_num;
+    arg_num = AST_resource_node->arg_num;
+    function_type = AST_resource_node->function_type;
+
+    count_expr_ending = AST_resource_node->count_expr_ending;
+
+    value = AST_resource_node->value;
+
+    declaration_bound_sym_node = AST_resource_node->declaration_bound_sym_node;
+
+//    sister = AST_resource_node->sister;
+//    child = AST_resource_node->child;
+//    last_child = AST_resource_node->last_child;
+
 }
 
 std::shared_ptr<symtable_node> AST_node::search_id_name(const std::string& search_name, const std::shared_ptr<symtable_node>& sym_head) {
@@ -317,31 +348,34 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
     if (now == nullptr) return;
     now = now->next;
     while (now != nullptr) {
-        if (now->ir_type == ir_calculate) {
-            if (now->calculate_nums == 1)
-                std::cout << now->name << " = "
-                          << now->opera << " "
-                          << now->type << " "
-                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1) << std::endl;
-            else if (now->calculate_nums == 2)
-                std::cout << now->name << " = "
-                          << now->opera << " "
-                          << now->type << " "
+        std::cout << now->index << "\t";
+        if (now->ir_type == ir_forth) {
+            std::cout << "    ";
+            if (now->opera == "jump")
+                std::cout << now->opera << " -> "
+                          << now->target;
+            else if (now->opera == "jumpe")
+                std::cout << now->opera << " -> "
+                          << now->target << " if "
+                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
+            else if (now->opera == "jumpn")
+                std::cout << now->opera << " -> "
+                          << now->target << " if-not "
+                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
+            else if (now->opera == "assign" || now->opera == "alias")
+                std::cout << now->target << " = "
+                          << now->opera << ", "
+                          << (now->org_1_using_value ? now->value_1.to_string() : now->org_1);
+            else
+                std::cout << now->target << " = "
+                          << now->opera << ", "
                           << (now->org_1_using_value ? now->value_1.to_string() : now->org_1) << ", "
-                          << now->org_2 << std::endl;
+                          << (now->org_2_using_value ? now->value_2.to_string() : now->org_2);
         }
-        else if (now->ir_type == ir_function_define)
-            std::cout << "define "
-                      << now->type << " "
-                      << now->name << " "
-                      << "; " << now->args_num << std::endl;
-        else if (now->ir_type == ir_function_para)
-            std::cout << now->type << " "
-                      << now->name << std::endl;
-        else if (now->ir_type == ir_punct)
-            std::cout << now->punct << std::endl;
-        else if (now->ir_type == ir_label)
-            std::cout << now->name << ":" << std::endl;
+        else if (now->ir_type == ir_label) {
+            std::cout << now->target << ":";
+        }
+        std::cout << (now->comment.empty() ? "" : "\t# " + now->comment)  << std::endl;
         now = now->next;
     }
 }

@@ -286,9 +286,10 @@ tuple count_child_number(const AST_PTR& now_node) {
     return res;
 }
 
-void optimize_single(const AST_PTR& now) {
+void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     if (now == nullptr) return;
-    optimize_single(now->child);
+    optimize_single(now->child, now);
+
     if (now->type == DeclarationStatement && now->data == "const") {
         AST_PTR child = now->child;
         while (child != nullptr && child->type == SingleDefinition) {
@@ -303,6 +304,7 @@ void optimize_single(const AST_PTR& now) {
             child = child->sister;
         }
     }
+
     if (now->type == Expression) {
         tuple res = count_child_number(now);
         if (res.judge) now->count_expr_ending = true;
@@ -326,10 +328,30 @@ void optimize_single(const AST_PTR& now) {
         if (res.judge) now->child = now->last_child = nullptr;
         // ^^^ --- ! important --- ^^^ //
     }
-    optimize_single(now->sister);
+
+    // destroy redundant statement
+    if (now->type == Statement || now->type == NormalStatement || now->type == DeclarationStatement) {
+        if (now->child != nullptr)
+            if (
+                now->child->type == SingleDefinition || now->child->type == ArrayDefinition ||
+                now->child->type == SingleAssignment || now->child->type == ArrayAssignment ||
+                now->child->type == NormalStatement || now->child->type == BlockStatement ||
+                now->child->type == KeywordStatement
+            )
+            {
+                now->copy(now->child);
+                AST_PTR temp = now->child;
+                now->child = temp->child;
+                now->last_child->sister = now->sister;
+                now->sister = temp->sister;
+                now->last_child = temp->last_child;
+            }
+    }
+
+    optimize_single(now->sister, parent);
 }
 
 void Front::Optimiser::Optimize(const AST_PTR& source_AST_head) {
-    optimize_single(source_AST_head);
+    optimize_single(source_AST_head, nullptr);
 }
 

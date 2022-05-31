@@ -9,10 +9,27 @@ int main() {
     float rea;
     res[0] = -.1;
     res[-1] = 1.23;
+
     while (i < 20) {
         float block;
         i = i + 1;;
         res[i] = res[i - 1] + res[i - 2];
+        if (res[i] > 50)
+            break;
+        else
+            continue;
+    }
+
+    if (i > 20) {
+        int y = 5;
+        y = y + 1;
+    }
+    else {
+        i = i - 50;
+    }
+
+    if (i < 0) {
+        123;
     }
 
     main2(res[3], 2, bin);
@@ -34,7 +51,7 @@ int main() {
     // return 9;
 
     int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
-    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * 7 && 5) + 1 + 2.4 * 8 - (1 - 1 || 0);
+    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 / 6) / 6 * i && 5) + 1 + 2.4 * 8 - (1 - 1 || 0);
     const int k = test_optimizer * 2 + 5;
     const int k2 = test_optimizer * 2 + kadaf2;
     const float hello[k][k] = {0, 1, 2};
