@@ -1,3 +1,4 @@
 .vscode
 /source/cmake-build-debug
 .idea
+build

@@ -3,6 +3,8 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
+#include <optional>
 
 class BaseAST {
  public:
@@ -48,12 +50,22 @@ class FuncTypeAST : public BaseAST {
 
 class BlockAST : public BaseAST {
  public:
-  std::unique_ptr<BaseAST> block_item;
+  std::unique_ptr<BaseAST> block_item_vector;
 
   void Dump() const override {
     std::cout << "BlockAST { " << std::endl;
-    block_item->Dump();
+    block_item_vector->Dump();
     std::cout << " }" << std::endl;
+  }
+};
+
+class BlockItemVectorAST : public BaseAST {
+ public:
+  std::vector<std::unique_ptr<BaseAST>> block_item_vector;
+
+  void Dump() const override {
+    for(int i=0;i<=block_item_vector.size()-1;i++)
+      block_item_vector[i]->Dump();
   }
 };
 
@@ -116,6 +128,24 @@ class ConstDefAST : public BaseAST {
     std::cout << eq << std::endl;
     const_initval->Dump();
     std::cout << " }" << std::endl;
+  }
+};
+
+struct add_const_def_ast
+{
+  std::string comma;
+  ConstDefAST const_def;
+};
+
+class AddConstDefAST : public BaseAST {
+ public:
+  std::vector<add_const_def_ast> vec;
+  
+  void Dump() const override {
+    for(int i=0;i<=vec.size()-1;i++){
+      std::cout<<vec[i].comma<<" ";
+      vec[i].const_def->Dump();
+    }
   }
 };
 
@@ -314,7 +344,7 @@ class PrimaryExpAST : public BaseAST {
     	exp->Dump();
     	std::cout << rparen;
     }
-    else if(lval)
+    else if(!lval.empty())
     	std::cout << lval;
     else
     	std::cout << number;
