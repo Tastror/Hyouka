@@ -310,13 +310,12 @@ struct IR_node {
     // normal
     IR_tuple target;
 
-    // single: "jump"
-    // double: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn", "reverse"
-    // triple: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
+    // target: "jump"
+    // target + org_1: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn"
+    // target + org_1 + org_2: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"
     std::string opera;
 
     IR_tuple org_1;
-
     IR_tuple org_2;
 
     std::string comment;

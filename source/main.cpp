@@ -7,7 +7,11 @@
 #include <string>
 #include <iostream>
 
+
 int main(int argc, char** argv) {
+
+
+    // shell
 
     std::string input_filename, output_filename, debug_mode, optimizer;
     bool to_assembly;
@@ -17,6 +21,9 @@ int main(int argc, char** argv) {
                   << "\nwhether to assembly = " << to_assembly << "\nwhich optimizer = " << optimizer << std::endl;
 
     if (Safe::GlobalError) return 1;
+
+
+    // frontend
 
     Lexical program_file(input_filename);
     program_file.Lexicalize();
@@ -53,6 +60,21 @@ int main(int argc, char** argv) {
         IR_node::print_all(IR_head);
 
     if (Safe::GlobalError) return 1;
+
+
+    // backend
+
+    // module
+    ActivityAnalyze act_ana(IR_head);
+    act_ana.Analyze();
+    const activitiy_graph& res = act_ana.graph;
+
+    // your nodes write in BackDefine.h;
+    // activitiy_graph write in BackDefine.h;
+
+    // factory write in your own .h & .cpp
+    // ActivityAnalyze write in your own .h & .cpp
+
 
     return 0;
 } 
