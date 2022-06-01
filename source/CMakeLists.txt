@@ -12,6 +12,7 @@ include_directories(
         front/Parsing/include
         front/Optimise/include
         front/IRGen/include
+        backend/Define/include
 )
 
 include_directories(
@@ -26,5 +27,7 @@ add_executable(hyouka
         front/Parsing/AST_keystmt.cpp
         front/Optimise/FrontOpt.cpp
         front/IRGen/IRGen.cpp
+        backend/Define/define.cpp
+        backend/ControlFlow/ControlFlow.cpp
         main.cpp
-)
+        )
