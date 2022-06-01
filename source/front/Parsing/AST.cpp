@@ -31,7 +31,7 @@ TOKEN_PTR SingleAssignmentAST::Parse() {
     AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
-    var_name->data = now_token->data;
+    var_name->data = token_safe::data(now_token);
     GoNext();
 
     if (token_safe::data(now_token) != "=") {
@@ -78,7 +78,7 @@ TOKEN_PTR ArrayAssignmentAST::Parse() {
     AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
-    var_name->data = now_token->data;
+    var_name->data = token_safe::data(now_token);
     GoNext();
 
     if (token_safe::data(now_token) != "[") {
@@ -149,7 +149,7 @@ TOKEN_PTR SingleDefinitionAST::Parse() {
     AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
-    var_name->data = now_token->data;
+    var_name->data = token_safe::data(now_token);
     GoNext();
 
     if (token_safe::data(now_token) == "=") {
@@ -245,7 +245,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     AST_PTR var_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, var_name);
     var_name->type = Identifier;
-    var_name->data = now_token->data;
+    var_name->data = token_safe::data(now_token);
     GoNext();
 
     if (token_safe::data(now_token) != "[") {
@@ -344,12 +344,10 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
     // AST_PTR var_type = std::make_shared<AST_node>();
     // AST_node::connect_child(head, var_type);
     // var_type->type = BasicType;
-    // var_type->data = now_token->data;
+    // var_type->data = token_safe::data(now_token);
 
     // v --- sym change --- v //
-    placeholder_sym_node.basic_type =
-            token_safe::data(now_token) == "int" ? basic_int :
-            token_safe::data(now_token) == "float" ? basic_float : basic_none;
+    placeholder_sym_node.value_and_type.stovt(token_safe::data(now_token));
     // ^ --- sym change --- ^ //
 
     GoNext();
@@ -369,13 +367,13 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
         sym_node.identifier_name = token_safe::data(now_token);
         sym_node.is_static = placeholder_sym_node.is_static;
         sym_node.is_const = placeholder_sym_node.is_const;
-        sym_node.basic_type = placeholder_sym_node.basic_type;
+        sym_node.value_and_type = placeholder_sym_node.value_and_type;
         // ^ --- sym --- ^ //
 
         if (token_safe::data(next_token) == "[") {
 
             // v --- sym change --- v //
-            sym_node.is_array_pointer = true;
+            sym_node.value_and_type.is_pointer = true;
             // ^ --- sym change --- ^ //
 
             // v --- sym append --- v //
@@ -444,13 +442,13 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
             sym_node.identifier_name = token_safe::data(now_token);
             sym_node.is_static = placeholder_sym_node.is_static;
             sym_node.is_const = placeholder_sym_node.is_const;
-            sym_node.basic_type = placeholder_sym_node.basic_type;
+            sym_node.value_and_type = placeholder_sym_node.value_and_type;
             // ^ --- sym --- ^ //
 
             if (token_safe::data(next_token) == "[") {
 
                 // v --- sym change --- v //
-                sym_node.is_array_pointer = true;
+                sym_node.value_and_type.is_pointer = true;
                 // ^ --- sym change --- ^ //
 
                 // v --- sym append --- v //
@@ -657,11 +655,10 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     // AST_PTR type_name = std::make_shared<AST_node>();
     // AST_node::connect_child(head, type_name);
     // type_name->type = BasicType;
-    // type_name->data = now_token->data;
+    // type_name->data = token_safe::data(now_token);
 
     // v --- sym --- v //
-    sym_node.basic_type = token_safe::data(now_token) == "int" ? basic_int :
-                          token_safe::data(now_token) == "float" ? basic_float : basic_none;
+    sym_node.value_and_type.stovt(token_safe::data(now_token));
     // ^ --- sym --- ^ //
 
     GoNext();
@@ -686,7 +683,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     AST_PTR id_name = std::make_shared<AST_node>();
     AST_node::connect_child(head, id_name);
     id_name->type = Identifier;
-    id_name->data = now_token->data;
+    id_name->data = token_safe::data(now_token);
     GoNext();
 
     // v --- sym append --- v //
@@ -696,7 +693,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     if (token_safe::data(now_token) == "[") {
 
         // v --- sym change --- v //
-        symtable_ptr->my_tail->is_array_pointer = true;
+        symtable_ptr->my_tail->value_and_type.is_pointer = true;
         symtable_ptr->my_tail->array_nest_num++;
         // ^ --- sym change --- ^ //
 
@@ -744,6 +741,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     }
 
     // v --- sym append & attribute --- v //
+    symtable_ptr->my_head->function_para_type.push_back(symtable_ptr->my_tail->value_and_type);
     head->absorb_sym_attribution(symtable_ptr->my_tail);
     head->declaration_bound_sym_node = symtable_ptr->my_tail;
     // ^ --- sym append & attribute --- ^ //
@@ -799,7 +797,8 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
 
     // v --- sym --- v //
     symtable_node sym_node;
-    sym_node.is_function_pointer = true;
+    sym_node.value_and_type.is_pointer = true;
+    sym_node.value_and_type.represent_type = basic_function;
     // ^ --- sym --- ^ //
 
     // v --- sym block --- v //
@@ -863,6 +862,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
 
     // v --- sym change --- v //
     sym_node.arg_num = func_para.GetBackSymtableAttribute()->arg_num;
+    sym_node.function_para_type = func_para.GetBackSymtableAttribute()->function_para_type;
     // ^ --- sym change --- ^ //
 
     // v --- sym append & attribute --- v //

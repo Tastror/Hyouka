@@ -48,12 +48,14 @@ int main() {
     x = .1;
     x = .1e10;
     x = .1e-200;
-    x = -.1e+20;
+    x = -.1e+1;
 
     // return 9;
 
-    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7;
-    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 % 6) + -6 * -Maxn - 5) + 1 + 2.4 * 8 - (1 - 1 || 0);
+    int kadaf2 = 1 + 2 * (-3 - 4) + (+5 % 1) + 6.7 * 7 + 0x1f;
+    const float ff = 1.2 + 1;
+    const int ii = 1.2;
+    const int test_optimizer = (1 + 2 * (-3 - 4) + (+5 % 6) + -6 * -Maxn - 5) + 1 + x + 2.4 * 8 - (1 - 1 || 0);
     const int k = test_optimizer * 2 + 5;
     const int k2 = test_optimizer * 2 + kadaf2;
     const float hello[k][k] = {0, 1, 2};

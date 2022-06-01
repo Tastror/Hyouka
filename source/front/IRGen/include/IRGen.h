@@ -15,15 +15,17 @@ public:
     IR_PTR now_ir;
     AST_PTR AST;
     static int line_num;
-
+    static int label_num;
     static int now_register;
 
     explicit IRGen(const std::shared_ptr<AST_node>& AST_head);
 
-    IR_PTR create_empty_ir();
-    IR_PTR create_label(const std::string& comment, const std::string& target);
-    IR_PTR create_forth(const std::string& comment, const IR_tuple& target,
+    void create_empty_ir();
+    void create_label(const std::string& comment, const std::string& target);
+    void create_forth(const std::string& comment, const IR_tuple& target,
                         const std::string& opera, const IR_tuple& org_1 = IR_tuple(), const IR_tuple& org_2 = IR_tuple());
+    void create_cast_or_assign(const std::string& comment, const IR_tuple& target, const IR_tuple& org_1);
+    void create_cast_or_not(const std::string& comment, IR_tuple& target_and_org, const IR_tuple& sample);
 
     void Generate();
 

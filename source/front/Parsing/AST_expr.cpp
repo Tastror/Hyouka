@@ -288,14 +288,9 @@ TOKEN_PTR ExpressionAST::Parse() {
                 AST_PTR token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
-                token_to_AST->basic_type = now_token->basic_type;
+                token_to_AST->value_and_type = now_token->value_and_type;
                 token_to_AST->count_expr_ending = true;
                 token_to_AST->using_attribute = true;
-                if (token_to_AST->basic_type == basic_int) {
-                    token_to_AST->value.int_value = now_token->value.int_value;
-                } else if (token_to_AST->basic_type == basic_float) {
-                    token_to_AST->value.double_value = now_token->value.double_value;
-                }
                 sym.push(token_to_AST);
                 GoNext();
             }
@@ -318,7 +313,6 @@ TOKEN_PTR ExpressionAST::Parse() {
             if (assign_operator(token_safe::data(now_token)) == 64) {
                 AST_PTR token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = "placeholder";
-                token_to_AST->basic_type = basic_int;
                 token_to_AST->count_expr_ending = true;
                 token_to_AST->type = Expression;
                 token_to_AST->using_attribute = true;
