@@ -324,4 +324,8 @@ struct IR_node {
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
 };
 
+namespace IR_safe {
+    void RaiseError(const std::string& error_code);
+}
+
 #define IR_PTR std::shared_ptr<IR_node>

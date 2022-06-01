@@ -25,7 +25,7 @@ public:
     void create_forth(const std::string& comment, const IR_tuple& target,
                         const std::string& opera, const IR_tuple& org_1 = IR_tuple(), const IR_tuple& org_2 = IR_tuple());
     void create_cast_or_assign(const std::string& comment, const IR_tuple& target, const IR_tuple& org_1);
-    void create_cast_or_not(const std::string& comment, IR_tuple& target_and_org, const IR_tuple& sample);
+    [[nodiscard]] IR_tuple create_cast_or_not(const std::string& comment, IR_tuple& target_and_org, const IR_tuple& sample);
 
     void Generate();
 
@@ -34,5 +34,6 @@ public:
     void function_generate(const std::shared_ptr<AST_node>& now_AST);
     void single_define_generate(const std::shared_ptr<AST_node>& now_AST);
     void if_generate(const std::shared_ptr<AST_node>& now_AST);
+    IR_tuple function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());
     IR_tuple expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());
 };

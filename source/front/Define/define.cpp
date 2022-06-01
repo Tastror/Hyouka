@@ -516,3 +516,8 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
         now = now->next;
     }
 }
+
+void IR_safe::RaiseError(const std::string& error_code) {
+    std::cout << "IR ERROR: " << error_code << std::endl;
+    Safe::GlobalError = true;
+}
