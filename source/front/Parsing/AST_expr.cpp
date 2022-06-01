@@ -133,6 +133,7 @@ TOKEN_PTR FunctionUsageAST::Parse() {
     GoNext();
 
     if (token_safe::data(now_token) == ")") {
+        GoNext();
         return now_token;
     }
 
