@@ -32,6 +32,20 @@ Tastror updated in 2022.6.1
 
 
 
+```
+IR_tuple
+
+is_name true: name, value_and_type, value_and_type.literal_value
+               √         √                      ×
+
+is_name false: name, value_and_type, value_and_type.literal_value
+                ×         √                     √
+```
+
+
+
+
+
 ## 规范
 
 ### 基本类型

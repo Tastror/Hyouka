@@ -9,6 +9,7 @@ int test(int x, int y) {
 int main() {
     float s = 75;
     int crash = 75;
-    int k = test(1 + s, crash * 2);
+    int x = 1 || test(1, 2);
+    int k = test(1 + s, crash * (2 + 5));
     return 0;
 }
