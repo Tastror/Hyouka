@@ -99,6 +99,10 @@ IR_tuple IRGen::create_cast_or_not(const std::string& comment, IR_tuple& target_
     return target_and_org;
 }
 
+
+
+
+
 void IRGen::Generate() {
     program_generate(AST);
 }
@@ -128,6 +132,9 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
             now = now->sister;
         }
     }
+    // void functions are here
+    else if (now_AST->type == NormalStatement)
+        expr_generate(now_AST);
 }
 
 
@@ -138,7 +145,7 @@ void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
     auto func_type = (function_type) now_AST->function_type;
     AST_PTR para = now_AST->child->sister->sister->child;
 
-    create_forth("", (std::string)"$paranum", "assign", now_AST->arg_num);
+    // create_forth("", (std::string)"$paranum", "assign", now_AST->arg_num);
 
     int in = 0;
     for (auto i : now_AST->declaration_bound_sym_node->function_para_type) {
@@ -177,6 +184,7 @@ void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
 }
 
 
+
 void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
     IR_tuple assign_target = now_AST->only_name;
@@ -193,6 +201,7 @@ void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
     }
 
 }
+
 
 
 IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down) {
@@ -230,6 +239,7 @@ IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST
     create_cast_or_assign("", ans, ret);
     return ans;
 }
+
 
 
 IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down) {
