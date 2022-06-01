@@ -65,9 +65,9 @@ int main(int argc, char** argv) {
     // backend
 
     // module
-    ActivityAnalyze act_ana(IR_head);
-    act_ana.Analyze();
-    const activitiy_graph& res = act_ana.graph;
+    //ActivityAnalyze act_ana(IR_head);
+    //act_ana.Analyze();
+    //const activitiy_graph& res = act_ana.graph;
 
     // your nodes write in BackDefine.h;
     // activitiy_graph write in BackDefine.h;
