@@ -81,21 +81,18 @@ public:
         now_token = now_token->next;
         now_token->data = data;
         now_token->type = type;
-        now_token->basic_type = basic_none;
         now_token->column = delay_column;
         now_token->line = line;
     }
 
     void save_int_node(int value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->basic_type = basic_int;
-        now_token->value.int_value = value;
+        now_token->value_and_type.assign_as(value);
     }
 
     void save_float_node(double value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->basic_type = basic_float;
-        now_token->value.double_value = value;
+        now_token->value_and_type.assign_as(value);
     }
 
     static bool is_number(char c) {

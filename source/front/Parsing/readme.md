@@ -27,7 +27,7 @@ Tastror updated in 2022.5.30
     bool using_attribute = false;
     std::string name;
     std::string only_name;
-    int basic_type = basic_none;
+    int basic_type = basic_any;
     bool is_const = false;
     bool is_static = false;
     bool is_array_pointer = false;
@@ -40,7 +40,7 @@ Tastror updated in 2022.5.30
     bool count_expr_ending = false;
 
     // field, use for Number (same as token node)
-    int_double_storage value;
+    int_double_storage value_and_type;
 
     // declaration bound sym node
     std::shared_ptr<symtable_node> declaration_bound_sym_node = nullptr;
@@ -57,7 +57,7 @@ Tastror updated in 2022.5.30
 - `normal` 是基础信息，注意 parent 被去掉了，防止使用 shared_ptr 的时候循环引用导致无法正常释放空间，所以这里只有引用平辈和引用子辈。
 - `symtable` 绑定了每个 AST 节点对应的符号表（符号表里又保存了可见域链来实现外部变量的引用，后面再提）
 - `attribution` 是关键点，保存了 AST 的属性。这里的属性一般很简单，但是在引用变量的时候是需要查符号表的，查询方式是使用 method 里的 search_id_name，最后使用 `AST_node.absorb_sym_attribution()` 来同步符号表的信息。
-- `field` 是当前 AST 的值，仅限 Number 使用。AST 的 Expression 的 Number 会独立同步 token_node 的 value。而 AST 的 Expression 部分的其他 value 的计算则不归语法分析管了（一部分归优化管，一部分直接写为 IR 的运算）。
+- `field` 是当前 AST 的值，仅限 Number 使用。AST 的 Expression 的 Number 会独立同步 token_node 的 value_and_type。而 AST 的 Expression 部分的其他 value_and_type 的计算则不归语法分析管了（一部分归优化管，一部分直接写为 IR 的运算）。
 - `declaration_bound_sym_node` 是当前 AST 绑定的符号节点，仅限「变量的定义和使用」使用。
 
 ### 2）语法树工厂
@@ -133,7 +133,7 @@ Tastror updated in 2022.5.30
 
     // attribute
     std::string only_name;
-    int basic_type = basic_none;
+    int basic_type = basic_any;
     bool is_const = false;
     bool is_static = false;
     bool is_array_pointer = false;
@@ -143,7 +143,7 @@ Tastror updated in 2022.5.30
     int function_type = function_none;
 
     // field, use for const
-    int_double_storage value;
+    int_double_storage value_and_type;
     bool treat_as_constexpr = false;
 
     // methods
@@ -159,9 +159,9 @@ Tastror updated in 2022.5.30
 
 ### 3）提示信息
 
-> **`symtable_node.value` 和 `symtable_node.treat_as_constexpr` 何时使用**
+> **`symtable_node.value_and_type` 和 `symtable_node.treat_as_constexpr` 何时使用**
 > 
-> 在 `front/Optimise` 的优化时，如果存在可以理解为 constexpr 表达式，会置 treat_as_constexpr 为真，并同步 AST_node 和 symtable_node 的 value。
+> 在 `front/Optimise` 的优化时，如果存在可以理解为 constexpr 表达式，会置 treat_as_constexpr 为真，并同步 AST_node 和 symtable_node 的 value_and_type。
 
 
 

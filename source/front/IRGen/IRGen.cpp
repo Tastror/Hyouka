@@ -3,8 +3,10 @@
 //
 
 #include "IRGen.h"
+#include "FrontOpt.h"
 
 int IRGen::line_num = 0;
+int IRGen::label_num = 0;
 int IRGen::now_register = 0;
 
 IRGen::IRGen(const std::shared_ptr<AST_node>& AST_head) {
@@ -13,15 +15,14 @@ IRGen::IRGen(const std::shared_ptr<AST_node>& AST_head) {
     AST = AST_head;
 }
 
-IR_PTR IRGen::create_empty_ir() {
+void IRGen::create_empty_ir() {
     IR_PTR new_ir = std::make_shared<IR_node>();
     now_ir->next = new_ir;
     now_ir = new_ir;
     now_ir->index = line_num++;
-    return now_ir;
 }
 
-IR_PTR IRGen::create_forth(const std::string& comment, const IR_tuple& target, const std::string& opera, const IR_tuple& org_1, const IR_tuple& org_2) {
+void IRGen::create_forth(const std::string& comment, const IR_tuple& target, const std::string& opera, const IR_tuple& org_1, const IR_tuple& org_2) {
     IR_PTR new_ir = std::make_shared<IR_node>();
     now_ir->next = new_ir;
     now_ir = new_ir;
@@ -32,10 +33,9 @@ IR_PTR IRGen::create_forth(const std::string& comment, const IR_tuple& target, c
     now_ir->org_1 = org_1;
     now_ir->org_2 = org_2;
     now_ir->index = line_num++;
-    return now_ir;
 }
 
-IR_PTR IRGen::create_label(const std::string& comment, const std::string& target) {
+void IRGen::create_label(const std::string& comment, const std::string& target) {
     IR_PTR new_ir = std::make_shared<IR_node>();
     now_ir->next = new_ir;
     now_ir = new_ir;
@@ -43,10 +43,44 @@ IR_PTR IRGen::create_label(const std::string& comment, const std::string& target
     now_ir->target = target;
     now_ir->comment = comment;
     now_ir->index = line_num++;
-    return now_ir;
 }
 
 
+void IRGen::create_cast_or_assign(const std::string& comment, const IR_tuple& target, const IR_tuple& org_1) {
+    if (target.name != org_1.name) {
+        if (org_1.value_and_type.represent_type != target.value_and_type.represent_type)
+            if (target.value_and_type.represent_type == basic_int || target.value_and_type.is_pointer)
+                create_forth(comment, target, "cast-int", org_1);
+            else if (target.value_and_type.represent_type == basic_float)
+                create_forth(comment, target, "cast-float", org_1);
+            else
+                create_forth(comment, target, "assign", org_1);
+        else
+            create_forth(comment, target, "assign", org_1);
+    }
+}
+
+
+void IRGen::create_cast_or_not(const std::string& comment, IR_tuple& target_and_org, const IR_tuple& sample) {
+    if (!target_and_org.is_name) {
+        if (sample.value_and_type.represent_type == basic_int || sample.value_and_type.is_pointer)
+            target_and_org.value_and_type.self_float_to_int();
+        else if (sample.value_and_type.represent_type == basic_float)
+            target_and_org.value_and_type.self_int_to_float();
+    }
+    if (target_and_org.value_and_type.represent_type != sample.value_and_type.represent_type) {
+        if (sample.value_and_type.represent_type == basic_int || sample.value_and_type.is_pointer) {
+            target_and_org.value_and_type.self_float_to_int();
+            create_forth(comment, target_and_org, "cast-int", target_and_org);
+        }
+
+        else if (sample.value_and_type.represent_type == basic_float) {
+            target_and_org.value_and_type.self_int_to_float();
+            create_forth(comment, target_and_org, "cast-float", target_and_org);
+        }
+
+    }
+}
 
 void IRGen::Generate() {
     program_generate(AST);
@@ -82,16 +116,20 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
-    create_label("", now_AST->only_name);
+    now_AST->declaration_bound_sym_node->label_name = "label_" + now_AST->only_name.substr(1);
+    create_label("", now_AST->declaration_bound_sym_node->label_name);
     auto func_type = (function_type) now_AST->function_type;
     AST_PTR para = now_AST->child->sister->sister->child;
 
-    create_forth("", (std::string)"$paranum", "assign", now_AST->arg_num, 0);
+    create_forth("", (std::string)"$paranum", "assign", now_AST->arg_num);
 
-    for (int i = 0; i < now_AST->arg_num; ++i) {
-        IR_tuple assign_target = para->only_name;
-        assign_target.str_type = para->basic_type;
-        create_forth("", assign_target, "assign", "$par" + std::to_string(i), 0);
+    int in = 0;
+    for (auto i : now_AST->declaration_bound_sym_node->function_para_type) {
+        IR_tuple assign_target(para->only_name);
+        assign_target.value_and_type = para->value_and_type;
+        IR_tuple par("$par" + std::to_string(++in));
+        par.value_and_type = i; // i and para->value_and_type are always same here, however they are not same in function usage
+        create_cast_or_assign("", assign_target, par);
         para = para->sister;
     }
 
@@ -101,7 +139,12 @@ void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
         if (block_child->type == KeywordStatement && block_child->data == "return") {
             if (func_type == function_int || func_type == function_float) {
                 IR_tuple res = expr_generate(block_child->child);
-                create_forth("", (std::string)"$ret", "assign", res);
+                IR_tuple ret("$ret");
+                if (now_AST->function_type == function_int)
+                    ret.value_and_type.stovt("int");
+                else if (now_AST->function_type == function_float)
+                    ret.value_and_type.stovt("float");
+                create_cast_or_assign("", ret, res);
             }
             create_forth("", (std::string)"$ra", "jump");
 
@@ -121,25 +164,16 @@ void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
 void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
     IR_tuple assign_target = now_AST->only_name;
-    assign_target.str_type = now_AST->basic_type;
+    assign_target.value_and_type = now_AST->value_and_type;
 
+    // default construction, however, C do not use it
     if (now_AST->last_child->type != Expression) {
         create_forth("", assign_target, "assign", 0);
     }
 
     else {
         IR_tuple res = expr_generate(now_AST->last_child, assign_target);
-        if (assign_target.str != res.str) {
-            if ((res.is_str && res.str_type != assign_target.str_type) || (!res.is_str && res.value.type != assign_target.str_type))
-                if (assign_target.str_type == basic_int || assign_target.str_type == basic_pointer)
-                    create_forth("", assign_target, "cast-int", res);
-                else if (assign_target.str_type == basic_float)
-                    create_forth("", assign_target, "cast-float", res);
-                else
-                    create_forth("", assign_target, "assign", res);
-            else
-                create_forth("", assign_target, "assign", res);
-        }
+        create_cast_or_assign("", assign_target, res);
     }
 
 }
@@ -153,13 +187,12 @@ IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR
 
     if (res.count == 0) {
         if (now_AST->count_expr_ending) {
-            ans.is_str = false;
-            ans.value.type = (basic_type) now_AST->basic_type;
-            ans.value.value = now_AST->value;
+            ans.is_name = false;
+            ans.value_and_type = now_AST->value_and_type;
         }
         else {
-            ans.str = now_AST->only_name;
-            ans.str_type = now_AST->basic_type;
+            ans.name = now_AST->only_name;
+            ans.value_and_type = now_AST->value_and_type;
         }
     }
 
@@ -168,35 +201,128 @@ IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR
     }
 
     else if (res.count == 2) {
-        IR_tuple ans_1 = expr_generate(now_AST->child);
-        IR_tuple ans_2 = expr_generate(now_AST->last_child);
 
-        ans.str_type = now_AST->basic_type;
+
+        ans.value_and_type = now_AST->value_and_type;
         std::string end_f;
-        if (now_AST->basic_type == basic_float)
+        if (now_AST->value_and_type.represent_type == basic_float)
             end_f = "f";
 
-        if (passing_down.str.empty()) {
-            now_register++;
-            ans.str = "%" + std::to_string(now_register);
-        } else {
-            ans.str = passing_down.str;
+
+        ans.name = "%" + std::to_string(++now_register);
+
+//        if (passing_down.name.empty()) {
+//            ans.name = "%" + std::to_string(++now_register);
+//        } else {
+//            ans.name = passing_down.name;
+//        }
+
+        // no short-cut
+        if (now_AST->data != "&&" && now_AST->data != "||") {
+            IR_tuple ans_1 = expr_generate(now_AST->child);
+            IR_tuple ans_2 = expr_generate(now_AST->last_child);
+
+            if (now_AST->data == "+") {
+                create_cast_or_not("", ans_1, ans);
+                create_cast_or_not("", ans_2, ans);
+                create_forth("", ans, "add" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "-") {
+                create_cast_or_not("", ans_1, ans);
+                create_cast_or_not("", ans_2, ans);
+                create_forth("", ans, "sub" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "*") {
+                create_cast_or_not("", ans_1, ans);
+                create_cast_or_not("", ans_2, ans);
+                create_forth("", ans, "mul" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "/") {
+                create_cast_or_not("", ans_1, ans);
+                create_cast_or_not("", ans_2, ans);
+                create_forth("", ans, "div" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "%")
+                create_forth("", ans, "mod", ans_1, ans_2);
+            else if (now_AST->data == "-unary")
+                create_forth("", ans, "sub" + end_f, 0, ans_2);
+            else if (now_AST->data == "+unary")
+                --now_register;
+            else if (now_AST->data == "!") {
+                create_cast_or_assign("", ans, 0);
+                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", ans_2);
+                create_cast_or_assign("", ans, 1);
+                create_label("! operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+            }
+            else if (now_AST->data == "==") {
+                create_cast_or_assign("", ans, 0);
+                IR_tuple foo("%" + std::to_string(++now_register));
+                foo.value_and_type = Optimize_Useful::implicit_conversion(ans_1.value_and_type, ans_2.value_and_type);
+                std::string end_f_addi;
+                if (foo.value_and_type.represent_type == basic_float)
+                    end_f_addi = "f";
+                create_cast_or_not("", ans_1, foo);
+                create_cast_or_not("", ans_2, foo);
+                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
+                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", foo);
+                create_cast_or_assign("", ans, 1);
+                create_label("== operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+            }
+            else if (now_AST->data == "!=") {
+                create_cast_or_assign("", ans, 0);
+                IR_tuple foo("%" + std::to_string(++now_register));
+                foo.value_and_type = Optimize_Useful::implicit_conversion(ans_1.value_and_type, ans_2.value_and_type);
+                std::string end_f_addi;
+                if (foo.value_and_type.represent_type == basic_float)
+                    end_f_addi = "f";
+                create_cast_or_not("", ans_1, foo);
+                create_cast_or_not("", ans_2, foo);
+                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
+                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpe", foo);
+                create_cast_or_assign("", ans, 1);
+                create_label("!= operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+            }
+            else if (now_AST->data == ">=") {
+                create_forth("", ans, "goe" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "<=") {
+                create_forth("", ans, "loe" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == ">") {
+                create_forth("", ans, "great" + end_f, ans_1, ans_2);
+            }
+            else if (now_AST->data == "<"){
+                create_forth("", ans, "less" + end_f, ans_1, ans_2);
+            }
+            else {
+
+            }
         }
 
-        if (now_AST->data == "+")
-            create_forth("", ans, "add" + end_f, ans_1, ans_2);
-        else if (now_AST->data == "-")
-            create_forth("", ans, "sub" + end_f, ans_1, ans_2);
-        else if (now_AST->data == "*")
-            create_forth("", ans, "mul" + end_f, ans_1, ans_2);
-        else if (now_AST->data == "/")
-            create_forth("", ans, "div" + end_f, ans_1, ans_2);
-        else if (now_AST->data == "%")
-            create_forth("", ans, "mod", ans_1, ans_2);
-        else if (now_AST->data == "-unary")
-            create_forth("", ans, "sub" + end_f, 0, ans_2);
-        else if (now_AST->data == "+unary")
-            now_register--;
+        // short-cut
+        else {
+            if (now_AST->data == "&&") {
+                int my_label_num = ++label_num;
+                create_cast_or_assign("", ans, 0);
+                IR_tuple ans_1 = expr_generate(now_AST->child);
+                create_forth("", "temp_label_" + std::to_string(my_label_num), "jumpe", ans_1);
+                IR_tuple ans_2 = expr_generate(now_AST->last_child);
+                create_forth("", "temp_label_" + std::to_string(my_label_num), "jumpe", ans_2);
+                create_cast_or_assign("", ans, 1);
+                create_label("&& operator exit, ans is " + ans.name, "temp_label_" + std::to_string(my_label_num));
+            }
+            else if (now_AST->data == "||") {
+                int my_label_num = ++label_num;
+                create_cast_or_assign("", ans, 1);
+                IR_tuple ans_1 = expr_generate(now_AST->child);
+                create_forth("", "temp_label_" + std::to_string(my_label_num), "jumpn", ans_1);
+                IR_tuple ans_2 = expr_generate(now_AST->last_child);
+                create_forth("", "temp_label_" + std::to_string(my_label_num), "jumpn", ans_2);
+                create_cast_or_assign("", ans, 0);
+                create_label("|| operator exit, ans is " + ans.name, "temp_label_" + std::to_string(my_label_num));
+            }
+        }
+
     }
 
     return ans;

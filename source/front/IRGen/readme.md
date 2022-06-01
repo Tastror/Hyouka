@@ -1,4 +1,4 @@
-# 语义分析 & 前端优化
+# Hyouka 四元式规范
 
 Tastror updated in 2022.6.1
 
@@ -32,16 +32,15 @@ Tastror updated in 2022.6.1
 
 
 
-## 转换规范
+## 规范
 
-### 隐式转换规范
+### 基本类型
 
-| value_and_type_tuple a | value_and_type_tuple b | 结果        |
-| ------------- | ------------- | ----------- |
-| 相同          | 相同          | 相同        |
-| basic_any     | basic_any下方任意 | b    |
-| basic_int     | basic_int下方任意 | b |
-| basic_float | basic_float下方任意 | 【报错】 |
-| basic_any\* | basic_any*下方任意 | b |
-| any\* 外其他任意指针 | any\* 外其他任意不同的指针 | 【报错】  |
+```
+ir_forth
+    [index]  target : operator : org_1 : org2  #  comment
+
+ir_label
+    [index]  target  #  comment
+```
 

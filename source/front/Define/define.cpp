@@ -13,15 +13,100 @@
 
 bool Safe::GlobalError = false;
 
-std::string value_tuple::to_string() {
-    if (type == basic_int || type == basic_pointer)
-        return std::to_string(value.int_value);
-    else if (type == basic_float)
-        return std::to_string(value.double_value);
+std::string literal_value_storage::to_string() const {
+    if (literal_type == literal_int)
+        return std::to_string(literal_value.int_value);
+    else if (literal_type == literal_float)
+        return std::to_string(literal_value.double_value);
     else
-        return "";
+        return "NaN";
 }
 
+std::string value_and_type_tuple::to_string(bool attribute) const{
+    if (attribute)
+        return "[" + basic_type_string_name[represent_type] + (is_pointer ? "*" : "") + "]" + literal_value.to_string();
+    else
+        return literal_value.to_string();
+}
+
+std::string value_and_type_tuple::type_to_string() const{
+    return basic_type_string_name[represent_type] + (is_pointer ? "*" : "");
+}
+
+void value_and_type_tuple::assign_as(int x) {
+    is_pointer = false;
+    represent_type = basic_int;
+    literal_value.literal_type = literal_int;
+    literal_value.literal_value.int_value = x;
+}
+
+void value_and_type_tuple::assign_as(double x) {
+    is_pointer = false;
+    represent_type = basic_float;
+    literal_value.literal_type = literal_float;
+    literal_value.literal_value.double_value = x;
+}
+
+void value_and_type_tuple::stovt(const std::string& str) {
+    if (str == "int") {
+        is_pointer = false;
+        represent_type = basic_int;
+        literal_value.literal_type = literal_int;
+    } else if (str == "float" || str == "double") {
+        is_pointer = false;
+        represent_type = basic_float;
+        literal_value.literal_type = literal_float;
+    } else if (str == "int*") {
+        is_pointer = true;
+        represent_type = basic_int;
+        literal_value.literal_type = literal_int;
+    } else if (str == "float*" || str == "double*") {
+        is_pointer = true;
+        represent_type = basic_float;
+        literal_value.literal_type = literal_int;
+    } else if (str == "function" || str == "function*") {
+        is_pointer = true;
+        represent_type = basic_function;
+        literal_value.literal_type = literal_int;
+    } else {
+        // do nothing
+    }
+    // is pointer can be modified later
+}
+
+void value_and_type_tuple::self_float_to_int() {
+    if (is_pointer || represent_type == basic_int)
+        return;
+    // represent_type == basic_float or basic_any
+    represent_type = basic_int;
+    if (literal_value.literal_type == literal_float) {
+        literal_value.literal_type = literal_int;
+        literal_value.literal_value.int_value = (int) literal_value.literal_value.double_value;
+    }
+}
+
+void value_and_type_tuple::self_int_to_float() {
+    if (is_pointer || represent_type == basic_float)
+        return;
+    // represent_type == basic_int or basic_any
+    represent_type = basic_float;
+    if (literal_value.literal_type == literal_int) {
+        literal_value.literal_type = literal_float;
+        literal_value.literal_value.double_value = (double) literal_value.literal_value.int_value;
+    }
+}
+
+bool value_and_type_tuple::self_check() const {
+    if (is_pointer && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_int))
+        return true;
+    if (!is_pointer && represent_type == basic_any)
+        return true;
+    if (!is_pointer && represent_type == basic_int && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_int))
+        return true;
+    if (!is_pointer && represent_type == basic_float && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_float))
+        return true;
+    return false;
+}
 
 
 
@@ -63,12 +148,7 @@ void token_node::print_all(const std::shared_ptr<token_node>& head) {
     while (now != nullptr) {
         std::cout << token_type_string_name[now->type] << ", " << now->line << ", " << now->column << ", " << now->data;
         if (now->type == NUMBER) {
-            std::cout << ", ";
-            if (now->basic_type == 1) {
-                std::cout  << "int: " << now->value.int_value;
-            } else if (now->basic_type == 2) {
-                std::cout  << "float: " << now->value.double_value;
-            }
+            std::cout << ", " << now->value_and_type.to_string();
         }
         std::cout << "\n";
         now = now->next;
@@ -100,25 +180,22 @@ void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_he
         if (now->is_head) std::cout << "[head] ";
         std::cout << "name: " << now->identifier_name;
         std::cout << ", only_name: " << now->only_name;
-        if (now->is_function_pointer) {
-            std::cout << ", is_function_pointer";
+        std::cout << ", basic_type: " << now->value_and_type.type_to_string();
+        if (now->value_and_type.is_pointer && now->value_and_type.represent_type == basic_function) {
+            std::cout << ", function_pointer";
             std::cout << ", function_type: " << function_type_string_name[now->function_type];
             std::cout << ", arg_num: " << now->arg_num;
-        } else if (now->is_array_pointer) {
-            std::cout << ", is_array_pointer";
-            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
+            if (now->arg_num > 0) {
+                for (auto i : now->function_para_type)
+                    std::cout << ", " << i.type_to_string();
+            }
+        } else if (now->value_and_type.is_pointer) {
+            std::cout << ", array_pointer";
             std::cout << ", array_nest_num: " << now->array_nest_num;
-        } else {
-            std::cout << ", is_basic_type";
-            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
         }
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
-        if (now->treat_as_constexpr) std::cout << ", treat_as_constexpr, value = " << (
-                    now->basic_type == basic_float ? std::to_string(now->value.double_value) :
-                    now->basic_type == basic_int || now->basic_type == basic_pointer ? std::to_string(now->value.int_value) :
-                    "NaN"
-                );
+        if (now->treat_as_constexpr) std::cout << ", treat_as_constexpr, value_and_type = " << now->value_and_type.to_string();
         std::cout << std::endl;
         now = now->next;
     }
@@ -190,30 +267,21 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     if (now->using_attribute) {
         if (!now->only_name.empty())
             std::cout << ", only_name: " << now->only_name;
-        if (now->is_function_pointer) {
-            std::cout << ", is_function_pointer";
+            std::cout << ", basic_type: " << now->value_and_type.type_to_string();
+        if (now->value_and_type.is_pointer && now->value_and_type.represent_type == basic_function) {
+            std::cout << ", function_pointer";
             std::cout << ", function_type: " << function_type_string_name[now->function_type];
             std::cout << ", arg_num: " << now->arg_num;
-        } else if (now->is_array_pointer) {
-            std::cout << ", is_array_pointer";
-            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
+        } else if (now->value_and_type.is_pointer) {
+            std::cout << ", array_pointer";
             std::cout << ", array_nest_num: " << now->array_nest_num;
-        } else {
-            std::cout << ", is_basic_type";
-            std::cout << ", basic_type: " << basic_type_string_name[now->basic_type];
         }
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
     }
     if (now->type == Number || now->count_expr_ending) {
         if (now->count_expr_ending) std::cout << ", count_expr_ending";
-        if (now->basic_type == 1) {
-            std::cout  << ", int: " << now->value.int_value;
-        } else if (now->basic_type == 2) {
-            std::cout  << ", float: " << now->value.double_value;
-        } else {
-            std::cout << ", data: " << now->data;
-        }
+        std::cout << ", " << now->value_and_type.to_string();
     }
     std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << (now->comment.empty() ? "" : " (" + now->comment + ")");
@@ -255,11 +323,9 @@ void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symt
     using_attribute = true;
     name = symtable_resource_node->identifier_name;
     only_name = symtable_resource_node->only_name;
-    basic_type = symtable_resource_node->basic_type;
+    value_and_type = symtable_resource_node->value_and_type;
     is_const = symtable_resource_node->is_const;
     is_static = symtable_resource_node->is_static;
-    is_array_pointer = symtable_resource_node->is_array_pointer;
-    is_function_pointer = symtable_resource_node->is_function_pointer;
     array_nest_num = symtable_resource_node->array_nest_num;
     arg_num = symtable_resource_node->arg_num;
     function_type = symtable_resource_node->function_type;
@@ -274,18 +340,14 @@ void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
     using_attribute = AST_resource_node->using_attribute;
     name = AST_resource_node->name;
     only_name = AST_resource_node->only_name;
-    basic_type = AST_resource_node->basic_type;
+    value_and_type = AST_resource_node->value_and_type;
     is_const = AST_resource_node->is_const;
     is_static = AST_resource_node->is_static;
-    is_array_pointer = AST_resource_node->is_array_pointer;
-    is_function_pointer = AST_resource_node->is_function_pointer;
     array_nest_num = AST_resource_node->array_nest_num;
     arg_num = AST_resource_node->arg_num;
     function_type = AST_resource_node->function_type;
 
     count_expr_ending = AST_resource_node->count_expr_ending;
-
-    value = AST_resource_node->value;
 
     declaration_bound_sym_node = AST_resource_node->declaration_bound_sym_node;
 }
@@ -335,8 +397,7 @@ AST_tuple AST_safe::count_child_number(const std::shared_ptr<AST_node>& now_node
         if (temp->declaration_bound_sym_node != nullptr) {
             if (temp->declaration_bound_sym_node->treat_as_constexpr) {
                 res.judge = true;
-                temp->value = temp->declaration_bound_sym_node->value;
-                temp->basic_type = temp->declaration_bound_sym_node->basic_type;
+                temp->value_and_type = temp->declaration_bound_sym_node->value_and_type;
             }
         }
         temp = temp->sister;
@@ -375,42 +436,48 @@ void AST_optimize_safe::RaiseError(const std::string& error_code) {
 
 // IRGen
 
-std::string IR_tuple::to_string() {
-    if (is_str) {
-        if (str_type == basic_float)
-            return "[float] " + str;
-        else if (str_type == basic_int || str_type == basic_pointer)
-            return "[int] " + str;
+std::string IR_tuple::to_string(bool attribute) const {
+    if (attribute)
+        if (is_name)
+            return "{name}[" + value_and_type.type_to_string() + "]" + name;
         else
-            return "[none] " + str;
-    }
-    else if (value.type == basic_float) return "[float] " + value.to_string();
-    else if (value.type == basic_int || value.type == basic_pointer) return "[int] " + value.to_string();
-    else return "[none]";
+            return value_and_type.to_string();
+    else
+        if (is_name)
+            return name;
+        else
+            return value_and_type.to_string(false);
 }
 
 IR_tuple::IR_tuple() {
-    is_str = true;
-    str_type = basic_none;
-    str = "";
+    is_name = true;
 }
 
-IR_tuple::IR_tuple(const std::string& str) {
-    is_str = true;
-    str_type = basic_none;
-    this->str = str;
+IR_tuple::IR_tuple(const std::string& str, basic_type type) {
+    is_name = true;
+    this->name = str;
+    value_and_type.represent_type = type;
 }
 
 IR_tuple::IR_tuple(int int_num) {
-    is_str = false;
-    value.type = basic_int;
-    value.value.int_value = int_num;
+    is_name = false;
+    value_and_type.represent_type = basic_int;
+    value_and_type.literal_value.literal_type = literal_int;
+    value_and_type.literal_value.literal_value.int_value = int_num;
 }
 
 IR_tuple::IR_tuple(double double_num) {
-    is_str = false;
-    value.type = basic_float;
-    value.value.double_value = double_num;
+    is_name = false;
+    value_and_type.represent_type = basic_float;
+    value_and_type.literal_value.literal_type = literal_float;
+    value_and_type.literal_value.literal_value.double_value = double_num;
+}
+
+IR_tuple::IR_tuple(basic_type pointer_represent_type) {
+    is_name = false;
+    value_and_type.represent_type = pointer_represent_type;
+    value_and_type.is_pointer = true;
+    value_and_type.literal_value.literal_type = literal_int;
 }
 
 void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
@@ -423,16 +490,16 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
             std::cout << "    ";
             if (now->opera == "jump")
                 std::cout << now->opera << " -> "
-                          << now->target.to_string();
+                          << now->target.to_string(false);
             else if (now->opera == "jumpe")
                 std::cout << now->opera << " -> "
-                          << now->target.to_string() << " if "
-                          << now->org_1.to_string();
+                          << now->target.to_string(false) << " if "
+                          << now->org_1.to_string() << " == zero";
             else if (now->opera == "jumpn")
                 std::cout << now->opera << " -> "
-                          << now->target.to_string() << " if-not "
-                          << now->org_1.to_string();
-            else if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float")
+                          << now->target.to_string(false) << " if "
+                          << now->org_1.to_string() << " != zero";
+            else if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float" || now->opera == "reverse")
                 std::cout << now->target.to_string() << " = "
                           << now->opera << ", "
                           << now->org_1.to_string();
@@ -443,7 +510,7 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
                           << now->org_2.to_string();
         }
         else if (now->ir_type == ir_label) {
-            std::cout << now->target.to_string() << ":";
+            std::cout << now->target.to_string(false) << ":";
         }
         std::cout << (now->comment.empty() ? "" : "\t# " + now->comment)  << std::endl;
         now = now->next;

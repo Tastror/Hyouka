@@ -13,8 +13,13 @@
 
 // all will use
 
+enum literal_type {
+    literal_none = 0, literal_int, literal_float
+};
+
 enum basic_type {
-    basic_none = 0, basic_int, basic_float, basic_pointer
+    basic_any = 0, basic_int, basic_float, basic_function
+    // basic_function only use in pointer !!!
 };
 
 enum function_type {
@@ -22,23 +27,41 @@ enum function_type {
 };
 
 const std::string basic_type_string_name[] = {
-        "basic_none", "basic_int", "basic_float", "basic_pointer"
+        "basic_any", "basic_int", "basic_float", "basic_function"
 };
 
 const std::string function_type_string_name[] = {
         "function_none", "function_int", "function_float", "function_void"
 };
 
-union int_double_storage {
-    int int_value;
-    double double_value = 0.0;
-    int ptr_address_value;
+struct literal_value_storage {
+
+    literal_type literal_type = literal_none;
+    union {
+        int int_value;
+        double double_value = 0.0;
+    } literal_value;
+
+    [[nodiscard]] std::string to_string() const;
 };
 
-struct value_tuple {
-    basic_type type = basic_none;
-    int_double_storage value;
-    std::string to_string();
+struct value_and_type_tuple {
+
+    bool is_pointer = false;
+    basic_type represent_type = basic_any;
+    literal_value_storage literal_value;
+
+    [[nodiscard]] std::string to_string(bool attribute = true) const;
+    [[nodiscard]] std::string type_to_string() const;
+
+    void assign_as(int x);
+    void assign_as(double x);
+    void stovt(const std::string& str);
+
+    void self_float_to_int();
+    void self_int_to_float();
+
+    [[nodiscard]] bool self_check() const;
 };
 
 namespace Safe {
@@ -68,8 +91,7 @@ struct token_node {
     std::shared_ptr<token_node> next = nullptr;
 
     // attribute
-    basic_type basic_type = basic_none;
-    int_double_storage value;
+    value_and_type_tuple value_and_type;
 
     // print
     static void print_all(const std::shared_ptr<token_node>& head);
@@ -100,18 +122,19 @@ struct symtable_node {
 
     // attribute
     std::string only_name;
-    basic_type basic_type = basic_none;
+    value_and_type_tuple value_and_type;
     bool is_const = false;
     bool is_static = false;
-    bool is_array_pointer = false;
-    bool is_function_pointer = false;
     int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
+    std::vector<value_and_type_tuple> function_para_type;
 
     // field, use for const
-    int_double_storage value;
     bool treat_as_constexpr = false;
+
+    // use for ir
+    std::string label_name;
 
     // methods
     void rename();
@@ -201,20 +224,15 @@ struct AST_node {
     bool using_attribute = false;
     std::string name;
     std::string only_name;
-    basic_type basic_type = basic_none;
+    value_and_type_tuple value_and_type;
     bool is_const = false;
     bool is_static = false;
-    bool is_array_pointer = false;
-    bool is_function_pointer = false;
     int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
 
     // use for Expr optimise
     bool count_expr_ending = false;
-
-    // field, use for Number (same as token node)
-    int_double_storage value;
 
     // declaration bound sym node
     std::shared_ptr<symtable_node> declaration_bound_sym_node = nullptr;
@@ -267,17 +285,18 @@ enum IR_type {
 
 struct IR_tuple {
 
-    bool is_str;
-    basic_type str_type;
-    std::string str;
-    value_tuple value;
+    bool is_name;
+    std::string name;
 
-    std::string to_string();
+    value_and_type_tuple value_and_type;
+
+    [[nodiscard]] std::string to_string(bool attribute = true) const;
 
     IR_tuple();
-    IR_tuple(const std::string& str);
+    IR_tuple(const std::string& str, basic_type type = basic_any);
     IR_tuple(int int_num);
     IR_tuple(double double_num);
+    IR_tuple(basic_type pointer_represent_type);
 
 };
 
@@ -289,21 +308,17 @@ struct IR_node {
     std::shared_ptr<IR_node> next = nullptr;
 
     // normal
-    std::string type_tar;
     IR_tuple target;
 
     // single: "jump"
-    // double: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn"
+    // double: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn", "reverse"
     // triple: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "sll", "srl", "sra"
     std::string opera;
 
-    std::string type_1;  // "void" "i32" "i32*" "float" "float*"
     IR_tuple org_1;
 
-    std::string type_2;  // "void" "i32" "i32*" "float" "float*"
     IR_tuple org_2;
 
-    // comment
     std::string comment;
 
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
