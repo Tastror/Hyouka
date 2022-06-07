@@ -3,6 +3,7 @@
 #include "AST.h"
 #include "FrontOpt.h"
 #include "IRGen.h"
+#include "CFG.h"
 
 #include <string>
 #include <iostream>
@@ -64,8 +65,9 @@ int main(int argc, char** argv) {
 
     /***************  backend  ***************/
 
-    /*
+
     // Control Flow Graph
+    /*
     CFG cfg(IR_head);
     cfg.Generate();
     const CFG_PTR& CFG_head = cfg.head;
@@ -73,7 +75,8 @@ int main(int argc, char** argv) {
         CFG_node::print_all(CFG_head);
 
     if (Safe::GlobalError) return 1;
-    */
+     */
+
 
     // module
     //ActivityAnalyze act_ana(IR_head);
