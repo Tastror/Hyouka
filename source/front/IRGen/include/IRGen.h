@@ -6,7 +6,7 @@
 #include <iostream>
 #include <utility>
 
-#include "define.h"
+#include "backend_define.h"
 
 
 class IRGen {

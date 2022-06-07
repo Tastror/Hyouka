@@ -28,7 +28,7 @@ add_executable(hyouka
         front/Parsing/AST_keystmt.cpp
         front/Optimise/FrontOpt.cpp
         front/IRGen/IRGen.cpp
-        backend/Define/define.cpp
+        backend/Define/backend_define.cpp
         backend/CFG/CFG.cpp
         main.cpp
         )
