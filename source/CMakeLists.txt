@@ -13,6 +13,7 @@ include_directories(
         front/Optimise/include
         front/IRGen/include
         backend/Define/include
+        backend/CFG/include
 )
 
 include_directories(
@@ -28,6 +29,6 @@ add_executable(hyouka
         front/Optimise/FrontOpt.cpp
         front/IRGen/IRGen.cpp
         backend/Define/define.cpp
-        backend/ControlFlow/ControlFlow.cpp
+        backend/CFG/CFG.cpp
         main.cpp
         )
