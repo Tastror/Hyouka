@@ -62,7 +62,18 @@ int main(int argc, char** argv) {
     if (Safe::GlobalError) return 1;
 
 
-    // backend
+    /***************  backend  ***************/
+
+    /*
+    // Control Flow Graph
+    CFG cfg(IR_head);
+    cfg.Generate();
+    const CFG_PTR& CFG_head = cfg.head;
+    if (debug_mode == "cfg")
+        CFG_node::print_all(CFG_head);
+
+    if (Safe::GlobalError) return 1;
+    */
 
     // module
     //ActivityAnalyze act_ana(IR_head);
