@@ -66,16 +66,26 @@ int main(int argc, char** argv) {
     /***************  backend  ***************/
 
 
+    // Basic Block Partition
+
+    BB bb(IR_head);
+    bb.Generate();
+    const BB_PTR& BB_head = bb.head;
+    if (debug_mode == "bb")
+        BB_node::print_all(BB_head);
+
+    if (Safe::GlobalError) return 1;
+
     // Control Flow Graph
-    /*
-    CFG cfg(IR_head);
+
+    CFG cfg(BB_head);
     cfg.Generate();
     const CFG_PTR& CFG_head = cfg.head;
     if (debug_mode == "cfg")
         CFG_node::print_all(CFG_head);
 
     if (Safe::GlobalError) return 1;
-     */
+
 
 
     // module
