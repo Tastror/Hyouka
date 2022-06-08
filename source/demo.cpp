@@ -8,7 +8,7 @@ int a[10][10];
 const int Maxn = 10005;
 
 int main() {
-    int res[0400], i = 1, bin[4][5] = {4 * 7, 2, 3};
+    int res[0400], i = 1, bin[4][5] = {{4 * 7, 2, 3}, {1, 5}};
     float rea;
     res[0] = -.1;
     res[-1] = 1.23;

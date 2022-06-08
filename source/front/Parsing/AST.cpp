@@ -87,8 +87,12 @@ TOKEN_PTR ArrayAssignmentAST::Parse() {
     }
     GoNext();
 
+    AST_PTR index_ast = std::make_shared<AST_node>();
+    AST_node::connect_child(head, index_ast);
+    index_ast->type = Index;
+
     ExpressionAST index(now_token, symtable_ptr);
-    AST_node::connect_child(head, index.head);
+    AST_node::connect_child(index_ast, index.head);
     index.head->data = "value";
     index.head->comment = "index";
     now_token = index.Parse();
@@ -104,7 +108,7 @@ TOKEN_PTR ArrayAssignmentAST::Parse() {
         GoNext();
 
         ExpressionAST index_addi(now_token, symtable_ptr);
-        AST_node::connect_child(head, index_addi.head);
+        AST_node::connect_child(index_ast, index_addi.head);
         index_addi.head->data = "value";
         index_addi.head->comment = "index";
         now_token = index_addi.Parse();
@@ -253,14 +257,18 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
         return now_token;
     }
 
+    AST_PTR index_ast = std::make_shared<AST_node>();
+    AST_node::connect_child(head, index_ast);
+    index_ast->type = Index;
+
     // v --- sym change --- v //
-    symtable_ptr->my_tail->array_nest_num++;
+    symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
     // ^ --- sym change --- ^//
 
     GoNext();
 
     ExpressionAST index(now_token, symtable_ptr);
-    AST_node::connect_child(head, index.head);
+    AST_node::connect_child(index_ast, index.head);
     index.head->data = "value";
     index.head->comment = "index";
     now_token = index.Parse();
@@ -275,13 +283,13 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     while (token_safe::data(now_token) == "[") {
 
         // v --- sym change --- v //
-        symtable_ptr->my_tail->array_nest_num++;
+        symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
         // ^ --- sym change --- ^//
 
         GoNext();
 
         ExpressionAST index_addi(now_token, symtable_ptr);
-        AST_node::connect_child(head, index_addi.head);
+        AST_node::connect_child(index_ast, index_addi.head);
         index_addi.head->data = "value";
         index_addi.head->comment = "index";
         now_token = index_addi.Parse();
@@ -694,7 +702,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
 
         // v --- sym change --- v //
         symtable_ptr->my_tail->value_and_type.is_pointer = true;
-        symtable_ptr->my_tail->array_nest_num++;
+        symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
         // ^ --- sym change --- ^ //
 
         GoNext();
@@ -720,7 +728,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
         while (token_safe::data(now_token) == "[") {
 
             // v --- sym change --- v //
-            symtable_ptr->my_tail->array_nest_num++;
+            symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
             // ^ --- sym change --- ^ //
 
             GoNext();

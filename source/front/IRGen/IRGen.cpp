@@ -104,6 +104,7 @@ IR_tuple IRGen::create_cast_or_not(const std::string& comment, IR_tuple& target_
 
 
 void IRGen::Generate() {
+    if (AST->type != ProgramBody) return;
     program_generate(AST);
 }
 
@@ -120,11 +121,11 @@ void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
+
     if (now_AST == nullptr) return;
-    else if (now_AST->type == FunctionDefinition)
-        function_generate(now_AST);
-    else if (now_AST->type == SingleDefinition)
-        single_define_generate(now_AST);
+
+    // recursive
+
     else if (now_AST->type == BlockStatement) {
         AST_PTR now = now_AST->child;
         while (now != nullptr) {
@@ -132,7 +133,25 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
             now = now->sister;
         }
     }
-    // void functions are here
+
+    // Defines
+
+    else if (now_AST->type == FunctionDefinition)
+        function_generate(now_AST);
+    else if (now_AST->type == SingleDefinition)
+        single_define_generate(now_AST);
+    else if (now_AST->type == ArrayDefinition)
+        array_define_generate(now_AST);
+
+    // Assigns
+
+    else if (now_AST->type == SingleAssignment)
+        single_assign_generate(now_AST);
+    else if (now_AST->type == ArrayAssignment)
+        array_assign_generate(now_AST);
+
+    // Expression
+
     else if (now_AST->type == NormalStatement)
         expr_generate(now_AST);
 }
@@ -204,6 +223,59 @@ void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 
+void IRGen::array_define_generate(const std::shared_ptr<AST_node>& now_AST) {
+
+    IR_tuple assign_target(now_AST->only_name);
+    assign_target.value_and_type = now_AST->value_and_type;
+
+    // default construction, however, C do not use it
+    if (now_AST->last_child->type != Expression) {
+        create_forth("", assign_target, "assign", 0);
+    }
+
+    else {
+        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
+        create_cast_or_assign("", assign_target, res);
+    }
+
+}
+
+void IRGen::single_assign_generate(const std::shared_ptr<AST_node> &now_AST) {
+
+    IR_tuple assign_target(now_AST->only_name);
+    assign_target.value_and_type = now_AST->value_and_type;
+
+    // default construction, however, C do not use it
+    if (now_AST->last_child->type != Expression) {
+        create_forth("", assign_target, "assign", 0);
+    }
+
+    else {
+        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
+        create_cast_or_assign("", assign_target, res);
+    }
+
+}
+
+void IRGen::array_assign_generate(const std::shared_ptr<AST_node>& now_AST) {
+
+    IR_tuple assign_target(now_AST->only_name);
+    assign_target.value_and_type = now_AST->value_and_type;
+
+    // default construction, however, C do not use it
+    if (now_AST->last_child->type != Expression) {
+        create_forth("", assign_target, "assign", 0);
+    }
+
+    else {
+        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
+        create_cast_or_assign("", assign_target, res);
+    }
+
+}
+
+
+
 IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down) {
 
     IR_tuple ans, ret("$ret");
@@ -234,7 +306,7 @@ IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST
         para = para->sister;
     }
 
-    create_forth("", (std::string)now_AST->declaration_bound_sym_node->label_name, "jump");
+    create_forth("", (std::string)now_AST->declaration_bound_sym_node->label_name, "call");
 
     create_cast_or_assign("", ans, ret);
     return ans;

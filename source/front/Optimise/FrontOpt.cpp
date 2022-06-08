@@ -53,7 +53,17 @@ value_and_type_tuple Optimize_Useful::implicit_conversion(const value_and_type_t
     }
 }
 
-value_and_type_tuple binary_operator_implicit_conversion(
+AST_PTR Optimize_Useful::get_last_child(const AST_PTR& statement_ast) {
+    if (statement_ast == nullptr) return nullptr;
+    AST_PTR now = statement_ast->child, res = nullptr;
+    while (now != nullptr) {
+        res = now;
+        now = now->sister;
+    }
+    return res;
+}
+
+value_and_type_tuple Optimize_Useful::binary_operator_implicit_conversion(
         const std::string& binary_operator,
         const value_and_type_tuple& a,
         const value_and_type_tuple& b
@@ -82,7 +92,7 @@ value_and_type_tuple binary_operator_implicit_conversion(
 
 // contains many meddle error which need to be thrown by binary_operator_implicit_conversion()
 // waiting for refactor  TBD...
-value_and_type_tuple calculate(
+value_and_type_tuple Optimize_Useful::calculate(
         const std::string& binary_operator,
         const value_and_type_tuple& a,
         const value_and_type_tuple& b
@@ -332,7 +342,7 @@ value_and_type_tuple calculate(
     return res;
 }
 
-void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
+void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     if (now == nullptr) return;
     optimize_single(now->child, now);
 
@@ -366,13 +376,13 @@ void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
                 now->value_and_type = now->child->value_and_type;
         }
         if (res.count == 2) {
-            value_and_type_tuple temp = binary_operator_implicit_conversion(
+            value_and_type_tuple temp = Optimize_Useful::binary_operator_implicit_conversion(
                 now->data, now->child->value_and_type, now->last_child->value_and_type
             );
             now->value_and_type.is_pointer = temp.is_pointer;
             now->value_and_type.represent_type = temp.represent_type;
             if (res.judge)
-                now->value_and_type = calculate(now->data, now->child->value_and_type, now->last_child->value_and_type);
+                now->value_and_type = Optimize_Useful::calculate(now->data, now->child->value_and_type, now->last_child->value_and_type);
         }
 
         // vvv --- ! important --- vvv //
@@ -382,7 +392,7 @@ void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     }
 
     // destroy redundant statement
-    if (now->type == Statement || now->type == NormalStatement || now->type == DeclarationStatement) {
+    if (now->type == Statement || now->type == NormalStatement ||now->type == DeclarationStatement) {
         if (now->child != nullptr)
             if (
                 now->child->type == SingleDefinition || now->child->type == ArrayDefinition ||
@@ -391,10 +401,13 @@ void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
                 now->child->type == KeywordStatement
             )
             {
+                now->last_child = Optimize_Useful::get_last_child(now);
+
+                // warning: now->parent->last_child has not changed !!!
                 now->copy(now->child);
                 AST_PTR temp = now->child;
-                now->child = temp->child;
                 now->last_child->sister = now->sister;
+                now->child = temp->child;
                 now->sister = temp->sister;
                 now->last_child = temp->last_child;
             }
@@ -404,6 +417,6 @@ void optimize_single(const AST_PTR& now, const AST_PTR& parent) {
 }
 
 void Front::Optimiser::Optimize(const AST_PTR& source_AST_head) {
-    optimize_single(source_AST_head, nullptr);
+    Front::Optimiser::optimize_single(source_AST_head, nullptr);
 }
 

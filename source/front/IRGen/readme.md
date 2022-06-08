@@ -58,3 +58,73 @@ ir_label
     [index]  target  #  comment
 ```
 
+
+
+
+
+## Parse 优化后的接口要求
+
+只能有如下内容出现在外层，并且其内层格式必须形如描述。
+
+[] 表示必须在该位置但可选，{} 表示任意位置且可选，无框表示必须在该位置且必须出现
+
+### 1，ProgramBody（✓）
+
+```
+ProgramBody
+    {FunctionDefinition}
+    {SingleDefinition}
+    {ArrayDefinition}
+```
+
+
+
+### 2，FunctionDefinition（✓）
+
+```
+FunctionDefinition
+    FunctionType
+    Identifier
+    FunctionParams
+    BlockStatement
+```
+
+
+
+### 3，SingleDefinition
+
+```
+SingleDefinition
+    Identifier
+    [Expression]
+```
+
+
+
+### 4，ArrayDefinition
+
+```
+ArrayDefinition
+    Identifier
+    Index
+    [ArrayInitialBlock]
+```
+
+
+
+### 5，BlockStatement
+
+```
+BlockStatement
+    {BlockStatement}
+    {SingleDefinition}
+    {ArrayDefinition}
+    {SingleAssignment}
+    {ArrayAssignment}
+    {KeywordStatement}
+    {NormalStatement}
+```
+
+
+
+### 6，
