@@ -39,4 +39,12 @@ public:
     void if_generate(const std::shared_ptr<AST_node>& now_AST);
     IR_tuple function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());
     IR_tuple expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());
+
+    void count_array_init_block(
+        const std::shared_ptr<AST_node>& init,
+        const std::vector<int>& index_list,
+        const IR_tuple& assign_unit, const IR_tuple& assign_target,
+        int stair, int offset_base
+    );
+
 };

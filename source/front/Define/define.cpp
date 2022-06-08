@@ -670,7 +670,7 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
                 std::cout << now->opera << " -> "
                           << now->target.to_string(false) << " if "
                           << now->org_1.to_string() << " != zero";
-            else if (now->opera == "assign" || now->opera == "cast-int" || now->opera == "cast-float" || now->opera == "reverse")
+            else if (now->opera == "assign" || now->opera == "addr_assign" || now->opera == "cast-int" || now->opera == "cast-float" || now->opera == "reverse")
                 std::cout << now->target.to_string() << " = "
                           << now->opera << ", "
                           << now->org_1.to_string();
