@@ -13,104 +13,307 @@
 
 bool Safe::GlobalError = false;
 
+
+
 std::string literal_value_storage::to_string() const {
+    if (!literal_used)
+        return "NaN";
     if (literal_type == literal_int)
         return std::to_string(literal_value.int_value);
-    else if (literal_type == literal_float)
-        return std::to_string(literal_value.double_value);
     else
-        return "NaN";
+        return std::to_string(literal_value.float_value);
 }
 
-std::string value_and_type_tuple::to_string(bool attribute) const{
-    if (attribute)
-        return "[" + basic_type_string_name[represent_type] +
-            (is_pointer ? "*" + (pointer_nest_num != 0 ? "<" + std::to_string(pointer_nest_num) + ">" : "") : "")
-            + "]" + literal_value.to_string();
+bool literal_value_storage::used() const {
+    return literal_used;
+}
+
+void literal_value_storage::make_unused() {
+    literal_used = false;
+}
+
+void literal_value_storage::change_to_int() {
+    if (literal_type == literal_float)
+        literal_value.int_value = (int)literal_value.float_value;
+    literal_type = literal_int;
+}
+
+void literal_value_storage::change_to_float() {
+    if (literal_type == literal_int)
+        literal_value.float_value = (double)literal_value.int_value;
+    literal_type = literal_float;
+}
+
+void literal_value_storage::cast_and_assign(int x) {
+    literal_used = true;
+    if (literal_type == literal_int)
+        literal_value.int_value = (int)x;
     else
-        return literal_value.to_string();
+        literal_value.float_value = (double)x;
 }
 
-std::string value_and_type_tuple::type_to_string() const{
-    return basic_type_string_name[represent_type]
-        + (is_pointer ? "*" + (pointer_nest_num != 0 ? "<" + std::to_string(pointer_nest_num) + ">" : "") : "");
+void literal_value_storage::cast_and_assign(double x) {
+    literal_used = true;
+    if (literal_type == literal_int)
+        literal_value.int_value = (int)x;
+    else
+        literal_value.float_value = (double)x;
 }
 
-void value_and_type_tuple::assign_as(int x) {
+enum literal_type literal_value_storage::get_literal_type() const {
+    return literal_type;
+}
+
+int literal_value_storage::get_int_value() const {
+    return literal_value.int_value;
+}
+
+double literal_value_storage::get_float_value() const {
+    return literal_value.float_value;
+}
+
+
+
+std::string type_storage::to_string() const {
+    return "[" + basic_type_string_name[represent_type] +
+           (is_pointer ? "*" + (pointer_nest_num != 0 ? "<" + std::to_string(pointer_nest_num) + ">" : "") : "")
+           + "]";
+}
+
+bool type_storage::used() const {
+    return represent_type != basic_unused;
+}
+
+bool type_storage::self_check() const {
+    if (represent_type == basic_function && !is_pointer)
+        return false;
+    if (pointer_nest_num < 0)
+        return false;
+    return true;
+}
+
+void type_storage::make_unused() {
+    represent_type = basic_unused;
     is_pointer = false;
-    represent_type = basic_int;
-    literal_value.literal_type = literal_int;
-    literal_value.literal_value.int_value = x;
+    pointer_nest_num = 0;
 }
 
-void value_and_type_tuple::assign_as(double x) {
-    is_pointer = false;
-    represent_type = basic_float;
-    literal_value.literal_type = literal_float;
-    literal_value.literal_value.double_value = x;
+void type_storage::add_nest() {
+    pointer_nest_num++;
 }
 
-void value_and_type_tuple::stovt(const std::string& str) {
+int type_storage::nest_num() const {
+    return pointer_nest_num;
+}
+
+
+
+std::string value_and_type_storage::to_string() const {
+    if (storage_value.used())
+        return storage_type.to_string() + " " + storage_value.to_string();
+    return storage_type.to_string();
+}
+
+bool value_and_type_storage::used() const {
+    return storage_type.used();
+}
+
+void value_and_type_storage::make_unused() {
+    storage_type.make_unused();
+    storage_value.make_unused();
+}
+
+void value_and_type_storage::change_to_int() {
+    storage_type.represent_type = basic_int;
+    storage_value.change_to_int();
+}
+
+void value_and_type_storage::change_to_float() {
+    storage_type.represent_type = basic_float;
+    storage_value.change_to_float();
+}
+
+void value_and_type_storage::change_to_pointer() {
+    storage_type.is_pointer = true;
+    storage_value.change_to_int();
+}
+
+void value_and_type_storage::add_nest() {
+    storage_type.add_nest();
+}
+
+int value_and_type_storage::nest_num() const {
+    return storage_type.nest_num();
+}
+
+int value_and_type_storage::get_int_value() const {
+    return storage_value.get_int_value();
+}
+
+double value_and_type_storage::get_float_value() const {
+    return storage_value.get_float_value();
+}
+
+
+void value_and_type_storage::parse_from_string(const std::string &str) {
+    make_unused();
     if (str == "int") {
-        is_pointer = false;
-        represent_type = basic_int;
-        literal_value.literal_type = literal_int;
+        storage_type.represent_type = basic_int;
+        storage_value.change_to_int();
     } else if (str == "float" || str == "double") {
-        is_pointer = false;
-        represent_type = basic_float;
-        literal_value.literal_type = literal_float;
+        storage_type.represent_type = basic_float;
+        storage_value.change_to_float();
     } else if (str == "int*") {
-        is_pointer = true;
-        represent_type = basic_int;
-        literal_value.literal_type = literal_int;
+        storage_type.is_pointer = true;
+        storage_type.represent_type = basic_int;
+        storage_value.change_to_int();
     } else if (str == "float*" || str == "double*") {
-        is_pointer = true;
-        represent_type = basic_float;
-        literal_value.literal_type = literal_int;
+        storage_type.is_pointer = true;
+        storage_type.represent_type = basic_float;
+        storage_value.change_to_int();
     } else if (str == "function" || str == "function*") {
-        is_pointer = true;
-        represent_type = basic_function;
-        literal_value.literal_type = literal_int;
+        storage_type.is_pointer = true;
+        storage_type.represent_type = basic_function;
+        storage_value.change_to_int();
+    } else if (str == "void") {
+       storage_type.represent_type = basic_void;
     } else {
         // do nothing
     }
-    // is pointer can be modified later
 }
 
-void value_and_type_tuple::self_float_to_int() {
-    if (is_pointer || represent_type == basic_int)
-        return;
-    // represent_type == basic_float or basic_any
-    represent_type = basic_int;
-    if (literal_value.literal_type == literal_float) {
-        literal_value.literal_type = literal_int;
-        literal_value.literal_value.int_value = (int) literal_value.literal_value.double_value;
+void value_and_type_storage::parse_from_basic_type(basic_type type, bool is_pointer) {
+    make_unused();
+    storage_type.represent_type = type;
+    if (is_pointer) {
+        storage_value.change_to_int();
+    } else {
+        if (type == basic_float)
+            storage_value.change_to_float();
+        else
+            storage_value.change_to_int();
     }
 }
 
-void value_and_type_tuple::self_int_to_float() {
-    if (is_pointer || represent_type == basic_float)
-        return;
-    // represent_type == basic_int or basic_any
-    represent_type = basic_float;
-    if (literal_value.literal_type == literal_int) {
-        literal_value.literal_type = literal_float;
-        literal_value.literal_value.double_value = (double) literal_value.literal_value.int_value;
-    }
+
+
+std::string identify_value_type_tuple::to_string() const {
+    std::string res = self_storage.to_string();
+    if (return_storage.used())
+        res += " return " + return_storage.to_string();
+    if (!additional_storage_vector.empty())
+        res += " para";
+    for (const auto& i : additional_storage_vector)
+        res += " " + i.to_string();
+    return res;
 }
 
-bool value_and_type_tuple::self_check() const {
-    if (is_pointer && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_int))
-        return true;
-    if (!is_pointer && represent_type == basic_any)
-        return true;
-    if (!is_pointer && represent_type == basic_int && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_int))
-        return true;
-    if (!is_pointer && represent_type == basic_float && (literal_value.literal_type == literal_none || literal_value.literal_type == literal_float))
-        return true;
-    return false;
+bool identify_value_type_tuple::used() const {
+    return self_storage.used();
 }
 
+void identify_value_type_tuple::make_unused() {
+    self_storage.make_unused();
+    return_storage.make_unused();
+    std::vector<identify_value_type_tuple>().swap(additional_storage_vector);
+}
+
+void identify_value_type_tuple::reset_and_assign_as_int(int x) {
+    make_unused();
+    self_storage.change_to_int();
+    self_storage.storage_value.cast_and_assign(x);
+}
+
+void identify_value_type_tuple::reset_and_assign_as_float(double x) {
+    make_unused();
+    self_storage.change_to_float();
+    self_storage.storage_value.cast_and_assign(x);
+}
+
+void identify_value_type_tuple::reset_and_parse_from_basic_type(basic_type type, bool is_pointer) {
+    make_unused();
+    self_storage.parse_from_basic_type(type, is_pointer);
+}
+
+void identify_value_type_tuple::reset_and_parse_from_string(const std::string& str) {
+    make_unused();
+    self_storage.parse_from_string(str);
+}
+
+type_storage identify_value_type_tuple::self_type() const {
+    return self_storage.storage_type;
+}
+
+bool identify_value_type_tuple::self_is_pointer() const {
+    return self_storage.storage_type.is_pointer;
+}
+
+basic_type identify_value_type_tuple::self_basic_type() const {
+    return self_storage.storage_type.represent_type;
+}
+
+void identify_value_type_tuple::self_change_to_int() {
+    self_storage.change_to_int();
+}
+
+void identify_value_type_tuple::self_change_to_float() {
+    self_storage.change_to_float();
+}
+
+void identify_value_type_tuple::self_change_to_pointer() {
+    self_storage.change_to_pointer();
+}
+
+void identify_value_type_tuple::self_add_nest() {
+    self_storage.add_nest();
+}
+
+int identify_value_type_tuple::self_get_int_value() const {
+    return self_storage.get_int_value();
+}
+
+double identify_value_type_tuple::self_get_float_value() const {
+    return self_storage.get_float_value();
+}
+
+int identify_value_type_tuple::self_nest_num() const {
+    return self_storage.nest_num();
+}
+
+void identify_value_type_tuple::return_storage_parse_from_string(const std::string& str) {
+    return_storage.parse_from_string(str);
+}
+
+type_storage identify_value_type_tuple::return_type() const {
+    return return_storage.storage_type;
+}
+
+bool identify_value_type_tuple::return_is_pointer() const {
+    return return_storage.storage_type.is_pointer;
+}
+
+basic_type identify_value_type_tuple::return_basic_type() const {
+    return return_storage.storage_type.represent_type;
+}
+
+void identify_value_type_tuple::additional_storage_push(const identify_value_type_tuple& IVTT) {
+    additional_storage_vector.push_back(IVTT);
+}
+
+void identify_value_type_tuple::additional_storage_push(const std::string& str) {
+    identify_value_type_tuple temp;
+    temp.return_storage_parse_from_string(str);
+    additional_storage_vector.push_back(temp);
+};
+
+void identify_value_type_tuple::additional_storage_pop() {
+    if (additional_storage_vector.empty()) return;
+    additional_storage_vector.pop_back();
+};
+
+int identify_value_type_tuple::parameter_num() const {
+    return (int) additional_storage_vector.size();
+}
 
 
 
@@ -151,7 +354,7 @@ void token_node::print_all(const std::shared_ptr<token_node>& head) {
     while (now != nullptr) {
         std::cout << token_type_string_name[now->type] << ", " << now->line << ", " << now->column << ", " << now->data;
         if (now->type == NUMBER) {
-            std::cout << ", " << now->value_and_type.to_string();
+            std::cout << ", " << now->IVTT.to_string();
         }
         std::cout << "\n";
         now = now->next;
@@ -183,21 +386,10 @@ void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_he
         if (now->is_head) std::cout << "[head] ";
         std::cout << "name: " << now->identifier_name;
         std::cout << ", only_name: " << now->only_name;
-        std::cout << ", basic_type: " << now->value_and_type.type_to_string();
-        if (now->value_and_type.is_pointer && now->value_and_type.represent_type == basic_function) {
-            std::cout << ", function_pointer";
-            std::cout << ", function_type: " << function_type_string_name[now->function_type];
-            std::cout << ", arg_num: " << now->arg_num;
-            if (now->arg_num > 0) {
-                for (auto i : now->function_para_type)
-                    std::cout << ", " << i.type_to_string();
-            }
-        } else if (now->value_and_type.is_pointer) {
-            std::cout << ", array_pointer";
-        }
+        std::cout << ", IVTT: " << now->IVTT.to_string();
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
-        if (now->treat_as_constexpr) std::cout << ", treat_as_constexpr, value_and_type = " << now->value_and_type.to_string();
+        if (now->treat_as_constexpr) std::cout << ", treat_as_constexpr";
         std::cout << std::endl;
         now = now->next;
     }
@@ -269,24 +461,14 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     if (now->using_attribute) {
         if (!now->only_name.empty())
             std::cout << ", only_name: " << now->only_name;
-            std::cout << ", basic_type: " << now->value_and_type.type_to_string();
-        if (now->value_and_type.is_pointer && now->value_and_type.represent_type == basic_function) {
-            std::cout << ", function_pointer";
-            std::cout << ", function_type: " << function_type_string_name[now->function_type];
-            std::cout << ", arg_num: " << now->arg_num;
-        } else if (now->value_and_type.is_pointer) {
-            std::cout << ", array_pointer";
-        }
+        std::cout << ", IVTT: " << now->IVTT.to_string();
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
     }
-    if (now->type == Number || now->count_expr_ending) {
-        if (now->count_expr_ending) std::cout << ", count_expr_ending";
-        std::cout << ", " << now->value_and_type.to_string();
-    }
+    if (now->count_expr_ending) std::cout << ", count_expr_ending";
     std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << (now->comment.empty() ? "" : " (" + now->comment + ")");
-    std::cout << "    #" << now << ", ch-" << now->child << ", si-" << now->sister << ", lc-" << now->last_child;
+    // std::cout << "    #" << now << ", ch-" << now->child << ", si-" << now->sister << ", lc-" << now->last_child;
     std::cout << std::endl;
     print_all(now->child, stage + 1);
     print_all(now->sister, stage);
@@ -324,11 +506,9 @@ void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symt
     using_attribute = true;
     name = symtable_resource_node->identifier_name;
     only_name = symtable_resource_node->only_name;
-    value_and_type = symtable_resource_node->value_and_type;
+    IVTT = symtable_resource_node->IVTT;
     is_const = symtable_resource_node->is_const;
     is_static = symtable_resource_node->is_static;
-    arg_num = symtable_resource_node->arg_num;
-    function_type = symtable_resource_node->function_type;
 }
 
 void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
@@ -340,11 +520,9 @@ void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
     using_attribute = AST_resource_node->using_attribute;
     name = AST_resource_node->name;
     only_name = AST_resource_node->only_name;
-    value_and_type = AST_resource_node->value_and_type;
+    IVTT = AST_resource_node->IVTT;
     is_const = AST_resource_node->is_const;
     is_static = AST_resource_node->is_static;
-    arg_num = AST_resource_node->arg_num;
-    function_type = AST_resource_node->function_type;
 
     count_expr_ending = AST_resource_node->count_expr_ending;
 
@@ -396,7 +574,7 @@ AST_tuple AST_safe::count_child_number(const std::shared_ptr<AST_node>& now_node
         if (temp->declaration_bound_sym_node != nullptr) {
             if (temp->declaration_bound_sym_node->treat_as_constexpr) {
                 res.judge = true;
-                temp->value_and_type = temp->declaration_bound_sym_node->value_and_type;
+                temp->IVTT = temp->declaration_bound_sym_node->IVTT;
             }
         }
         temp = temp->sister;
@@ -438,14 +616,14 @@ void AST_optimize_safe::RaiseError(const std::string& error_code) {
 std::string IR_tuple::to_string(bool attribute) const {
     if (attribute)
         if (is_name)
-            return "{name}[" + value_and_type.type_to_string() + "]" + name;
+            return "{name}[" + IVTT.to_string() + "]" + name;
         else
-            return value_and_type.to_string();
+            return IVTT.to_string();
     else
         if (is_name)
             return name;
         else
-            return value_and_type.to_string(false);
+            return IVTT.to_string();
 }
 
 IR_tuple::IR_tuple() {
@@ -455,28 +633,22 @@ IR_tuple::IR_tuple() {
 IR_tuple::IR_tuple(const std::string& str, basic_type type) {
     is_name = true;
     this->name = str;
-    value_and_type.represent_type = type;
+    IVTT.reset_and_parse_from_basic_type(type);
 }
 
 IR_tuple::IR_tuple(int int_num) {
     is_name = false;
-    value_and_type.represent_type = basic_int;
-    value_and_type.literal_value.literal_type = literal_int;
-    value_and_type.literal_value.literal_value.int_value = int_num;
+    IVTT.reset_and_assign_as_int(int_num);
 }
 
 IR_tuple::IR_tuple(double double_num) {
     is_name = false;
-    value_and_type.represent_type = basic_float;
-    value_and_type.literal_value.literal_type = literal_float;
-    value_and_type.literal_value.literal_value.double_value = double_num;
+    IVTT.reset_and_assign_as_float(double_num);
 }
 
 IR_tuple::IR_tuple(basic_type pointer_represent_type) {
     is_name = false;
-    value_and_type.represent_type = pointer_represent_type;
-    value_and_type.is_pointer = true;
-    value_and_type.literal_value.literal_type = literal_int;
+    IVTT.reset_and_parse_from_basic_type(pointer_represent_type, true);
 }
 
 void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
@@ -487,7 +659,7 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
         std::cout << now->index << "\t";
         if (now->ir_type == ir_forth) {
             std::cout << "    ";
-            if (now->opera == "jump")
+            if (now->opera == "jump" || now->opera == "call")
                 std::cout << now->opera << " -> "
                           << now->target.to_string(false);
             else if (now->opera == "jumpe")

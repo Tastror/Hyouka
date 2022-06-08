@@ -29,8 +29,8 @@ public:
 
     void Generate();
 
-    void basic_generate(const std::shared_ptr<AST_node>& now_AST);
     void program_generate(const std::shared_ptr<AST_node>& now_AST);
+    void basic_generate(const std::shared_ptr<AST_node>& now_AST);
     void function_generate(const std::shared_ptr<AST_node>& now_AST);
     void single_assign_generate(const std::shared_ptr<AST_node>& now_AST);
     void array_assign_generate(const std::shared_ptr<AST_node>& now_AST);

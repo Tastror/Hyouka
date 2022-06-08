@@ -262,7 +262,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     index_ast->type = Index;
 
     // v --- sym change --- v //
-    symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
+    symtable_ptr->my_tail->IVTT.self_add_nest();
     // ^ --- sym change --- ^//
 
     GoNext();
@@ -283,7 +283,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     while (token_safe::data(now_token) == "[") {
 
         // v --- sym change --- v //
-        symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
+        symtable_ptr->my_tail->IVTT.self_add_nest();
         // ^ --- sym change --- ^//
 
         GoNext();
@@ -355,7 +355,7 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
     // var_type->data = token_safe::data(now_token);
 
     // v --- sym change --- v //
-    placeholder_sym_node.value_and_type.stovt(token_safe::data(now_token));
+    placeholder_sym_node.IVTT.reset_and_parse_from_string(token_safe::data(now_token));
     // ^ --- sym change --- ^ //
 
     GoNext();
@@ -375,13 +375,13 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
         sym_node.identifier_name = token_safe::data(now_token);
         sym_node.is_static = placeholder_sym_node.is_static;
         sym_node.is_const = placeholder_sym_node.is_const;
-        sym_node.value_and_type = placeholder_sym_node.value_and_type;
+        sym_node.IVTT = placeholder_sym_node.IVTT;
         // ^ --- sym --- ^ //
 
         if (token_safe::data(next_token) == "[") {
 
             // v --- sym change --- v //
-            sym_node.value_and_type.is_pointer = true;
+            sym_node.IVTT.self_change_to_pointer();
             // ^ --- sym change --- ^ //
 
             // v --- sym append --- v //
@@ -450,13 +450,13 @@ TOKEN_PTR DeclarationStatementAST::Parse() {
             sym_node.identifier_name = token_safe::data(now_token);
             sym_node.is_static = placeholder_sym_node.is_static;
             sym_node.is_const = placeholder_sym_node.is_const;
-            sym_node.value_and_type = placeholder_sym_node.value_and_type;
+            sym_node.IVTT = placeholder_sym_node.IVTT;
             // ^ --- sym --- ^ //
 
             if (token_safe::data(next_token) == "[") {
 
                 // v --- sym change --- v //
-                sym_node.value_and_type.is_pointer = true;
+                sym_node.IVTT.self_change_to_pointer();
                 // ^ --- sym change --- ^ //
 
                 // v --- sym append --- v //
@@ -666,7 +666,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     // type_name->data = token_safe::data(now_token);
 
     // v --- sym --- v //
-    sym_node.value_and_type.stovt(token_safe::data(now_token));
+    sym_node.IVTT.reset_and_parse_from_string(token_safe::data(now_token));
     // ^ --- sym --- ^ //
 
     GoNext();
@@ -701,8 +701,8 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     if (token_safe::data(now_token) == "[") {
 
         // v --- sym change --- v //
-        symtable_ptr->my_tail->value_and_type.is_pointer = true;
-        symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
+        symtable_ptr->my_tail->IVTT.self_change_to_pointer();
+        symtable_ptr->my_tail->IVTT.self_add_nest();
         // ^ --- sym change --- ^ //
 
         GoNext();
@@ -728,7 +728,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
         while (token_safe::data(now_token) == "[") {
 
             // v --- sym change --- v //
-            symtable_ptr->my_tail->value_and_type.pointer_nest_num++;
+            symtable_ptr->my_tail->IVTT.self_add_nest();
             // ^ --- sym change --- ^ //
 
             GoNext();
@@ -749,7 +749,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
     }
 
     // v --- sym append & attribute --- v //
-    symtable_ptr->my_head->function_para_type.push_back(symtable_ptr->my_tail->value_and_type);
+    symtable_ptr->my_head->IVTT.additional_storage_push(symtable_ptr->my_tail->IVTT);
     head->absorb_sym_attribution(symtable_ptr->my_tail);
     head->declaration_bound_sym_node = symtable_ptr->my_tail;
     // ^ --- sym append & attribute --- ^ //
@@ -770,10 +770,6 @@ TOKEN_PTR FunctionParamsAST::Parse() {
     now_token = func_param.Parse();
     next_token = token_safe::next(now_token);
 
-    // v --- sym change --- v //
-    symtable_ptr->my_head->arg_num++;
-    // ^ --- sym change --- ^ //
-
     while (true) {
 
         if (token_safe::data(now_token) == ")") {
@@ -791,9 +787,6 @@ TOKEN_PTR FunctionParamsAST::Parse() {
         now_token = addi_func_param.Parse();
         next_token = token_safe::next(now_token);
 
-        // v --- sym change --- v //
-        symtable_ptr->my_head->arg_num++;
-        // ^ --- sym change --- ^ //
     }
 
     return now_token;
@@ -805,8 +798,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
 
     // v --- sym --- v //
     symtable_node sym_node;
-    sym_node.value_and_type.is_pointer = true;
-    sym_node.value_and_type.represent_type = basic_function;
+    sym_node.IVTT.reset_and_parse_from_string("function*");
     // ^ --- sym --- ^ //
 
     // v --- sym block --- v //
@@ -818,16 +810,9 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
         AST_safe::RaiseError("in FunctionDefinition, type is not [int] or [float] or [void]", now_token);
         return now_token;
     }
-    AST_PTR func_type = std::make_shared<AST_node>();
-    AST_node::connect_child(head, func_type);
-    func_type->type = FunctionType;
-    func_type->data = token_safe::data(now_token);
 
     // v --- sym change --- v //
-    sym_node.function_type =
-            token_safe::data(now_token) == "int" ? function_int :
-            token_safe::data(now_token) == "float" ? function_float :
-            token_safe::data(now_token) == "void" ? function_void : function_none;
+    sym_node.IVTT.return_storage_parse_from_string(token_safe::data(now_token));
     // ^ --- sym change --- ^ //
 
     GoNext();
@@ -869,8 +854,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
     next_token = token_safe::next(now_token);
 
     // v --- sym change --- v //
-    sym_node.arg_num = func_para.GetBackSymtableAttribute()->arg_num;
-    sym_node.function_para_type = func_para.GetBackSymtableAttribute()->function_para_type;
+    sym_node.IVTT.additional_storage_vector = func_para.GetBackSymtableAttribute()->IVTT.additional_storage_vector;
     // ^ --- sym change --- ^ //
 
     // v --- sym append & attribute --- v //

@@ -12,16 +12,16 @@ namespace Front::Optimiser {
 }
 
 namespace Optimize_Useful {
-    value_and_type_tuple implicit_conversion(const value_and_type_tuple& a, const value_and_type_tuple& b);
-    value_and_type_tuple binary_operator_implicit_conversion(
+    identify_value_type_tuple implicit_conversion(const identify_value_type_tuple& a, const identify_value_type_tuple& b);
+    identify_value_type_tuple binary_operator_implicit_conversion(
             const std::string& binary_operator,
-            const value_and_type_tuple& a,
-            const value_and_type_tuple& b
+            const identify_value_type_tuple& a,
+            const identify_value_type_tuple& b
     );
-    value_and_type_tuple calculate(
+    identify_value_type_tuple calculate(
             const std::string& binary_operator,
-            const value_and_type_tuple& a,
-            const value_and_type_tuple& b
+            const identify_value_type_tuple& a,
+            const identify_value_type_tuple& b
     );
     AST_PTR get_last_child(const AST_PTR& statement_ast);
 }
