@@ -14,7 +14,7 @@ Tastror updated in 2022.6.1
 
 
 
-### 基本数据类型 value_and_type_tuple
+### 基本数据类型 identify_value_type_tuple
 
 ```
 [basic_any]  // 任意类型数据，本身的literal_int或literal_float将会被无视，直接传输literal_value
@@ -35,10 +35,10 @@ Tastror updated in 2022.6.1
 ```
 IR_tuple
 
-is_name true: name, value_and_type, value_and_type.literal_value
+is_name true: name, IVTT, IVTT.literal_value
                √         √                      ×
 
-is_name false: name, value_and_type, value_and_type.literal_value
+is_name false: name, IVTT, IVTT.literal_value
                 ×         √                     √
 ```
 
@@ -68,7 +68,9 @@ ir_label
 
 [] 表示必须在该位置但可选，{} 表示任意位置且可选，无框表示必须在该位置且必须出现
 
-### 1，ProgramBody（✓）
+### 1, ProgramBody（✓）
+
+also use basic_generate
 
 ```
 ProgramBody
@@ -79,7 +81,9 @@ ProgramBody
 
 
 
-### 2，FunctionDefinition（✓）
+### 2, FunctionDefinition（✓）
+
+function_generate
 
 ```
 FunctionDefinition
@@ -91,7 +95,9 @@ FunctionDefinition
 
 
 
-### 3，SingleDefinition
+### 3, SingleDefinition（✓）
+
+single_define_generate
 
 ```
 SingleDefinition
@@ -101,7 +107,9 @@ SingleDefinition
 
 
 
-### 4，ArrayDefinition
+### 4, ArrayDefinition
+
+array_define_generate
 
 ```
 ArrayDefinition
@@ -112,19 +120,71 @@ ArrayDefinition
 
 
 
-### 5，BlockStatement
+### 5, BlockStatement（✓）
+
+also use basic_generate
 
 ```
 BlockStatement
+
     {BlockStatement}
+    
     {SingleDefinition}
     {ArrayDefinition}
+    
     {SingleAssignment}
     {ArrayAssignment}
+    
     {KeywordStatement}
     {NormalStatement}
 ```
 
 
 
-### 6，
+### 6, SingleAssignment
+
+```
+SingleAssignment
+```
+
+
+
+### 7, ArrayAssignment
+
+```
+ArrayAssignment
+```
+
+
+
+### 8, NormalStatement
+
+```
+NormalStatement
+    Expression
+```
+
+
+
+### 9, Expression
+
+```
+Expression
+    Expression/Number/ArrayUsage/FunctionUsage
+    [Expression/Number/ArrayUsage/FunctionUsage]
+```
+
+
+
+### 10, ArrayUsage
+
+```
+ArrayUsage
+```
+
+
+
+### 11, FunctionUsage
+
+```
+FunctionUsage

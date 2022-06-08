@@ -4,50 +4,43 @@
 
 #include "FrontOpt.h"
 
-value_and_type_tuple Optimize_Useful::implicit_conversion(const value_and_type_tuple& a, const value_and_type_tuple& b) {
+identify_value_type_tuple Optimize_Useful::implicit_conversion(const identify_value_type_tuple& a, const identify_value_type_tuple& b) {
 
-    if (!a.self_check() || !b.self_check())
-        AST_optimize_safe::RaiseError(
-            "Develop Error in value_and_type_tuple.self_check(). You can ask Tastror for help."
-        );
+    identify_value_type_tuple res;
 
-    value_and_type_tuple res;
-
-    // make F(a) <= F(b), F() is a map from value_and_type_tuple types to integer
-    const value_and_type_tuple* ap = &a, * bp = &b;
-    int F_a = (int) a.is_pointer * 10 + (int) a.represent_type;
-    int F_b = (int) b.is_pointer * 10 + (int) b.represent_type;
+    // make F(a) <= F(b), F() is a map from identify_value_type_tuple types to integer
+    const identify_value_type_tuple* ap = &a, * bp = &b;
+    int F_a = (int) a.self_is_pointer() * 10 + (int) a.self_basic_type();
+    int F_b = (int) b.self_is_pointer() * 10 + (int) b.self_basic_type();
     if (F_a > F_b) { ap = &b; bp = &a; }
 
-    if (ap->is_pointer == bp->is_pointer && ap->represent_type == bp->represent_type) {
-        res.is_pointer = ap->is_pointer;
-        res.represent_type = ap->represent_type;
+    if (ap->self_is_pointer() == bp->self_is_pointer() && ap->self_basic_type() == bp->self_basic_type()) {
+        res.reset_and_parse_from_basic_type(ap->self_basic_type(), ap->self_is_pointer());
         return res;
     }
-    else if (!ap->is_pointer && ap->represent_type == basic_any) {
-        res.is_pointer = bp->is_pointer;
-        res.represent_type = bp->represent_type;
+    else if (!ap->self_is_pointer() &&
+             (ap->self_basic_type() == basic_any || ap->self_basic_type() == basic_unused)) {
+        res.reset_and_parse_from_basic_type(bp->self_basic_type(), bp->self_is_pointer());
         return res;
     }
-    else if (!ap->is_pointer && ap->represent_type == basic_int) {
-        res.is_pointer = bp->is_pointer;
-        res.represent_type = bp->represent_type;
+    else if (!ap->self_is_pointer() && ap->self_basic_type() == basic_int) {
+        res.reset_and_parse_from_basic_type(bp->self_basic_type(), bp->self_is_pointer());
         return res;
     }
-    else if (!ap->is_pointer && ap->represent_type == basic_float) {
+    else if (!ap->self_is_pointer() && ap->self_basic_type() == basic_float) {
         AST_optimize_safe::RaiseError(
-            "cannot implicitly converse " + a.type_to_string() + " and " + b.type_to_string()
+            "cannot implicitly converse " + a.to_string() + " and " + b.to_string()
         );
         return res;
     }
-    else if (ap->is_pointer && ap->represent_type == basic_any) {
-        res.is_pointer = bp->is_pointer;
-        res.represent_type = bp->represent_type;
+    else if (ap->self_is_pointer() &&
+             (ap->self_basic_type() == basic_any || ap->self_basic_type() == basic_unused)) {
+        res.reset_and_parse_from_basic_type(bp->self_basic_type(), bp->self_is_pointer());
         return res;
     }
     else {
         AST_optimize_safe::RaiseError(
-            "cannot implicitly converse " + a.type_to_string() + " and " + b.type_to_string()
+            "cannot implicitly converse " + a.to_string() + " and " + b.to_string()
         );
         return res;
     }
@@ -63,26 +56,26 @@ AST_PTR Optimize_Useful::get_last_child(const AST_PTR& statement_ast) {
     return res;
 }
 
-value_and_type_tuple Optimize_Useful::binary_operator_implicit_conversion(
+identify_value_type_tuple Optimize_Useful::binary_operator_implicit_conversion(
         const std::string& binary_operator,
-        const value_and_type_tuple& a,
-        const value_and_type_tuple& b
+        const identify_value_type_tuple& a,
+        const identify_value_type_tuple& b
 ) {
 
     if (
         binary_operator == "==" || binary_operator == "!=" || binary_operator == ">=" || binary_operator == "<=" ||
         binary_operator == ">" || binary_operator == "<" || binary_operator == "!" || binary_operator == "&&" || binary_operator == "||"
     ) {
-        value_and_type_tuple res;
-        res.stovt("int");
+        identify_value_type_tuple res;
+        res.reset_and_parse_from_string("int");
         return res;
     }
     else if (binary_operator == "%") {
-        if (!a.is_pointer && a.represent_type != basic_int) {
-            AST_optimize_safe::RaiseError("cannot mod " + a.type_to_string() + " and " + b.type_to_string());
+        if (!a.self_is_pointer() && a.self_basic_type() != basic_int) {
+            AST_optimize_safe::RaiseError("cannot mod " + a.to_string() + " and " + b.to_string());
         }
-        value_and_type_tuple res;
-        res.stovt("int");
+        identify_value_type_tuple res;
+        res.reset_and_parse_from_string("int");
         return res;
     }
     else {
@@ -92,250 +85,277 @@ value_and_type_tuple Optimize_Useful::binary_operator_implicit_conversion(
 
 // contains many meddle error which need to be thrown by binary_operator_implicit_conversion()
 // waiting for refactor  TBD...
-value_and_type_tuple Optimize_Useful::calculate(
+identify_value_type_tuple Optimize_Useful::calculate(
         const std::string& binary_operator,
-        const value_and_type_tuple& a,
-        const value_and_type_tuple& b
+        const identify_value_type_tuple& a,
+        const identify_value_type_tuple& b
 ) {
 
-    value_and_type_tuple res = binary_operator_implicit_conversion(binary_operator, a, b);
+    identify_value_type_tuple res = binary_operator_implicit_conversion(binary_operator, a, b);
     if (Safe::GlobalError) return res;
 
-    if (res.represent_type == basic_any)
-        AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+    if (res.self_basic_type() == basic_any)
+        AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
 
     if (binary_operator == "+unary") {
         res = b;
     }
 
     else if (binary_operator == "-unary") {
-        if (res.is_pointer || res.represent_type == basic_int)
-            res.assign_as(-b.literal_value.literal_value.int_value);
-        else if (res.represent_type == basic_float)
-            res.assign_as(-b.literal_value.literal_value.double_value);
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int)
+            res.reset_and_assign_as_int(-b.self_get_int_value());
+        else if (res.self_basic_type() == basic_float)
+            res.reset_and_assign_as_float(-b.self_get_float_value());
         else
-            AST_optimize_safe::RaiseError("cannot use unary minus before " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot use unary minus before " + b.to_string());
     }
 
     if (binary_operator == "!") {
-        if (res.is_pointer || res.represent_type == basic_int)
-            res.assign_as((int) ! b.literal_value.literal_value.int_value);
-        else if (res.represent_type == basic_float)
-            res.assign_as((int) ! (bool) b.literal_value.literal_value.double_value);
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int)
+            res.reset_and_assign_as_int((int) !b.self_get_int_value());
+        else if (res.self_basic_type() == basic_float)
+            res.reset_and_assign_as_float((int) !(bool) b.self_get_float_value());
         else
-            AST_optimize_safe::RaiseError("cannot plus " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot plus " + a.to_string() + " and " + b.to_string());
     }
 
     else if (binary_operator == "+") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer) {
-            if (a.is_pointer && !b.is_pointer && b.represent_type == basic_int)
-                res.assign_as(temp_a.literal_value.literal_value.int_value + temp_b.literal_value.literal_value.int_value * 4);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer()) {
+            if (a.self_is_pointer() && !b.self_is_pointer() && b.self_basic_type() == basic_int)
+                res.reset_and_assign_as_int(
+                        temp_a.self_get_int_value() + temp_b.self_get_int_value() * 4);
             else
-                AST_optimize_safe::RaiseError("cannot plus " + a.type_to_string() + " and " + b.type_to_string());
+                AST_optimize_safe::RaiseError("cannot plus " + a.to_string() + " and " + b.to_string());
         }
-        else if (res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value + temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value + temp_b.literal_value.literal_value.double_value);
+        else if (res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() + temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() + temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot plus " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot plus " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "-") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer) {
-            if (a.is_pointer && !b.is_pointer && b.represent_type == basic_int)
-                res.assign_as(temp_a.literal_value.literal_value.int_value - temp_b.literal_value.literal_value.int_value * 4);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer()) {
+            if (a.self_is_pointer() && !b.self_is_pointer() && b.self_basic_type() == basic_int)
+                res.reset_and_assign_as_int(
+                        temp_a.self_get_int_value() - temp_b.self_get_int_value() * 4);
             else
-                AST_optimize_safe::RaiseError("cannot minus " + a.type_to_string() + " and " + b.type_to_string());
+                AST_optimize_safe::RaiseError("cannot minus " + a.to_string() + " and " + b.to_string());
         }
-        else if (res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value - temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value - temp_b.literal_value.literal_value.double_value);
+        else if (res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() - temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() - temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot minus " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot minus " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "*") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer) {
-            AST_optimize_safe::RaiseError("cannot multiply " + a.type_to_string() + " and " + b.type_to_string());
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer()) {
+            AST_optimize_safe::RaiseError("cannot multiply " + a.to_string() + " and " + b.to_string());
         }
-        else if (res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value * temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value * temp_b.literal_value.literal_value.double_value);
+        else if (res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() * temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() * temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot multiply " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot multiply " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "/") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer) {
-            AST_optimize_safe::RaiseError("cannot divide " + a.type_to_string() + " and " + b.type_to_string());
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer()) {
+            AST_optimize_safe::RaiseError("cannot divide " + a.to_string() + " and " + b.to_string());
         }
-        else if (res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value / temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value / temp_b.literal_value.literal_value.double_value);
+        else if (res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() / temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() / temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot divide " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot divide " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "%") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer) {
-            AST_optimize_safe::RaiseError("cannot mod " + a.type_to_string() + " and " + b.type_to_string());
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer()) {
+            AST_optimize_safe::RaiseError("cannot mod " + a.to_string() + " and " + b.to_string());
         }
-        else if (res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value % temp_b.literal_value.literal_value.int_value);
+        else if (res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() % temp_b.self_get_int_value());
         }
         else {
-            AST_optimize_safe::RaiseError("cannot mod " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot mod " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "&&") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value && temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as((bool) temp_a.literal_value.literal_value.double_value && (bool) temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() && temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float((bool) temp_a.self_get_float_value() &&
+                                        (bool) temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "||") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value || temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as((bool) temp_a.literal_value.literal_value.double_value || (bool) temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() || temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float((bool) temp_a.self_get_float_value() ||
+                                        (bool) temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "==") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value == temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value == temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() == temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() == temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "!=") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value != temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value != temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() != temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() != temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == ">=") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value >= temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value >= temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() >= temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() >= temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "<=") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value <= temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value <= temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() <= temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() <= temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == ">") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value > temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value > temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() > temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() > temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
     else if (binary_operator == "<") {
-        value_and_type_tuple temp_a = a, temp_b = b;
-        if (res.is_pointer || res.represent_type == basic_int) {
-            temp_a.self_float_to_int();
-            temp_b.self_float_to_int();
-            res.assign_as(temp_a.literal_value.literal_value.int_value < temp_b.literal_value.literal_value.int_value);
-        } else if (res.represent_type == basic_float) {
-            temp_a.self_int_to_float();
-            temp_b.self_int_to_float();
-            res.assign_as(temp_a.literal_value.literal_value.double_value < temp_b.literal_value.literal_value.double_value);
+        identify_value_type_tuple temp_a = a, temp_b = b;
+        if (res.self_is_pointer() || res.self_basic_type() == basic_int) {
+            temp_a.self_change_to_int();
+            temp_b.self_change_to_int();
+            res.reset_and_assign_as_int(
+                    temp_a.self_get_int_value() < temp_b.self_get_int_value());
+        } else if (res.self_basic_type() == basic_float) {
+            temp_a.self_change_to_float();
+            temp_b.self_change_to_float();
+            res.reset_and_assign_as_float(
+                    temp_a.self_get_float_value() < temp_b.self_get_float_value());
         } else {
-            AST_optimize_safe::RaiseError("cannot calculate " + a.type_to_string() + " and " + b.type_to_string());
+            AST_optimize_safe::RaiseError("cannot calculate " + a.to_string() + " and " + b.to_string());
         }
     }
 
@@ -352,16 +372,16 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
         // declaration conversion
         while (child != nullptr && child->type == SingleDefinition) {
             if (child->last_child->count_expr_ending) {
-                if (child->value_and_type.represent_type == basic_int || child->value_and_type.is_pointer) {
-                    child->value_and_type = child->last_child->value_and_type;
-                    child->value_and_type.self_float_to_int();
+                if (child->IVTT.self_basic_type() == basic_int || child->IVTT.self_is_pointer()) {
+                    child->IVTT = child->last_child->IVTT;
+                    child->IVTT.self_change_to_int();
                 }
-                else if (child->value_and_type.represent_type == basic_float){
-                    child->value_and_type = child->last_child->value_and_type;
-                    child->value_and_type.self_int_to_float();
+                else if (child->IVTT.self_basic_type() == basic_float){
+                    child->IVTT = child->last_child->IVTT;
+                    child->IVTT.self_change_to_float();
                 }
                 child->declaration_bound_sym_node->treat_as_constexpr = true;
-                child->declaration_bound_sym_node->value_and_type = child->value_and_type;
+                child->declaration_bound_sym_node->IVTT = child->IVTT;
             }
             child = child->sister;
         }
@@ -371,18 +391,18 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
         AST_tuple res = AST_safe::count_child_number(now);
         if (res.judge) now->count_expr_ending = true;
         if (res.count == 1) {
-            now->value_and_type.represent_type = now->child->value_and_type.represent_type;
+            now->IVTT.reset_and_parse_from_basic_type(now->child->IVTT.self_basic_type(),
+                                                      now->child->IVTT.self_is_pointer());
             if (res.judge)
-                now->value_and_type = now->child->value_and_type;
+                now->IVTT = now->child->IVTT;
         }
         if (res.count == 2) {
-            value_and_type_tuple temp = Optimize_Useful::binary_operator_implicit_conversion(
-                now->data, now->child->value_and_type, now->last_child->value_and_type
+            identify_value_type_tuple temp = Optimize_Useful::binary_operator_implicit_conversion(
+                    now->data, now->child->IVTT, now->last_child->IVTT
             );
-            now->value_and_type.is_pointer = temp.is_pointer;
-            now->value_and_type.represent_type = temp.represent_type;
+            now->IVTT.reset_and_parse_from_basic_type(temp.self_basic_type(), temp.self_is_pointer());
             if (res.judge)
-                now->value_and_type = Optimize_Useful::calculate(now->data, now->child->value_and_type, now->last_child->value_and_type);
+                now->IVTT = Optimize_Useful::calculate(now->data, now->child->IVTT, now->last_child->IVTT);
         }
 
         // vvv --- ! important --- vvv //

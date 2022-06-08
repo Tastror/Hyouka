@@ -14,55 +14,124 @@
 // all will use
 
 enum literal_type {
-    literal_none = 0, literal_int, literal_float
+    literal_int, literal_float
 };
 
+// basic_function only use in pointer
 enum basic_type {
-    basic_any = 0, basic_int, basic_float, basic_function
-    // basic_function only use in pointer !!!
-};
-
-enum function_type {
-    function_none = 0, function_int, function_float, function_void
+    basic_unused = 0, basic_any, basic_int, basic_float, basic_function, basic_void
 };
 
 const std::string basic_type_string_name[] = {
-        "basic_any", "basic_int", "basic_float", "basic_function"
+        "unused", "any", "int", "float", "function", "void"
 };
 
-const std::string function_type_string_name[] = {
-        "function_none", "function_int", "function_float", "function_void"
-};
-
-struct literal_value_storage {
-
-    literal_type literal_type = literal_none;
+class literal_value_storage {
+private:
+    bool literal_used = false;
+    literal_type literal_type = literal_int;
     union {
         int int_value;
-        double double_value = 0.0;
+        double float_value = 0.0;
     } literal_value;
 
+public:
     [[nodiscard]] std::string to_string() const;
+    [[nodiscard]] bool used() const;
+    void make_unused();
+
+    void change_to_int();
+    void change_to_float();
+
+    void cast_and_assign(int x);
+    void cast_and_assign(double x);
+
+    [[nodiscard]] enum literal_type get_literal_type() const;
+    [[nodiscard]] int get_int_value() const;
+    [[nodiscard]] double get_float_value() const;
 };
 
-struct value_and_type_tuple {
-
+class type_storage {
+public:
+    basic_type represent_type = basic_unused;
     bool is_pointer = false;
     int pointer_nest_num = 0;
-    basic_type represent_type = basic_any;
-    literal_value_storage literal_value;
 
-    [[nodiscard]] std::string to_string(bool attribute = true) const;
-    [[nodiscard]] std::string type_to_string() const;
-
-    void assign_as(int x);
-    void assign_as(double x);
-    void stovt(const std::string& str);
-
-    void self_float_to_int();
-    void self_int_to_float();
-
+    [[nodiscard]] std::string to_string() const;
+    [[nodiscard]] bool used() const;
     [[nodiscard]] bool self_check() const;
+    void make_unused();
+
+    void add_nest();
+    [[nodiscard]] int nest_num() const;
+};
+
+class value_and_type_storage {
+public:
+    type_storage storage_type;
+    literal_value_storage storage_value;
+
+    [[nodiscard]] std::string to_string() const;
+    [[nodiscard]] bool used() const;
+    void make_unused();
+
+    void change_to_int();
+    void change_to_float();
+    void change_to_pointer();
+    void add_nest();
+    [[nodiscard]] int nest_num() const;
+
+    [[nodiscard]] int get_int_value() const;
+    [[nodiscard]] double get_float_value() const;
+
+    void parse_from_string(const std::string& str);
+    void parse_from_basic_type(basic_type type, bool is_pointer = false);
+};
+
+// call it IVTT
+class identify_value_type_tuple {
+public:
+    // normal use
+    value_and_type_storage self_storage;
+
+    // use for function return value
+    value_and_type_storage return_storage;
+    // use for function parameters
+    std::vector<identify_value_type_tuple> additional_storage_vector;
+
+    [[nodiscard]] std::string to_string() const;
+    [[nodiscard]] bool used() const;
+    void make_unused();
+
+    // make_unused and xxx
+    void reset_and_assign_as_int(int x);
+    void reset_and_assign_as_float(double x);
+    void reset_and_parse_from_basic_type(basic_type type, bool is_pointer = false);
+    void reset_and_parse_from_string(const std::string& str);
+
+    // self_storage
+    [[nodiscard]] type_storage self_type() const;
+    [[nodiscard]] bool self_is_pointer() const;
+    [[nodiscard]] basic_type self_basic_type() const;
+    void self_change_to_int();
+    void self_change_to_float();
+    void self_change_to_pointer();
+    void self_add_nest();
+    [[nodiscard]] int self_get_int_value() const;
+    [[nodiscard]] double self_get_float_value() const;
+    [[nodiscard]] int self_nest_num() const;
+
+    // return_storage
+    void return_storage_parse_from_string(const std::string& str);
+    [[nodiscard]] type_storage return_type() const;
+    [[nodiscard]] bool return_is_pointer() const;
+    [[nodiscard]] basic_type return_basic_type() const;
+
+    // additional_storage
+    void additional_storage_push(const identify_value_type_tuple& IVTT);
+    void additional_storage_push(const std::string& str);
+    void additional_storage_pop();
+    [[nodiscard]] int parameter_num() const;
 };
 
 namespace Safe {
@@ -92,7 +161,7 @@ struct token_node {
     std::shared_ptr<token_node> next = nullptr;
 
     // attribute
-    value_and_type_tuple value_and_type;
+    identify_value_type_tuple IVTT;
 
     // print
     static void print_all(const std::shared_ptr<token_node>& head);
@@ -123,12 +192,9 @@ struct symtable_node {
 
     // attribute
     std::string only_name;
-    value_and_type_tuple value_and_type;
+    identify_value_type_tuple IVTT;
     bool is_const = false;
     bool is_static = false;
-    int arg_num = 0;
-    int function_type = function_none;
-    std::vector<value_and_type_tuple> function_para_type;
 
     // field, use for const
     bool treat_as_constexpr = false;
@@ -184,7 +250,7 @@ public:
 
 enum AST_type {
     None, ProgramBody,
-    Number, Identifier, BasicType, FunctionType,
+    Number, Identifier,
     Expression, FunctionUsage, ArrayUsage,
     BlockStatement, Statement, KeywordStatement,
     NormalStatement, DeclarationStatement,
@@ -197,7 +263,7 @@ enum AST_type {
 
 const std::string AST_type_string_name[] = {
     "None", "ProgramBody",
-    "Number", "Identifier", "BasicType", "FunctionType",
+    "Number", "Identifier",
     "Expression", "FunctionUsage", "ArrayUsage",
     "BlockStatement", "Statement", "KeywordStatement",
     "NormalStatement", "DeclarationStatement",
@@ -226,11 +292,9 @@ struct AST_node {
     bool using_attribute = false;
     std::string name;
     std::string only_name;
-    value_and_type_tuple value_and_type;
+    identify_value_type_tuple IVTT;
     bool is_const = false;
     bool is_static = false;
-    int arg_num = 0;
-    int function_type = function_none;
 
     // use for Expr optimise
     bool count_expr_ending = false;
@@ -288,8 +352,7 @@ struct IR_tuple {
 
     bool is_name;
     std::string name;
-
-    value_and_type_tuple value_and_type;
+    identify_value_type_tuple IVTT;
 
     [[nodiscard]] std::string to_string(bool attribute = true) const;
 

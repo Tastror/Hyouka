@@ -87,12 +87,12 @@ public:
 
     void save_int_node(int value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->value_and_type.assign_as(value);
+        now_token->IVTT.reset_and_assign_as_int(value);
     }
 
     void save_float_node(double value, const std::string& data) {
         save_node(NUMBER, data);
-        now_token->value_and_type.assign_as(value);
+        now_token->IVTT.reset_and_assign_as_float(value);
     }
 
     static bool is_number(char c) {

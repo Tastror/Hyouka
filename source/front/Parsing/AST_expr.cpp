@@ -293,7 +293,7 @@ TOKEN_PTR ExpressionAST::Parse() {
                 AST_PTR token_to_AST = std::make_shared<AST_node>();
                 token_to_AST->data = now_token->data;
                 token_to_AST->type = Number;
-                token_to_AST->value_and_type = now_token->value_and_type;
+                token_to_AST->IVTT = now_token->IVTT;
                 token_to_AST->count_expr_ending = true;
                 token_to_AST->using_attribute = true;
                 sym.push(token_to_AST);

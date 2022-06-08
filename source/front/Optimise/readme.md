@@ -14,7 +14,7 @@ Tastror updated in 2022.6.1
 
 
 
-### 基本数据类型 value_and_type_tuple
+### 基本数据类型 identify_value_type_tuple
 
 ```
 [basic_any]  // 任意类型数据，本身的literal_int或literal_float将会被无视，直接传输literal_value
@@ -36,7 +36,7 @@ Tastror updated in 2022.6.1
 
 ### 隐式转换规范
 
-| value_and_type_tuple a | value_and_type_tuple b | 结果        |
+| identify_value_type_tuple a | identify_value_type_tuple b | 结果        |
 | ------------- | ------------- | ----------- |
 | 相同          | 相同          | 相同        |
 | basic_any     | basic_any下方任意 | b    |
