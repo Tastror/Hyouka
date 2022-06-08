@@ -220,11 +220,10 @@ void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
     IR_tuple assign_target = now_AST->only_name;
     assign_target.IVTT = now_AST->IVTT;
 
-    // default construction, however, C do not use it
     if (now_AST->last_child->type != Expression) {
-        create_forth("", assign_target, "assign", 0);
+        if (now_AST->is_static)
+            create_forth("", assign_target, "assign", 0);
     }
-
     else {
         IR_tuple res = expr_generate(now_AST->last_child, assign_target);
         create_cast_or_assign("", assign_target, res);
@@ -234,21 +233,72 @@ void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 
+void IRGen::count_array_init_block(
+        const std::shared_ptr<AST_node>& init,
+        const std::vector<int>& index_list,
+        const IR_tuple& assign_unit,
+        const IR_tuple& assign_target,
+        int stair, int offset_base
+) {
+    std::shared_ptr<AST_node> ini = init;
+    if (stair > (int) index_list.size()) {
+        IR_safe::RaiseError("array index initial blocks are too much");
+        return;
+    }
+
+    int up = 1;
+    for (int i = stair; i < index_list.size(); ++i) {
+        up *= index_list[i];
+    }
+    std::cout << ini->IVTT.to_string() << " " << up << std::endl;
+
+    while (ini != nullptr) {
+        if (ini->type == Expression) {
+            IR_tuple res = expr_generate(ini, assign_unit);
+            if (offset_base == 0) {
+                create_forth("", assign_target, "addr_assign", res);
+            } else {
+                create_forth("", assign_unit, "add", assign_target, offset_base * 4);
+                create_forth("", assign_unit, "addr_assign", res);
+            }
+        }
+        else if (ini->type == ArrayInitialBlock) {
+            count_array_init_block(ini->child, index_list, assign_unit, assign_target, stair + 1, offset_base);
+        }
+        offset_base += up;
+        ini = ini->sister;
+    }
+}
+
+
+
 void IRGen::array_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
     IR_tuple assign_target(now_AST->only_name);
     assign_target.IVTT = now_AST->IVTT;
 
-    // default construction, however, C do not use it
-    if (now_AST->last_child->type != Expression) {
-        create_forth("", assign_target, "assign", 0);
+    if (now_AST->is_static) {
+        create_forth("", assign_target, "assign", (std::string)"(static memory address)");
+    } else {
+        create_forth("", assign_target, "assign", (std::string)"(stack memory address)");
     }
 
-    else {
-        IR_tuple res = expr_generate(now_AST->last_child, assign_target);
-        create_cast_or_assign("", assign_target, res);
+    if (now_AST->last_child->type != Index) {
+        auto index = now_AST->child->sister->child;
+        std::vector<int> index_list;
+        while (index != nullptr) {
+            if (!index->count_expr_ending) {
+                IR_safe::RaiseError("array index definition parameter is not a const-expression");
+                return;
+            }
+            index->IVTT.self_change_to_int();
+            index_list.push_back(index->IVTT.self_get_int_value());
+            index = index->sister;
+        }
+        IR_tuple assign_unit("%" + std::to_string(++now_register));
+        assign_unit.IVTT.reset_and_parse_from_basic_type(basic_int, true);
+        count_array_init_block(now_AST->last_child, index_list, assign_unit, assign_target, 0, 0);
     }
-
 }
 
 

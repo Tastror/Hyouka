@@ -6,8 +6,10 @@ int test(int x, int y, int fuck[2]) {
     return x + y;
 }
 
+float kkk[2] = {1, 2.2};
+
 int main() {
-    int test_array[4][2] = {1, 2, 3};
+    int test_array[4][3] = {{1}, {2, 4}, 3};
     float s = 75;
     int crash = 75;
     test(1, 2, test_array[2]);
