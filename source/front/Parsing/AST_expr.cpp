@@ -67,8 +67,12 @@ TOKEN_PTR ArrayUsageAST::Parse() {
     }
     GoNext();
 
+    AST_PTR index_ast = std::make_shared<AST_node>();
+    AST_node::connect_child(head, index_ast);
+    index_ast->type = Index;
+
     ExpressionAST expr(now_token, symtable_ptr);
-    AST_node::connect_child(head, expr.head);
+    AST_node::connect_child(index_ast, expr.head);
     expr.head->data = "value";
     expr.head->comment = "index";
     now_token = expr.Parse();
@@ -84,7 +88,7 @@ TOKEN_PTR ArrayUsageAST::Parse() {
         GoNext();
 
         ExpressionAST addi_expr(now_token, symtable_ptr);
-        AST_node::connect_child(head, addi_expr.head);
+        AST_node::connect_child(index_ast, addi_expr.head);
         addi_expr.head->data = "value";
         addi_expr.head->comment = "index";
         now_token = addi_expr.Parse();

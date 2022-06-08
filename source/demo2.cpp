@@ -7,6 +7,7 @@ int test(int x, int y) {
 }
 
 int main() {
+    int test_array[4][2] = {1, 2, 3};
     float s = 75;
     int crash = 75;
     int x = 1 || test(1, 2);

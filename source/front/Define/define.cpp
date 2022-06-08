@@ -24,13 +24,16 @@ std::string literal_value_storage::to_string() const {
 
 std::string value_and_type_tuple::to_string(bool attribute) const{
     if (attribute)
-        return "[" + basic_type_string_name[represent_type] + (is_pointer ? "*" : "") + "]" + literal_value.to_string();
+        return "[" + basic_type_string_name[represent_type] +
+            (is_pointer ? "*" + (pointer_nest_num != 0 ? "<" + std::to_string(pointer_nest_num) + ">" : "") : "")
+            + "]" + literal_value.to_string();
     else
         return literal_value.to_string();
 }
 
 std::string value_and_type_tuple::type_to_string() const{
-    return basic_type_string_name[represent_type] + (is_pointer ? "*" : "");
+    return basic_type_string_name[represent_type]
+        + (is_pointer ? "*" + (pointer_nest_num != 0 ? "<" + std::to_string(pointer_nest_num) + ">" : "") : "");
 }
 
 void value_and_type_tuple::assign_as(int x) {
@@ -191,7 +194,6 @@ void symtable_node::print(const std::shared_ptr<symtable_node>& symtable_node_he
             }
         } else if (now->value_and_type.is_pointer) {
             std::cout << ", array_pointer";
-            std::cout << ", array_nest_num: " << now->array_nest_num;
         }
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
@@ -274,7 +276,6 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
             std::cout << ", arg_num: " << now->arg_num;
         } else if (now->value_and_type.is_pointer) {
             std::cout << ", array_pointer";
-            std::cout << ", array_nest_num: " << now->array_nest_num;
         }
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
@@ -285,7 +286,7 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     }
     std::cout << (now->data.empty() ? "" : ", " + now->data);
     std::cout << (now->comment.empty() ? "" : " (" + now->comment + ")");
-    // std::cout << "\t" << now << ", " << now->child << ", " << now->sister << ", " << now->last_child;
+    std::cout << "    #" << now << ", ch-" << now->child << ", si-" << now->sister << ", lc-" << now->last_child;
     std::cout << std::endl;
     print_all(now->child, stage + 1);
     print_all(now->sister, stage);
@@ -326,7 +327,6 @@ void AST_node::absorb_sym_attribution(const std::shared_ptr<symtable_node>& symt
     value_and_type = symtable_resource_node->value_and_type;
     is_const = symtable_resource_node->is_const;
     is_static = symtable_resource_node->is_static;
-    array_nest_num = symtable_resource_node->array_nest_num;
     arg_num = symtable_resource_node->arg_num;
     function_type = symtable_resource_node->function_type;
 }
@@ -343,7 +343,6 @@ void  AST_node::copy(const std::shared_ptr<AST_node>& AST_resource_node) {
     value_and_type = AST_resource_node->value_and_type;
     is_const = AST_resource_node->is_const;
     is_static = AST_resource_node->is_static;
-    array_nest_num = AST_resource_node->array_nest_num;
     arg_num = AST_resource_node->arg_num;
     function_type = AST_resource_node->function_type;
 

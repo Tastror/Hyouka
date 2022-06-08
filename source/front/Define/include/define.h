@@ -48,6 +48,7 @@ struct literal_value_storage {
 struct value_and_type_tuple {
 
     bool is_pointer = false;
+    int pointer_nest_num = 0;
     basic_type represent_type = basic_any;
     literal_value_storage literal_value;
 
@@ -125,7 +126,6 @@ struct symtable_node {
     value_and_type_tuple value_and_type;
     bool is_const = false;
     bool is_static = false;
-    int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
     std::vector<value_and_type_tuple> function_para_type;
@@ -192,6 +192,7 @@ enum AST_type {
     SingleDefinition, ArrayDefinition,
     FunctionDefinition,
     FunctionParams, FunctionFormParam,
+    Index,
 };
 
 const std::string AST_type_string_name[] = {
@@ -204,6 +205,7 @@ const std::string AST_type_string_name[] = {
     "SingleDefinition", "ArrayDefinition",
     "FunctionDefinition",
     "FunctionParams", "FunctionFormParam",
+    "Index",
 };
 
 struct AST_node {
@@ -227,7 +229,6 @@ struct AST_node {
     value_and_type_tuple value_and_type;
     bool is_const = false;
     bool is_static = false;
-    int array_nest_num = 0;
     int arg_num = 0;
     int function_type = function_none;
 
