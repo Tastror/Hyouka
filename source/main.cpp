@@ -24,8 +24,10 @@ int main(int argc, char** argv) {
     if (Safe::GlobalError) return 1;
 
 
-    // frontend
+    /***************  frontend  ***************/
 
+
+    // Lexical Analyze
     Lexical program_file(input_filename);
     program_file.Lexicalize();
     const TOKEN_PTR& token_head = program_file.head;
@@ -34,6 +36,7 @@ int main(int argc, char** argv) {
 
     if (Safe::GlobalError) return 1;
 
+    // AST && Symbol_Table
     Symtable symtable;
     ProgramAST program(token_head, symtable);
     program.Parse();
@@ -45,6 +48,7 @@ int main(int argc, char** argv) {
 
     if (Safe::GlobalError) return 1;
 
+    // Semantic Check && Frontend Optimize
     Front::Optimiser::Optimize(AST_head);
     const AST_PTR& optimized_AST_head = AST_head;
     if (debug_mode == "opt")
@@ -54,6 +58,7 @@ int main(int argc, char** argv) {
 
     if (Safe::GlobalError) return 1;
 
+    // 4th-IR Generation
     IRGen ir_gen(optimized_AST_head);
     ir_gen.Generate();
     const IR_PTR& IR_head = ir_gen.head;
@@ -67,7 +72,6 @@ int main(int argc, char** argv) {
 
 
     // Control Flow Graph
-
     CFG cfg(IR_head);
     cfg.Generate();
     const CFG_PTR& CFG_head = cfg.head;
@@ -76,18 +80,7 @@ int main(int argc, char** argv) {
 
     if (Safe::GlobalError) return 1;
 
-
-    // module
-    //ActivityAnalyze act_ana(IR_head);
-    //act_ana.Analyze();
-    //const activitiy_graph& res = act_ana.graph;
-
-    // your nodes write in BackDefine.h;
-    // activitiy_graph write in BackDefine.h;
-
-    // factory write in your own .h & .cpp
-    // ActivityAnalyze write in your own .h & .cpp
-
+    // TODO:More Optimization...
 
     return 0;
 } 
