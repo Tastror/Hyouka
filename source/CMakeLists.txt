@@ -31,4 +31,4 @@ add_executable(hyouka
         backend/Define/backend_define.cpp
         backend/CFG/CFG.cpp
         main.cpp
-        )
+        backend/ActivityAnalysis/include/ActivityAnalysis.h backend/ActivityAnalysis/ActivityAnalysis.cpp)
