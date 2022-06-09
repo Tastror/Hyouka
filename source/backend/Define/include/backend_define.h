@@ -9,37 +9,33 @@
 #include <string>
 #include <vector>
 
+enum BB_type {
+    bb_basic_block, bb_label
+};
+
 /*  similar to the IR_node  */
-typedef struct BasicBlock_node {
+typedef struct BasicBlockList_node {
 
     int index = -1;
-    //IR_type ir_type = ir_label;
-    std::shared_ptr<BasicBlock_node> next = nullptr;
+    BB_type bb_type = bb_label;
+    std::shared_ptr<BasicBlockList_node> next = nullptr;
 
-    // normal
-    IR_tuple target;
+    static void print_all(const std::shared_ptr<BasicBlockList_node>& BBList_head);
+} BBList_node;
 
-    // target: "jump"
-    // target + org_1: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn"
-    // target + org_1 + org_2: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"
-    std::string opera;
+#define BBList_PTR std::shared_ptr<BBList_node>
 
-    IR_tuple org_1;
-    IR_tuple org_2;
-
-    std::string comment;
-
-    static void print_all(const std::shared_ptr<BasicBlock_node>& BB_head);
-} BB_node;
-
-#define BB_PTR std::shared_ptr<BB_node>
+enum CFG_type {
+    cfg_basic_block, cfg_label
+};
 
 struct CFG_node {
     int index = -1;
+    CFG_type cfg_type = cfg_label;
 
-    BB_node current_node;
-    std::vector<BB_node> predecessor;
-    std::vector<BB_node> successor;
+    BBList_node current_node;
+    std::vector<BBList_node> predecessor;
+    std::vector<BBList_node> successor;
 
     static void print_all(const std::shared_ptr<CFG_node>& CFG_head);
 };
