@@ -5,11 +5,21 @@
 #include<string>
 #include<set>
 
-class ActivityTab{
+class BlockVariableSets{
+    std::set<std::string> DefinedVariables;
+    std::set<std::string> UsedVariables;
+    void CalculateDefined(const BBList_node& bbListNode){
 
-    CFG_node cfgNode;
+    }
+    void CalculateUsed(const BBList_node& bbListNode){
+
+    }
+};
+
+class ActivityTab{
     std::set<std::string> ActiveVariables;
     std::set<std::string> DeadVariables;
+    void AnalyzeActivity(const CFG_node& cfgNode){
 
-
+    }
 };
