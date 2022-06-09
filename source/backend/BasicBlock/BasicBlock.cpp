@@ -4,28 +4,38 @@
 
 #include "BasicBlock.h"
 
+int BBList::line_num = 0;
+int BBList::label_num = 0;
+
 BBList::BBList(const std::shared_ptr<IR_node>& IR_head){
     head = std::make_shared<BBList_node>();
-    now_bb = head;
+    now_bb_list = head;
     IR = IR_head;
 }
 
-void BBList::set_basic_block_entry(const std::shared_ptr<IR_node>& now_IR){
-    IR_PTR now = now_IR;
-    BBList_PTR now_bb;
+void BBList::create_empty_bb_list(){
+    BBList_PTR new_bb_list = std::make_shared<BBList_node>();
+    now_bb_list->next = new_bb_list;
+    now_bb_list = new_bb_list;
+    now_bb_list->index = line_num++;
 }
 
-void BBList::set_basic_block_middle(const std::shared_ptr<IR_node>& now_IR){
-    //TODO
-}
-
-void BBList::set_basic_block_exit(const std::shared_ptr<IR_node>& now_IR){
-    //TODO
+void BBList::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
+    BBList_PTR new_bb_list = std::make_shared<BBList_node>();
+    now_bb_list->next = new_bb_list;
+    now_bb_list = new_bb_list;
+    auto now = now_IR;
+    while (now != nullptr && now->ir_type != ir_label){
+        now_bb_list->basic_block.push_back(*now);
+        if(now->opera == "call" || now->opera == "jump") break;
+        now = now->next;
+    }
+    if(now->ir_type == ir_label) label_num++;
+    now_bb_list->index = line_num++;
 }
 
 void BBList::Generate() {
     if (IR->next == nullptr) return;
-
     list_generate(IR);
 }
 
@@ -34,19 +44,19 @@ void BBList::list_generate(const std::shared_ptr<IR_node>& now_IR){
     while (now != nullptr) {
             // first instruction must be basic block entry
         if(now->index == 0){
-            BBList::set_basic_block_entry(now);
+            BBList::create_basic_block(now);
         }
 
             // function entry must be basic block entry
         else if (now->ir_type == ir_label){
-            BBList::set_basic_block_entry(now);
+            BBList::create_basic_block(now);
         }
 
             // instruction following jump/call must be basic block entry
-        else if (now->ir_type == ir_forth && (now->target.name == "jump" || now->target.name == "call")){
-            BBList::set_basic_block_entry(now->next);
+        else if (now->ir_type == ir_forth && (now->opera == "jump" || now->opera == "call")){
+            BBList::create_basic_block(now->next);
         }
-            //FIXME
+
         now = now->next;
     }
 }

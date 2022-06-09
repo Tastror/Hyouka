@@ -66,20 +66,19 @@ int main(int argc, char** argv) {
 
     /***************  backend  ***************/
 
-
     // Basic Block Partition
     BBList basic_block_list(IR_head);
     basic_block_list.Generate();
-    const BBList_PTR& BB_head = basic_block_list.head;
+    const BBList_PTR& BBList_head = basic_block_list.head;  //  FIXME:  BUG!!!
     if (debug_mode == "bb")
-        //TODO: BBList_node::print_all(BB_head);
-        return 0;
+        //TODO
+        std::cout << "TODO: BBList_node::print_all(BB_head);" << std::endl;
 
     if (Safe::GlobalError) return 1;
 
     // Control Flow Graph
 /*
-    CFG cfg(BB_head);
+    CFG cfg(BBList_head);
     cfg.Generate();
     const CFG_PTR& CFG_head = cfg.head;
     if (debug_mode == "cfg")
