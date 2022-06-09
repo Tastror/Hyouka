@@ -3,6 +3,7 @@
 #include "AST.h"
 #include "FrontOpt.h"
 #include "IRGen.h"
+#include "BasicBlock.h"
 #include "CFG.h"
 
 #include <string>
@@ -65,27 +66,26 @@ int main(int argc, char** argv) {
 
     /***************  backend  ***************/
 
-
     // Basic Block Partition
-
-    BB bb(IR_head);
-    bb.Generate();
-    const BB_PTR& BB_head = bb.head;
+    BBList basic_block_list(IR_head);
+    basic_block_list.Generate();
+    const BBList_PTR& BBList_head = basic_block_list.head;  //  FIXME:  BUG!!!
     if (debug_mode == "bb")
-        BB_node::print_all(BB_head);
+        //TODO
+        std::cout << "TODO: BBList_node::print_all(BB_head);" << std::endl;
 
     if (Safe::GlobalError) return 1;
 
     // Control Flow Graph
-
-    CFG cfg(BB_head);
+/*
+    CFG cfg(BBList_head);
     cfg.Generate();
     const CFG_PTR& CFG_head = cfg.head;
     if (debug_mode == "cfg")
         CFG_node::print_all(CFG_head);
 
     if (Safe::GlobalError) return 1;
-
+*/
 
 
     // module
