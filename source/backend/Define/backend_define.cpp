@@ -5,9 +5,9 @@
 #include "backend_define.h"
 #include <iostream>
 
-void BB_node::print_all(const std::shared_ptr<BB_node>& BB_head){
-    std::shared_ptr<BB_node> now = BB_head;
-    std::cout << "print BB" << std::endl;
+void BBList_node::print_all(const std::shared_ptr<BBList_node>& BB_head){
+    std::shared_ptr<BBList_node> now = BB_head;
+    std::cout << "print BasicBlock" << std::endl;
     return;
 }
 
