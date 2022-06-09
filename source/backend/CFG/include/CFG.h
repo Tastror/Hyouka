@@ -10,20 +10,16 @@ class CFG{
 public:
     CFG_PTR head;
     CFG_PTR now_cfg;
-    BBList_PTR BB;
+    IR_PTR IR;
     static int line_num;
     static int label_num;
-    static int now_register;
 
-    explicit CFG(const std::shared_ptr<BBList_node>& BB_head);
+    explicit CFG(const std::shared_ptr<IR_node>& IR_head);
 
     void create_empty_cfg();
-    void create_label(const std::string& comment, const std::string& target);
-    void create_basic_block(const std::shared_ptr<IR_node>& IR_node);
+    void create_basic_block(const std::shared_ptr<IR_node>& now_IR);
 
     void Generate();
 
-    void entry_generate(const std::shared_ptr<BBList_node>& now_BB);
-    void basic_generate(const std::shared_ptr<BBList_node>& now_BB);
-    void exit_generate(const std::shared_ptr<BBList_node>& now_BB);
+    void cfg_generate(const std::shared_ptr<IR_node>& now_IR);
 };

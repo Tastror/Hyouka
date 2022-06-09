@@ -8,10 +8,10 @@
 class BlockVariableSets{
     std::set<std::string> DefinedVariables;
     std::set<std::string> UsedVariables;
-    void CalculateDefined(const BBList_node& bbListNode){
+    void CalculateDefined(const CFG_node& cfgNode){
 
     }
-    void CalculateUsed(const BBList_node& bbListNode){
+    void CalculateUsed(const CFG_node& cfgNode){
 
     }
 };
