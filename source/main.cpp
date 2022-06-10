@@ -70,7 +70,6 @@ int main(int argc, char** argv) {
 
     /***************  backend  ***************/
 
-
     // Control Flow Graph
     CFG cfg(IR_head);
     cfg.Generate();
