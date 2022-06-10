@@ -10,9 +10,10 @@ class CFG{
 public:
     CFG_PTR head;
     CFG_PTR now_cfg;
+    CFG_PTR tail;
     IR_PTR IR;
     static int line_num;
-    static int label_num;
+    static int basic_block_num;
 
     explicit CFG(const std::shared_ptr<IR_node>& IR_head);
 
