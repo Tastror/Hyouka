@@ -1,8 +1,29 @@
 //
-// Created by 17619 on 2022/6/9.
+// Created by Shirone on 2022/6/9.
 //
 
-#ifndef HYOUKA_ACTIVITYANALYSIS_H
-#define HYOUKA_ACTIVITYANALYSIS_H
+#include"backend_define.h"
+#include<string>
+#include<set>
+#include <algorithm>
 
-#endif //HYOUKA_ACTIVITYANALYSIS_H
+class BlockVariableSets {
+    bool judgeOperator(std::string op) {
+        std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"};
+        for (auto i: operats) {
+            if (op == i) return true;
+        }
+        return false;
+    }
+public:
+    std::set<std::string> DefinedVariables, UsedVariables;
+    void CalculateVariables(const CFG_node &cfgNode);
+};
+
+class CFGActivityTab {
+public:
+    CFG_node cfgNode;
+    BlockVariableSets blockVariableSets;
+    void AnalyzeBlockVariables();
+};
+
