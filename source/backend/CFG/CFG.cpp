@@ -68,10 +68,10 @@ bool CFG::is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR){
 
 void CFG::Generate() {
     if (IR->next == nullptr) return;
-    cfg_generate(IR);
+    cfg_list_generate(IR);
 }
 
-void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
+void CFG::cfg_list_generate(const std::shared_ptr<IR_node>& now_IR){
 
     IR_PTR now = now_IR->next;
     while (now != nullptr) {

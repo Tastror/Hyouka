@@ -1,11 +1,17 @@
-# Control Flow Graph
-Simon updated in 2022.6.10
+# Control Flow Graph(CFG)
+Simon updated in 2022.6.11
 
 ## Pipeline
-4th IR --> CFG
+4th IR --> CFG List
+
+## CFG List
+CFG List is a list composed of several CFGs, where each CFG is corresponded to a certain function in the program.
+
+## CFG
+CFG is a Directed Acyclic Graph(DAG) where each node is a basic block.
 
 ## Basic Block 
-### （一）定义
+### （一）Definition
 `基本块`是指程序中一顺序执行的语句序列，其中只有一个入口语句（第一个语句）和一个出口语句（最后一个语句）
 
 对于一个基本块来说，执行时只能从其入口语句进入，从其出口语句退出
@@ -16,9 +22,9 @@ Simon updated in 2022.6.10
 入口语句	所转向的目标语句
 ```
 
-### （二）如何划分
-#### 1、求四元式序列中各个基本块的入口语句。
-① 程序的第一个语句
+### （二）Implementation
+#### 1、求函数中各个基本块的入口语句。
+① 函数的第一个语句
 
 ② 能由条件或无条件转移语句转移到的语句
 
@@ -31,16 +37,4 @@ Simon updated in 2022.6.10
 
 3）该入口语句到一停语句（包括该停语句）之间的语句序列组成
 
-#### 3、凡是未包含在某一基本块中的语句，都是程序中控制流程不可达的语句，可删除它们。
-
-## Control Flow Graph
-### （一）定义 
-以基本块为结点，控制程序流向作为有向边，画出的有向图称为流图。
-
-### （二）特性
-
-1）具有唯一首结点的有向图
-
-2）从首结点开始到流图中任何结点都有通路
-
-3）如果一个结点的基本块的入口语句是程序的第一条语句，则称此结点为首结点
+#### 3、凡是函数中未包含在某一基本块中的语句，都是函数中控制流程不可达的语句，可删除它们。(可达性分析？)

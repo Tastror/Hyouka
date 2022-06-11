@@ -71,13 +71,13 @@ int main(int argc, char** argv) {
     /***************  backend  ***************/
 
     // Control Flow Graph
-    CFG cfg(IR_head);
-    cfg.Generate();
-    const CFG_PTR& CFG_head = cfg.head;
-    if (debug_mode == "cfg")
-        CFG_node::print_all(CFG_head);
+    //CFG_LIST cfg_list(IR_head);
+    //cfg_list.Generate();
+    //const CFG_PTR& CFG_head = cfg_list.head;
+    //if (debug_mode == "cfg")
+        //CFG_node::print_all(CFG_head);
 
-    if (Safe::GlobalError) return 1;
+    //if (Safe::GlobalError) return 1;
 
     // TODO:More Optimization...
 

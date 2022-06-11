@@ -22,3 +22,15 @@ struct CFG_node {
 };
 
 #define CFG_PTR std::shared_ptr<CFG_node>
+
+struct CFG_List_node {
+    int index = -1;
+    CFG_node cfg;
+
+    std::vector<std::shared_ptr<CFG_List_node>> predecessor;
+    std::vector<std::shared_ptr<CFG_List_node>> successor;
+
+    static void print_all(const std::shared_ptr<CFG_List_node>& CFG_List_head);
+};
+
+#define CFG_LIST_PTR std::shared_ptr<CFG_List_node>
