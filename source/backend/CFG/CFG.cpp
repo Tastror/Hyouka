@@ -25,15 +25,21 @@ void CFG::create_empty_cfg(){
 void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
     CFG_PTR new_cfg = std::make_shared<CFG_node>();
     new_cfg->basic_block.push_back(*now_IR);
+    new_cfg->entry_ir = *now_IR;
     now_cfg->successor.push_back(new_cfg);
+    new_cfg->predecessor.push_back(now_cfg);
     now_cfg = new_cfg;
 
     auto now = now_IR->next;
     while (now != nullptr && now->ir_type != ir_label){
         now_cfg->basic_block.push_back(*now);
-        if(now->opera == "call" || now->opera == "jump") break;
+        if(now->opera == "call" || now->opera == "jump"){
+            now_cfg->exit_ir = *now;
+            break;
+        }
         now = now->next;
     }
+
     if(now->ir_type == ir_label) basic_block_num++;
     now_cfg->index = line_num++;
 }
@@ -49,19 +55,21 @@ void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
             // first instruction must be basic block entry
         if(now->index == 0){
             CFG::create_basic_block(now);
+            std::cout << now->index << std::endl;
             break;  //debug
         }
 
             // function entry must be basic block entry
         else if (now->ir_type == ir_label){
             CFG::create_basic_block(now);
+            std::cout << now->index << std::endl;
         }
 
             // instruction following jump/call must be basic block entry
         else if (now->ir_type == ir_forth && (now->opera == "jump" || now->opera == "call")){
             CFG::create_basic_block(now->next);
+            std::cout << now->index << std::endl;
         }
-
         now = now->next;
     }
 }
