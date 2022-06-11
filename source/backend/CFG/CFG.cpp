@@ -35,6 +35,7 @@ void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
         now_cfg->basic_block.push_back(*now);
         if(now->opera == "call" || now->opera == "jump"){
             now_cfg->exit_ir = *now;
+            find_successor(now);
             break;
         }
         now = now->next;
@@ -42,6 +43,10 @@ void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
 
     if(now->ir_type == ir_label) basic_block_num++;
     now_cfg->index = line_num++;
+}
+
+void CFG::find_successor(const std::shared_ptr<IR_node> &now_IR) {
+    //TODO
 }
 
 void CFG::Generate() {
