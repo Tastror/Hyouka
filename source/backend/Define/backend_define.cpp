@@ -45,7 +45,7 @@ void CFG_List_node::print_all(const std::shared_ptr<CFG_List_node>& CFG_List_hea
         std::cout << "----CFG List exist, print as follows:----" << std::endl;
         while (now != nullptr){
             now = now->next;
-            //CFG_node::print_all(*now->cfg); //FIXME
+            CFG_node::print_all(now->cfg);
         }
     }
     else{

@@ -24,7 +24,7 @@ public:
 
     void Generate();
 
-    void cfg_list_generate(const std::shared_ptr<IR_node>& now_IR);
+    void cfg_generate(const std::shared_ptr<IR_node>& now_IR);
 };
 
 class CFG_LIST{
@@ -34,13 +34,12 @@ public:
     CFG_PTR IR;
     static int cfg_num;
 
-    //TODO
-    explicit CFG_LIST(const std::shared_ptr<IR_node>& IR_head);
+    explicit CFG_LIST(const std::shared_ptr<CFG_node>& CFG_head);
 
     void create_empty_cfg_list();
-    void create_cfg(const std::shared_ptr<IR_node>& now_IR);
+    void create_cfg(const std::shared_ptr<CFG_node>& now_CFG);
 
     void Generate();
 
-    void cfg_list_generate(const std::shared_ptr<IR_node>& now_IR);
+    void cfg_list_generate(const std::shared_ptr<CFG_node>& now_CFG);
 };

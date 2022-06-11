@@ -25,7 +25,7 @@ struct CFG_node {
 
 struct CFG_List_node {
     int index = -1;
-    CFG_node cfg;
+    std::shared_ptr<CFG_node> cfg;
 
     std::shared_ptr<CFG_List_node> next;
 

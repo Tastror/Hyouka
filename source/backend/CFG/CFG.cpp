@@ -68,10 +68,10 @@ bool CFG::is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR){
 
 void CFG::Generate() {
     if (IR->next == nullptr) return;
-    cfg_list_generate(IR);
+    cfg_generate(IR);
 }
 
-void CFG::cfg_list_generate(const std::shared_ptr<IR_node>& now_IR){
+void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
 
     IR_PTR now = now_IR->next;
     while (now != nullptr) {
@@ -92,4 +92,38 @@ void CFG::cfg_list_generate(const std::shared_ptr<IR_node>& now_IR){
         }
         now = now->next;
     }
+}
+
+int CFG_LIST::cfg_num = 0;
+
+CFG_LIST::CFG_LIST(const std::shared_ptr<CFG_node>& CFG_head){
+    head = std::make_shared<CFG_node>();
+    now_cfg = head;
+    IR = IR_head;
+}
+
+void CFG_LIST::create_empty_cfg_list(){
+    CFG_PTR new_cfg = std::make_shared<CFG_node>();
+    now_cfg->successor.push_back(new_cfg);
+    now_cfg = new_cfg;
+    now_cfg->index = line_num++;
+}
+
+void CFG_LIST::create_cfg(const std::shared_ptr<CFG_node>& now_CFG){
+    CFG_PTR new_cfg = std::make_shared<CFG_node>();
+    new_cfg->basic_block.push_back(*now_IR);
+    new_cfg->entry_ir = *now_IR;
+    now_cfg->successor.push_back(new_cfg);
+    new_cfg->predecessor.push_back(now_cfg);
+    now_cfg = new_cfg;
+}
+
+void CFG_LIST::Generate(){
+    if (IR->next == nullptr) return;
+    cfg_list_generate(IR);
+}
+
+void CFG_LIST::cfg_list_generate(const std::shared_ptr<CFG_node>& now_CFG){
+    IR_PTR now = now_IR->next;
+    while (now != nullptr) {
 }
