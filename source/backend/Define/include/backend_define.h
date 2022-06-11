@@ -27,8 +27,7 @@ struct CFG_List_node {
     int index = -1;
     CFG_node cfg;
 
-    std::vector<std::shared_ptr<CFG_List_node>> predecessor;
-    std::vector<std::shared_ptr<CFG_List_node>> successor;
+    std::shared_ptr<CFG_List_node> next;
 
     static void print_all(const std::shared_ptr<CFG_List_node>& CFG_List_head);
 };
