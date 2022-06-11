@@ -19,7 +19,8 @@ public:
 
     void create_empty_cfg();
     void create_basic_block(const std::shared_ptr<IR_node>& now_IR);
-    void find_successor(const std::shared_ptr<IR_node>& now_IR);
+    IR_node find_successor(const std::shared_ptr<IR_node>& target_IR);
+    bool is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR);
 
     void Generate();
 

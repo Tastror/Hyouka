@@ -34,8 +34,14 @@ void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
     while (now != nullptr && now->ir_type != ir_label){
         now_cfg->basic_block.push_back(*now);
         if(now->opera == "call" || now->opera == "jump"){
-            now_cfg->exit_ir = *now;
-            find_successor(now);
+            new_cfg->exit_ir = *now;
+            /*
+            auto target = find_successor(now_IR);
+            if(is_exist_basic_block(*target))
+                now_cfg->successor.push_back(new_cfg);
+            else
+                create_basic_block(&target);
+                */
             break;
         }
         now = now->next;
@@ -45,8 +51,19 @@ void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
     now_cfg->index = line_num++;
 }
 
-void CFG::find_successor(const std::shared_ptr<IR_node> &now_IR) {
-    //TODO
+IR_node CFG::find_successor(const std::shared_ptr<IR_node> &target_IR) {
+
+    auto now = IR->next;
+    while (now != nullptr){
+        if(target_IR->target.name == now->target.name)
+            return *now;
+        now = now->next;
+    }
+    //TODO: What if not found?
+}
+
+bool CFG::is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR){
+
 }
 
 void CFG::Generate() {
@@ -55,25 +72,23 @@ void CFG::Generate() {
 }
 
 void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
+
     IR_PTR now = now_IR->next;
     while (now != nullptr) {
             // first instruction must be basic block entry
         if(now->index == 0){
             CFG::create_basic_block(now);
-            std::cout << now->index << std::endl;
             break;  //debug
         }
 
             // function entry must be basic block entry
         else if (now->ir_type == ir_label){
             CFG::create_basic_block(now);
-            std::cout << now->index << std::endl;
         }
 
             // instruction following jump/call must be basic block entry
         else if (now->ir_type == ir_forth && (now->opera == "jump" || now->opera == "call")){
             CFG::create_basic_block(now->next);
-            std::cout << now->index << std::endl;
         }
         now = now->next;
     }
