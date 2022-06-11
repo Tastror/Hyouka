@@ -37,3 +37,19 @@ void CFG_node::print_all(const std::shared_ptr<CFG_node>& CFG_head){
     }
     return;
 }
+
+void CFG_List_node::print_all(const std::shared_ptr<CFG_List_node>& CFG_List_head){
+    std::shared_ptr<CFG_List_node> now = CFG_List_head;
+
+    if(!now->successor.empty()){
+        std::cout << "----CFG List exist, print as follows:----" << std::endl;
+        for(int i=0; i<now->successor.size(); i++) {
+            now = now->successor[i];
+            std::cout << "Basic_Block " << now->index << ":" << std::endl;
+            //TODO
+        }
+    } else{
+        std::cout << "ERROR: CFG List don't exist!!!" << std::endl;
+    }
+    return;
+}
