@@ -10,10 +10,11 @@ void CFG_node::print_all(const std::shared_ptr<CFG_node>& CFG_head){
 
     if(!now->successor.empty()){
         std::cout << "----CFG exist, print as follows:----" << std::endl;
-        for(int i=0;i<now->successor.size();i++) {
+        for(int i=0; i<now->successor.size(); i++) {
             now = now->successor[i];
-            std::cout << "Basic_Block " << i+1 << ":" << std::endl;
+            std::cout << "Basic_Block " << now->index << ":" << std::endl;
             for (int j = 0; j < now->basic_block.size(); j++) {
+
                 if(now->basic_block[j].ir_type == ir_label) {
                     std::cout << j << "    ";
                     std::cout << now->basic_block[j].target.name << std::endl;
