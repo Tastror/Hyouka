@@ -38,11 +38,6 @@ bool CFG::is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR){
 
 }
 
-void CFG::Generate() {
-    if (IR->next == nullptr) return;
-    cfg_generate(IR);
-}
-
 void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
 
     IR_PTR now = now_IR->next;
@@ -68,22 +63,32 @@ void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
 
 int CFG_LIST::cfg_num = 0;
 
-CFG_LIST::CFG_LIST(const std::shared_ptr<CFG_List_node>& CFG_head){
-
+CFG_LIST::CFG_LIST(const std::shared_ptr<IR_node>& IR_head){
+    IR_PTR now = IR_head->next;
+    while (now != nullptr) {
+        // judge if it is function entry
+        if(now->target.name[0] == '@')
+            head = now->target.name;
+        now = now->next;
+    }
+    IR = IR_head;
 }
 
 void CFG_LIST::create_empty_cfg_list(){
 
 }
 
-void CFG_LIST::create_cfg(const std::shared_ptr<CFG_List_node>& now_CFG){
-
-}
-
 void CFG_LIST::Generate(){
-
+    if (IR->next == nullptr) return;
+    cfg_list_generate(IR);
 }
 
-void CFG_LIST::cfg_list_generate(const std::shared_ptr<CFG_List_node>& now_CFG){
-
+void CFG_LIST::cfg_list_generate(const std::shared_ptr<IR_node>& now_IR){
+    IR_PTR now = now_IR->next;
+    while (now != nullptr) {
+        // judge if it is function entry
+        if(now->target.name[0] == '@')
+            CFG::cfg_generate(now); //FIXME
+        now = now->next;
+    }
 }
