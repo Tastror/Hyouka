@@ -7,7 +7,7 @@
 #include<set>
 #include <algorithm>
 
-class BlockVariableSets {
+class BlockVariableFactory {
     bool judgeOperator(std::string op) {
         std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"};
         for (auto i: operats) {
@@ -16,14 +16,13 @@ class BlockVariableSets {
         return false;
     }
 public:
-    std::set<std::string> DefinedVariables, UsedVariables;
-    void CalculateVariables(const CFG_node &cfgNode);
+    std::set<std::string> DefinedVariables, usedVariables;
+    void CalculateDefinedAndUsed(const CFG_node &cfgNode);
 };
 
 class CFGActivityTab {
 public:
-    CFG_node cfgNode;
-    BlockVariableSets blockVariableSets;
-    void AnalyzeBlockVariables();
+    void AnalyzeBlockVariables(CFG_LIST_PTR node);
+    void Generate();
 };
 
