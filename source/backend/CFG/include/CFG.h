@@ -29,17 +29,15 @@ public:
 
 class CFG_LIST{
 public:
-    CFG_LIST_PTR head;
-    CFG_LIST_PTR now_cfg_list;
-    CFG_PTR IR;
     static int cfg_num;
+    std::unordered_map<std::string, CFG_PTR> cfg_list;
 
-    explicit CFG_LIST(const std::shared_ptr<CFG_node>& CFG_head);
+    explicit CFG_LIST(const std::shared_ptr<CFG_List_node>& CFG_head);
 
     void create_empty_cfg_list();
-    void create_cfg(const std::shared_ptr<CFG_node>& now_CFG);
+    void create_cfg(const std::shared_ptr<CFG_List_node>& now_CFG);
 
     void Generate();
 
-    void cfg_list_generate(const std::shared_ptr<CFG_node>& now_CFG);
+    void cfg_list_generate(const std::shared_ptr<CFG_List_node>& now_CFG);
 };
