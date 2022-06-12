@@ -8,7 +8,7 @@
 #include <algorithm>
 
 class BlockVariableFactory {
-    bool judgeOperator(std::string op) {
+    static bool judgeOperator(std::string op) {
         std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"};
         for (auto i: operats) {
             if (op == i) return true;
@@ -17,7 +17,7 @@ class BlockVariableFactory {
     }
 public:
     //std::set<std::string> DefinedVariables, usedVariables;
-    void CalculateDefinedAndUsed(CFG_node &cfgNode);
+    static void CalculateDefinedAndUsed(CFG_node &cfgNode);
 };
 
 class CFGActivityTab {
