@@ -16,13 +16,13 @@ class BlockVariableFactory {
         return false;
     }
 public:
-    std::set<std::string> DefinedVariables, usedVariables;
-    void CalculateDefinedAndUsed(const CFG_node &cfgNode);
+    //std::set<std::string> DefinedVariables, usedVariables;
+    void CalculateDefinedAndUsed(CFG_node &cfgNode);
 };
 
 class CFGActivityTab {
 public:
-    void AnalyzeBlockVariables(CFG_LIST_PTR node);
+    void AnalyzeBlockVariables(CFG_List_node &listHead);
     void Generate();
 };
 
