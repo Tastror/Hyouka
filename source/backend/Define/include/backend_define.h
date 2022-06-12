@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <unordered_map>
 
 struct CFG_node {
     int index = -1;
@@ -20,24 +21,21 @@ struct CFG_node {
     std::set<std::string> in_variables;
     std::set<std::string> out_variables;
     std::set<std::string> used_variables;
-    std::set<std::string> defined_varibles;
+    std::set<std::string> defined_variables;
     //End ActivityAnalysis
 
-    std::vector<std::shared_ptr<CFG_node>> predecessor;
-    std::vector<std::shared_ptr<CFG_node>> successor;
+    // save linear index of other basic block in the cfg
+    std::vector<CFG_node> predecessor;
+    std::vector<CFG_node> successor;
 
-    static void print_all(const std::shared_ptr<CFG_node> &CFG_head);
+    static void print_all(std::vector<CFG_node> cfg_head);
 };
 
-#define CFG_PTR std::shared_ptr<CFG_node>
+#define CFG_PTR std::shared_ptr<std::vector<CFG_node>>
 
 struct CFG_List_node {
     int index = -1;
     std::shared_ptr<CFG_node> cfg;
 
-    std::shared_ptr<CFG_List_node> next;
-
-    static void print_all(const std::shared_ptr<CFG_List_node> &CFG_List_head);
+    static void print_all(std::unordered_map<std::string, CFG_PTR> cfg_list);
 };
-
-#define CFG_LIST_PTR std::shared_ptr<CFG_List_node>

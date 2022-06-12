@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     // Control Flow Graph
     //CFG_LIST cfg_list(IR_head);
     //cfg_list.Generate();
-    //const CFG_PTR& CFG_head = cfg_list.head;
+    //const CFG_LIST_PTR& CFG_LIST_head = cfg_list.head;
     //if (debug_mode == "cfg")
         //CFG_node::print_all(CFG_head);
 
