@@ -72,13 +72,13 @@ int main(int argc, char** argv) {
     /***************  backend  ***************/
 
     // Control Flow Graph
-    //CFG_LIST cfg_list(IR_head);
-    //cfg_list.Generate();
-    //const CFG_LIST_PTR& CFG_LIST_head = cfg_list.head;
-    //if (debug_mode == "cfg")
-        //CFG_node::print_all(CFG_head);
+    CFG_builder cfg_builder(IR_head);
+    cfg_builder.Generate();
+    const std::vector<CFG_PTR>& cfg_list = cfg_builder.CFG_blocks_chain;
+    if (debug_mode == "cfg")
+        CFG_List::print_all(cfg_list);
 
-    //if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 1;
 
     CFGList cfgList;
     cfgList.GenerateCFGBlockList(IR_head);

@@ -6,33 +6,28 @@
 
 #include "backend_define.h"
 
-class CFG{
+class CFG_builder {
 public:
-    static int line_num;
-    static int basic_block_num;
 
-    explicit CFG(const std::shared_ptr<IR_node>& IR_head);
+    IR_PTR IR_head;
+    int basic_block_num;
 
-    void create_empty_cfg();
-    void create_basic_block(const std::shared_ptr<IR_node>& now_IR);
-    IR_node find_successor(const std::shared_ptr<IR_node>& target_IR);
-    bool is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR);
+    CFG_PTR last_CFG;
+    CFG_PTR now_CFG;
+    std::vector<IR_PTR> IR_chain;
+    std::vector<CFG_PTR> CFG_blocks_chain;
+    std::unordered_map<std::string, int> IR_maps;  // label -> index
+    std::unordered_map<IR_PTR, CFG_PTR> CFG_maps;  // ir -> cfg
 
-    void cfg_generate(const std::shared_ptr<IR_node>& now_IR);
-};
-
-class CFG_LIST{
-public:
-    std::string head;
-    IR_PTR IR;
-    static int cfg_num;
-    std::unordered_map<std::string, CFG_PTR> cfg_list;
-
-    explicit CFG_LIST(const std::shared_ptr<IR_node>& IR_head);
-
-    void create_empty_cfg_list();
-
+    explicit CFG_builder(const IR_PTR& IR_head);
     void Generate();
 
-    void cfg_list_generate(const std::shared_ptr<IR_node>& now_IR);
+    void init();
+    void first_generate();
+    void second_generate();
+    void create_new_block(const IR_PTR& connect_IR, int ir_index);
+    void add_to_now(const IR_PTR& now_IR);
+    void add_last_to_now();
+    void add_predecessor_to_now(const std::string& CFG_str);
+    void add_successor_to_now(const std::string& CFG_str);
 };
