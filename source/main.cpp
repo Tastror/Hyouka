@@ -3,14 +3,14 @@
 #include "AST.h"
 #include "FrontOpt.h"
 #include "IRGen.h"
-//#include "CFG.h"
-#include "CFG_Yuki.h"
+#include "CFG.h"
+#include "ActivityAnalysis.h"
 
 #include <string>
 #include <iostream>
 
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
 
     // shell
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     // Lexical Analyze
     Lexical program_file(input_filename);
     program_file.Lexicalize();
-    const TOKEN_PTR& token_head = program_file.head;
+    const TOKEN_PTR &token_head = program_file.head;
     if (debug_mode == "lex")
         token_node::print_all(token_head);
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     Symtable symtable;
     ProgramAST program(token_head, symtable);
     program.Parse();
-    const AST_PTR& AST_head = program.head;
+    const AST_PTR &AST_head = program.head;
     if (debug_mode == "parse")
         AST_node::print_all(AST_head);
     if (debug_mode == "sym")
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 
     // Semantic Check && Frontend Optimize
     Front::Optimiser::Optimize(AST_head);
-    const AST_PTR& optimized_AST_head = AST_head;
+    const AST_PTR &optimized_AST_head = AST_head;
     if (debug_mode == "opt")
         AST_node::print_all(optimized_AST_head);
     if (debug_mode == "optsym")
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     // 4th-IR Generation
     IRGen ir_gen(optimized_AST_head);
     ir_gen.Generate();
-    const IR_PTR& IR_head = ir_gen.head;
+    const IR_PTR &IR_head = ir_gen.head;
     if (debug_mode == "ir")
         IR_node::print_all(IR_head);
 
@@ -74,18 +74,17 @@ int main(int argc, char** argv) {
     // Control Flow Graph
     CFG_builder cfg_builder(IR_head);
     cfg_builder.Generate();
-    const std::vector<CFG_PTR>& cfg_list = cfg_builder.CFG_blocks_chain;
+    const std::vector<CFG_PTR > &cfg_list = cfg_builder.CFG_blocks_chain;
     if (debug_mode == "cfg")
         CFG_List::print_all(cfg_list);
 
     if (Safe::GlobalError) return 1;
 
-    CFGList cfgList;
-    cfgList.GenerateCFGBlockList(IR_head);
-    if(debug_mode=="cfg"){
-        cfgList.print_all();
-    }
-    // TODO:More Optimization...
+    CFGActivityTab cfgActivityTab;
+    cfgActivityTab.AnalyzeBlockVariables(cfg_builder.CFG_blocks_chain);
+    if (debug_mode == "aa")
+        CFGActivityTab::print_all(cfg_list);
+    if (Safe::GlobalError) return 1;
 
     return 0;
 } 
