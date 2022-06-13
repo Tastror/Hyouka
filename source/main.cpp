@@ -3,7 +3,8 @@
 #include "AST.h"
 #include "FrontOpt.h"
 #include "IRGen.h"
-#include "CFG.h"
+//#include "CFG.h"
+#include "CFG_Yuki.h"
 
 #include <string>
 #include <iostream>
@@ -79,6 +80,11 @@ int main(int argc, char** argv) {
 
     //if (Safe::GlobalError) return 1;
 
+    CFGList cfgList;
+    cfgList.GenerateCFGBlockList(IR_head);
+    if(debug_mode=="cfg"){
+        cfgList.print_all();
+    }
     // TODO:More Optimization...
 
     return 0;
