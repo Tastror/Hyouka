@@ -15,7 +15,7 @@ struct CFG_node {
     int index = -1;
     std::string name;
 
-    std::vector<IR_node> block_content;
+    std::vector<IR_PTR> content;
 
     //For ActivityAnalysis
     std::set<std::string> in_variables;
@@ -25,6 +25,8 @@ struct CFG_node {
     //End ActivityAnalysis
 
     // save linear index of other basic block in the cfg
+    std::vector<std::string> str_predecessor;
+    std::vector<std::string> str_successor;
     std::vector<std::shared_ptr<CFG_node>> predecessor;
     std::vector<std::shared_ptr<CFG_node>> successor;
 
@@ -34,5 +36,10 @@ struct CFG_node {
 #define CFG_PTR std::shared_ptr<CFG_node>
 
 namespace CFG_List {
-    void print_all(const std::vector<CFG_node>& CFG_blocks_chain_);
-};
+    void print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_);
+}
+
+namespace CFG_safe {
+    void RaiseError(const std::string& error_code);
+    void RaiseWarning(const std::string& warning_code);
+}
