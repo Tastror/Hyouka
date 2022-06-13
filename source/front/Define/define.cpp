@@ -662,39 +662,43 @@ IR_tuple::IR_tuple(basic_type pointer_represent_type) {
     IVTT.reset_and_parse_from_basic_type(pointer_represent_type, true);
 }
 
+void IR_node::print() const {
+    std::cout << index << "\t";
+    if (ir_type == ir_forth) {
+        std::cout << "    ";
+        if (opera == "jump" || opera == "call")
+            std::cout << opera << " -> "
+                      << target.to_string(false);
+        else if (opera == "jumpe")
+            std::cout << opera << " -> "
+                      << target.to_string(false) << " if "
+                      << org_1.to_string() << " == zero";
+        else if (opera == "jumpn")
+            std::cout << opera << " -> "
+                      << target.to_string(false) << " if "
+                      << org_1.to_string() << " != zero";
+        else if (opera == "assign" || opera == "sw" || opera == "lw" || opera == "cast-int" || opera == "cast-float")
+            std::cout << target.to_string() << " = "
+                      << opera << ", "
+                      << org_1.to_string();
+        else
+            std::cout << target.to_string() << " = "
+                      << opera << ", "
+                      << org_1.to_string() << ", "
+                      << org_2.to_string();
+    }
+    else if (ir_type == ir_label) {
+        std::cout << target.to_string(false) << ":";
+    }
+    std::cout << (comment.empty() ? "" : "\t# " + comment)  << std::endl;
+}
+
 void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
     std::shared_ptr<IR_node> now = IR_head;
     if (now == nullptr) return;
     now = now->next;
     while (now != nullptr) {
-        std::cout << now->index << "\t";
-        if (now->ir_type == ir_forth) {
-            std::cout << "    ";
-            if (now->opera == "jump" || now->opera == "call")
-                std::cout << now->opera << " -> "
-                          << now->target.to_string(false);
-            else if (now->opera == "jumpe")
-                std::cout << now->opera << " -> "
-                          << now->target.to_string(false) << " if "
-                          << now->org_1.to_string() << " == zero";
-            else if (now->opera == "jumpn")
-                std::cout << now->opera << " -> "
-                          << now->target.to_string(false) << " if "
-                          << now->org_1.to_string() << " != zero";
-            else if (now->opera == "assign" || now->opera == "sw" || now->opera == "lw" || now->opera == "cast-int" || now->opera == "cast-float")
-                std::cout << now->target.to_string() << " = "
-                          << now->opera << ", "
-                          << now->org_1.to_string();
-            else
-                std::cout << now->target.to_string() << " = "
-                          << now->opera << ", "
-                          << now->org_1.to_string() << ", "
-                          << now->org_2.to_string();
-        }
-        else if (now->ir_type == ir_label) {
-            std::cout << now->target.to_string(false) << ":";
-        }
-        std::cout << (now->comment.empty() ? "" : "\t# " + now->comment)  << std::endl;
+        now->print();
         now = now->next;
     }
 }

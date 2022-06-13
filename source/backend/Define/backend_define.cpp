@@ -5,30 +5,27 @@
 #include "backend_define.h"
 #include <iostream>
 
-void CFG_node::print_all(std::vector<CFG_node> cfg){
+void CFG_node::print() const{
 
-    if(cfg.size() == 0) {
-        std::cout << "ERROR: CFG is empty!!!" << std::endl;
-        return;
+    std::cout << name << ", " << this << std::endl;
+
+    for (const auto& mem : block_content) {
+        mem.print();
     }
 
-    for (int i = 0; i<cfg.size(); i++){
-        for (int j = 0; j<cfg[i].basic_block.size(); j++){
-            std::cout << "TODO print" << std::endl;
-        }
+    std::cout << "predecessor:";
+    for (const auto& mem : predecessor) {
+        std::cout << " " << mem;
+    }
+
+    std::cout << "successor:" << std::endl;
+    for (const auto& mem : successor) {
+        std::cout << " " << mem;
     }
 }
 
-void CFG_List_node::print_all(std::unordered_map<std::string, CFG_PTR> cfg_list){
-
-    if(cfg_list.empty()){
-        std::cout << "ERROR: CFG LIST is empty!!!";
-        return;
+void CFG_List::print_all(const std::vector<CFG_node>& CFG_blocks_chain_){
+    for (const auto& mem : CFG_blocks_chain_) {
+        mem.print();
     }
-
-    for(auto it=cfg_list.begin();it!=cfg_list.end();it++){
-        std::cout << it->first << ":" << std::endl;
-        CFG_node::print_all(*it->second);
-    }
-
 }
