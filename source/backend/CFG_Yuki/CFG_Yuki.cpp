@@ -16,6 +16,7 @@ void CFGList::GenerateCFGBlockList(IR_PTR irptr) {
             irptrnew=listNode->GenerateCFGBlock(irptr);
             CFGNodes.push_back(*listNode);
             listNode=std::make_shared<CFGListNode>(CFGListNode());
+            irptr=irptrnew;
         }
         else return;
     }
@@ -24,6 +25,8 @@ void CFGList::GenerateCFGBlockList(IR_PTR irptr) {
 IR_PTR CFGListNode::GenerateCFGBlock(IR_PTR irptr) {
     CFGBlock_PTR block= std::make_shared<CFGBlock>(CFGBlock());
     block->entry=*irptr;
+    if(irptr==nullptr)
+        return nullptr;
     //TODO:Maintain predecessors&successors, distinguishing function call for CFGListNode other than CFGBlocks by Shirone
     for (auto current = irptr; current; current = current->next) {
         if(current->next->ir_type==ir_label||(!current)){
@@ -43,11 +46,20 @@ IR_PTR CFGListNode::GenerateCFGBlock(IR_PTR irptr) {
             block->irs.push_back(*current);
         }
     }
+    return nullptr;
 }
 
 void CFGListNode::print_all() {
+    std::cout<<"ListNode#"<<index<<std::endl;
     for(auto i:CFGBlocks){
-        cout<<CFGBlocks.printf_all()<<endl;
+        i.print_all();
+        std::cout<<std::endl;
+    }
+}
+void CFGList::print_all(){
+    for(auto i:CFGNodes){
+        i.print_all();
+        std::cout<<std::endl;
     }
 }
 

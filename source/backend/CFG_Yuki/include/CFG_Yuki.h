@@ -19,6 +19,7 @@ struct CFGBlock {
         index++;
     }
     void print_all(){
+        std::cout<<"Block#"<<index<<std::endl;
         std::cout<<entry.opera<< std::endl;
         for(auto i : irs){
             std::cout<<i.opera<<std::endl;
@@ -43,4 +44,5 @@ struct CFGListNode {
 struct CFGList{
     std::vector<CFGListNode> CFGNodes;
     void GenerateCFGBlockList(IR_PTR irptr);
+    void print_all();
 };

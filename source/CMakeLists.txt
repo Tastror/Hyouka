@@ -13,9 +13,9 @@ include_directories(
         front/Optimise/include
         front/IRGen/include
         backend/Define/include
-        backend/CFG/include
+#        backend/CFG/include
         backend/CFG_Yuki/include
-        backend/ActivityAnalysis/include
+#        backend/ActivityAnalysis/include
 )
 
 include_directories(
@@ -33,8 +33,8 @@ add_executable(hyouka
         front/IRGen/IRGen.cpp
 
         backend/Define/backend_define.cpp
-        backend/CFG/CFG.cpp
-        backend/ActivityAnalysis/ActivityAnalysis.cpp
+#        backend/CFG/CFG.cpp
+#        backend/ActivityAnalysis/ActivityAnalysis.cpp
         backend/CFG_Yuki/CFG_Yuki.cpp
 )
 
