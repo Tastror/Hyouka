@@ -1,7 +1,7 @@
 //
 // Created by Shirone on 2022/6/9.
 //
-
+#pragma once
 #include"backend_define.h"
 #include<string>
 #include<set>
@@ -23,6 +23,8 @@ public:
     static void CalculateDefinedAndUsed(CFG_node &cfgNode);
 
     static void CalculateActivity(CFG_node &cfgNode);
+
+    static bool change;
 
     static bool DetectChange() {
         if (CFGChange.empty()) {
