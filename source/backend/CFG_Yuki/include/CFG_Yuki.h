@@ -6,6 +6,7 @@
 #include "define.h"
 #include <vector>
 #include <map>
+#include <iostream>
 
 struct CFGBlock {
     IR_node entry;
@@ -13,14 +14,33 @@ struct CFGBlock {
     std::vector<IR_node> irs;
     std::vector<int> successor;
     std::vector<int> predecessor;
-    int index = -1;
+    static int index;
+    CFGBlock(){
+        index++;
+    }
+    void print_all(){
+        std::cout<<entry.opera<< std::endl;
+        for(auto i : irs){
+            std::cout<<i.opera<<std::endl;
+        }
+        std::cout<<exit.opera<<std::endl;
+    }
 };
 #define CFGBlock_PTR std::shared_ptr<CFGBlock>
 
-struct CFG {
-    std::vector<CFGBlock> CFG;
-    std::map<IR_node,int> lables;
-    int size=0;
-    void GenerateCFG(IR_PTR irptr);
+struct CFGListNode {
+    std::vector<CFGBlock> CFGBlocks;
+    std::string name;
+    static int index;
+    CFGListNode(){
+        index++;
+    }
+    IR_PTR GenerateCFGBlock(IR_PTR irptr);
+    void print_all();
 };
+#define CFGListNode_PTR std::shared_ptr<CFGListNode>
 
+struct CFGList{
+    std::vector<CFGListNode> CFGNodes;
+    void GenerateCFGBlockList(IR_PTR irptr);
+};
