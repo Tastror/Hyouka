@@ -243,7 +243,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     head->type = ArrayDefinition;
 
     if (token_safe::type(now_token) != IDENTI) {
-        AST_safe::RaiseError("in ArrayAssignment, beginning is not a valid name", now_token);
+        AST_safe::RaiseError("in ArrayDefinition, beginning is not a valid name", now_token);
         return now_token;
     }
     AST_PTR var_name = std::make_shared<AST_node>();
@@ -253,7 +253,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     GoNext();
 
     if (token_safe::data(now_token) != "[") {
-        AST_safe::RaiseError("in ArrayAssignment, lost punctuation [[]", now_token);
+        AST_safe::RaiseError("in ArrayDefinition, lost punctuation [[]", now_token);
         return now_token;
     }
 
@@ -275,7 +275,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
     next_token = token_safe::next(now_token);
 
     if (token_safe::data(now_token) != "]") {
-        AST_safe::RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
+        AST_safe::RaiseError("in ArrayDefinition, lost punctuation []]", now_token);
         return now_token;
     }
     GoNext();
@@ -296,7 +296,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
         next_token = token_safe::next(now_token);
 
         if (token_safe::data(now_token) != "]") {
-            AST_safe::RaiseError("in ArrayAssignment, lost punctuation []]", now_token);
+            AST_safe::RaiseError("in ArrayDefinition, lost punctuation []]", now_token);
             return now_token;
         }
         GoNext();
@@ -313,7 +313,7 @@ TOKEN_PTR ArrayDefinitionAST::Parse() {
 
     // meddle check, may cause error, could be removed
     if (token_safe::data(now_token) != "," && token_safe::data(now_token) != ";") {
-        AST_safe::RaiseError("in SingleDefinition, lost punctuation [;] or [,]", now_token);
+        AST_safe::RaiseError("in Definition, lost punctuation [;] or [,]", now_token);
         return now_token;
     }
 
@@ -700,6 +700,10 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
 
     if (token_safe::data(now_token) == "[") {
 
+        AST_PTR index_ast = std::make_shared<AST_node>();
+        AST_node::connect_child(head, index_ast);
+        index_ast->type = Index;
+
         // v --- sym change --- v //
         symtable_ptr->my_tail->IVTT.self_change_to_pointer();
         symtable_ptr->my_tail->IVTT.self_add_nest();
@@ -712,7 +716,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
         }
         else {
             ExpressionAST index(now_token, symtable_ptr);
-            AST_node::connect_child(head, index.head);
+            AST_node::connect_child(index_ast, index.head);
             index.head->data = "value";
             index.head->comment = "index";
             now_token = index.Parse();
@@ -734,7 +738,7 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
             GoNext();
 
             ExpressionAST index_addi(now_token, symtable_ptr);
-            AST_node::connect_child(head, index_addi.head);
+            AST_node::connect_child(index_ast, index_addi.head);
             index_addi.head->data = "value";
             index_addi.head->comment = "index";
             now_token = index_addi.Parse();

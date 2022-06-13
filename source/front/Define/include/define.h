@@ -99,6 +99,9 @@ public:
     // use for function parameters
     std::vector<identify_value_type_tuple> additional_storage_vector;
 
+    // use for array length
+    std::vector<int> array_length;
+
     [[nodiscard]] std::string to_string() const;
     [[nodiscard]] bool used() const;
     void make_unused();
@@ -132,6 +135,9 @@ public:
     void additional_storage_push(const std::string& str);
     void additional_storage_pop();
     [[nodiscard]] int parameter_num() const;
+
+    // array_length
+    void array_add(const int& n);
 };
 
 namespace Safe {
@@ -374,8 +380,8 @@ struct IR_node {
     // normal
     IR_tuple target;
 
-    // target: "jump"
-    // target + org_1: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn"
+    // target: "jump", "call"
+    // target + org_1: "alloca", "cast-float", "cast-int", "assign", "jumpe", "jumpn", "lw", "sw"
     // target + org_1 + org_2: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"
     std::string opera;
 
