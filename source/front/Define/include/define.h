@@ -367,7 +367,6 @@ struct IR_tuple {
     IR_tuple(int int_num);
     IR_tuple(double double_num);
     IR_tuple(basic_type pointer_represent_type);
-
 };
 
 struct IR_node {
@@ -390,6 +389,7 @@ struct IR_node {
 
     std::string comment;
 
+    void print() const;
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
 };
 

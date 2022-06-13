@@ -4,91 +4,35 @@
 
 #include "CFG.h"
 
-#include <iostream>
-
-int CFG::line_num = 0;
-int CFG::basic_block_num = 0;
-
-CFG::CFG(const std::shared_ptr<IR_node>& IR_head){
-    head = std::make_shared<CFG_node>();
-    now_cfg = head;
-    IR = IR_head;
+CFG::CFG(const std::shared_ptr<IR_node>& IR_head) {
+    this->IR_head = IR_head;
+    basic_block_num = 0;
 }
 
-void CFG::create_empty_cfg(){
+void CFG::Generate() {
+    init();
+    for (const auto& i : IR_chain) {
 
-}
-
-void CFG::create_basic_block(const std::shared_ptr<IR_node>& now_IR){
-
-}
-
-IR_node CFG::find_successor(const std::shared_ptr<IR_node> &target_IR) {
-
-    auto now = IR->next;
-    while (now != nullptr){
-        if(target_IR->target.name == now->target.name)
-            return *now;
-        now = now->next;
     }
-    //TODO: What if not found?
 }
 
-bool CFG::is_exist_basic_block(const std::shared_ptr<IR_node>& target_IR){
-
-}
-
-void CFG::cfg_generate(const std::shared_ptr<IR_node>& now_IR){
-
-    IR_PTR now = now_IR->next;
-    while (now != nullptr) {
-            // first instruction must be basic block entry
-        if(now->index == 0){
-            CFG::create_basic_block(now);
-            break;  //debug
+void CFG::init() {
+    IR_PTR temp = IR_head;
+    int i = 0;
+    while (temp != nullptr) {
+        IR_chain.push_back(temp);
+        if (temp->ir_type == ir_label) {
+            auto map_member = std::make_pair(temp->target.name, i);
+            IR_maps.insert(map_member);
         }
-
-            // function entry must be basic block entry
-        else if (now->ir_type == ir_label){
-            CFG::create_basic_block(now);
-        }
-
-            // instruction following jump/call must be basic block entry
-        else if (now->ir_type == ir_forth && (now->opera == "jump" || now->opera == "call")){
-            CFG::create_basic_block(now->next);
-        }
-        now = now->next;
+        temp = temp->next;
+        ++i;
     }
 }
 
-int CFG_LIST::cfg_num = 0;
-
-CFG_LIST::CFG_LIST(const std::shared_ptr<IR_node>& IR_head){
-    IR_PTR now = IR_head->next;
-    while (now != nullptr) {
-        // judge if it is function entry
-        if(now->target.name[0] == '@')
-            head = now->target.name;
-        now = now->next;
-    }
-    IR = IR_head;
-}
-
-void CFG_LIST::create_empty_cfg_list(){
-
-}
-
-void CFG_LIST::Generate(){
-    if (IR->next == nullptr) return;
-    cfg_list_generate(IR);
-}
-
-void CFG_LIST::cfg_list_generate(const std::shared_ptr<IR_node>& now_IR){
-    IR_PTR now = now_IR->next;
-    while (now != nullptr) {
-        // judge if it is function entry
-        if(now->target.name[0] == '@')
-            CFG::cfg_generate(now); //FIXME
-        now = now->next;
-    }
+void CFG::create_new_block() {
+    basic_block_num++;
+    now_dealt_with = std::make_shared<CFG_node>();
+    now_dealt_with->index = basic_block_num;
+    CFG_blocks_chain.push_back(now_dealt_with);
 }

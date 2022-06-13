@@ -362,6 +362,10 @@ identify_value_type_tuple Optimize_Useful::calculate(
     return res;
 }
 
+#include <set>
+#include <iostream>
+std::set<std::string> count;
+
 void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent) {
     if (now == nullptr) return;
     optimize_single(now->child, now);
@@ -433,7 +437,10 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
             }
     }
 
-    else if (now->type == ArrayDefinition) {
+    if (now->type == ArrayDefinition && count.find(now->only_name) == count.end()) {
+
+        count.insert(now->only_name);
+
         AST_PTR temp = now->child->sister;
         if (temp->type != Index) {
             AST_optimize_safe::RaiseError("temp->type != Index, AST need to be fixed");
@@ -450,13 +457,16 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
                 AST_optimize_safe::RaiseError("array index definition parameter is not a const-expression");
                 now->IVTT.array_add(0);
                 now->declaration_bound_sym_node->IVTT.array_add(0);
-                return;
+                break;
             }
             temp = temp->sister;
         }
     }
 
-    if (now->type == FunctionFormParam && now->last_child->type == Index) {
+    if (now->type == FunctionFormParam && now->last_child->type == Index && count.find(now->only_name) == count.end()) {
+
+        count.insert(now->only_name);
+
         AST_PTR temp = now->child->sister;
         if (temp->type != Index) {
             AST_optimize_safe::RaiseError("temp->type != Index, AST need to be fixed");
@@ -472,7 +482,7 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
             else {
                 now->IVTT.array_add(0);
                 now->declaration_bound_sym_node->IVTT.array_add(0);
-                return;
+                break;
             }
             temp = temp->sister;
         }
