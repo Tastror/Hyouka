@@ -13,9 +13,9 @@ include_directories(
         front/Optimise/include
         front/IRGen/include
         backend/Define/include
-        backend/CFG/include
-        backend/CFG_Yuki/include
-        backend/ActivityAnalysis/include
+#        backend/CFG/include
+#        backend/CFG_Yuki/include
+#        backend/ActivityAnalysis/include
 )
 
 include_directories(
@@ -23,6 +23,7 @@ include_directories(
 )
 
 add_executable(hyouka
+        main.cpp
         front/Define/define.cpp
         front/Lexical/Lex.cpp
         front/Parsing/AST.cpp
@@ -30,9 +31,10 @@ add_executable(hyouka
         front/Parsing/AST_keystmt.cpp
         front/Optimise/FrontOpt.cpp
         front/IRGen/IRGen.cpp
+
         backend/Define/backend_define.cpp
-        backend/CFG/CFG.cpp
-        backend/ActivityAnalysis/ActivityAnalysis.cpp
-        main.cpp
-        backend/CFG_Yuki/CFG_Yuki.cpp)
+#        backend/CFG/CFG.cpp
+#        backend/ActivityAnalysis/ActivityAnalysis.cpp
+#        backend/CFG_Yuki/CFG_Yuki.cpp
+)
 

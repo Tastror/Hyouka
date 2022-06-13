@@ -433,6 +433,51 @@ void Front::Optimiser::optimize_single(const AST_PTR& now, const AST_PTR& parent
             }
     }
 
+    else if (now->type == ArrayDefinition) {
+        AST_PTR temp = now->child->sister;
+        if (temp->type != Index) {
+            AST_optimize_safe::RaiseError("temp->type != Index, AST need to be fixed");
+            return;
+        }
+        temp = temp->child;
+        while (temp != nullptr) {
+            if (temp->count_expr_ending) {
+                temp->IVTT.self_change_to_int();
+                now->IVTT.array_add(temp->IVTT.self_get_int_value());
+                now->declaration_bound_sym_node->IVTT.array_add(temp->IVTT.self_get_int_value());
+            }
+            else {
+                AST_optimize_safe::RaiseError("array index definition parameter is not a const-expression");
+                now->IVTT.array_add(0);
+                now->declaration_bound_sym_node->IVTT.array_add(0);
+                return;
+            }
+            temp = temp->sister;
+        }
+    }
+
+    if (now->type == FunctionFormParam && now->last_child->type == Index) {
+        AST_PTR temp = now->child->sister;
+        if (temp->type != Index) {
+            AST_optimize_safe::RaiseError("temp->type != Index, AST need to be fixed");
+            return;
+        }
+        temp = temp->child;
+        while (temp != nullptr) {
+            if (temp->count_expr_ending) {
+                temp->IVTT.self_change_to_int();
+                now->IVTT.array_add(temp->IVTT.self_get_int_value());
+                now->declaration_bound_sym_node->IVTT.array_add(temp->IVTT.self_get_int_value());
+            }
+            else {
+                now->IVTT.array_add(0);
+                now->declaration_bound_sym_node->IVTT.array_add(0);
+                return;
+            }
+            temp = temp->sister;
+        }
+    }
+
     optimize_single(now->sister, parent);
 }
 

@@ -200,11 +200,15 @@ void value_and_type_storage::parse_from_basic_type(basic_type type, bool is_poin
 std::string identify_value_type_tuple::to_string() const {
     std::string res = self_storage.to_string();
     if (return_storage.used())
-        res += " return " + return_storage.to_string();
+        res += " return(" + return_storage.to_string() + ")";
     if (!additional_storage_vector.empty())
         res += " para";
     for (const auto& i : additional_storage_vector)
-        res += " " + i.to_string();
+        res += "(" + i.to_string() + ")";
+    if (!array_length.empty())
+        res += " len";
+    for (const auto& i : array_length)
+        res += "(" + std::to_string(i) + ")";
     return res;
 }
 
@@ -313,6 +317,10 @@ void identify_value_type_tuple::additional_storage_pop() {
 
 int identify_value_type_tuple::parameter_num() const {
     return (int) additional_storage_vector.size();
+}
+
+void identify_value_type_tuple::array_add(const int& n) {
+    array_length.push_back(n);
 }
 
 
@@ -461,7 +469,10 @@ void AST_node::print_all(const std::shared_ptr<AST_node>& now, int stage) {
     if (now->using_attribute) {
         if (!now->only_name.empty())
             std::cout << ", only_name: " << now->only_name;
-        std::cout << ", IVTT: " << now->IVTT.to_string();
+        if (now->declaration_bound_sym_node != nullptr)
+            std::cout << ", bound_IVTT: " << now->declaration_bound_sym_node->IVTT.to_string();
+        else
+            std::cout << ", IVTT: " << now->IVTT.to_string();
         if (now->is_const) std::cout << ", is_const";
         if (now->is_static) std::cout << ", is_static";
     }
@@ -670,7 +681,7 @@ void IR_node::print_all(const std::shared_ptr<IR_node>& IR_head) {
                 std::cout << now->opera << " -> "
                           << now->target.to_string(false) << " if "
                           << now->org_1.to_string() << " != zero";
-            else if (now->opera == "assign" || now->opera == "addr_assign" || now->opera == "cast-int" || now->opera == "cast-float" || now->opera == "reverse")
+            else if (now->opera == "assign" || now->opera == "sw" || now->opera == "lw" || now->opera == "cast-int" || now->opera == "cast-float")
                 std::cout << now->target.to_string() << " = "
                           << now->opera << ", "
                           << now->org_1.to_string();
