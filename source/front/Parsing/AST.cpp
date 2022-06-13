@@ -712,6 +712,9 @@ TOKEN_PTR FunctionFormParamAST::Parse() {
         GoNext();
 
         if (token_safe::data(now_token) == "]") {
+            AST_PTR empty = std::make_shared<AST_node>();
+            AST_node::connect_child(index_ast, empty);
+            empty->type = Expression;
             GoNext();
         }
         else {

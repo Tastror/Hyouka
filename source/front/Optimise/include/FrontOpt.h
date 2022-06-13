@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "backend_define.h"
+#include "define.h"
 
 namespace Front::Optimiser {
     void Optimize(const AST_PTR& source_AST_head);

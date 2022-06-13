@@ -5,30 +5,51 @@
 #include "backend_define.h"
 #include <iostream>
 
-void CFG_node::print_all(std::vector<CFG_node> cfg){
+void CFG_node::print() const{
 
-    if(cfg.size() == 0) {
-        std::cout << "ERROR: CFG is empty!!!" << std::endl;
-        return;
+    std::cout << "str predecessor:";
+    for (const auto& mem : str_predecessor) {
+        std::cout << " " << mem;
+    }
+    std::cout << std::endl;
+
+    std::cout << "predecessor:";
+    for (const auto& mem : predecessor) {
+        std::cout << " " << mem;
+    }
+    std::cout << std::endl;
+
+    std::cout << index << ", " << name << ", " << this << std::endl;
+
+    for (const auto& mem : content) {
+        mem->print();
     }
 
-    for (int i = 0; i<cfg.size(); i++){
-        for (int j = 0; j<cfg[i].basic_block.size(); j++){
-            std::cout << "TODO print" << std::endl;
-        }
+    std::cout << "str successor:";
+    for (const auto& mem : str_successor) {
+        std::cout << " " << mem;
+    }
+    std::cout << std::endl;
+
+    std::cout << "successor:";
+    for (const auto& mem : successor) {
+        std::cout << " " << mem;
+    }
+    std::cout << std::endl;
+}
+
+void CFG_List::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_){
+    for (const auto& mem : CFG_blocks_chain_) {
+        mem->print();
+        std::cout << std::endl;
     }
 }
 
-void CFG_List_node::print_all(std::unordered_map<std::string, CFG_PTR> cfg_list){
+void CFG_safe::RaiseError(const std::string &error_code) {
+    std::cout << "CFG Error: " << error_code << std::endl;
+    Safe::GlobalError = true;
+}
 
-    if(cfg_list.empty()){
-        std::cout << "ERROR: CFG LIST is empty!!!";
-        return;
-    }
-
-    for(auto it=cfg_list.begin();it!=cfg_list.end();it++){
-        std::cout << it->first << ":" << std::endl;
-        CFG_node::print_all(*it->second);
-    }
-
+void CFG_safe::RaiseWarning(const std::string& warning_code) {
+    std::cout << "CFG Warning: " << warning_code << std::endl;
 }

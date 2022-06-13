@@ -118,8 +118,6 @@ void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
     }
 }
 
-
-
 void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
 
     if (now_AST == nullptr) return;
