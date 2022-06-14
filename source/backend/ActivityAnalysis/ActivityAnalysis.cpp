@@ -10,13 +10,24 @@ bool BlockVariableFactory::change=true;
 
 void BlockVariableFactory::CalculateDefinedAndUsed(CFG_node &cfgNode) {
     for (auto i: cfgNode.content) {
-        if (judgeOperator(i->opera))
-            if (cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end() &&
+        if (OperatorFilter(i->opera)) //This filters instruction: jump, jumpe, jumpn, call
+            if(i->opera=="sw"){
+                /*Instruction sw is used to put a data into where i->target points at, so i->target is a used variable rather than a defined one*/
+                if (cfgNode.defined_variables.find(i->target.name) == cfgNode.defined_variables.end() &&
+                    cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end() &&
+                    cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end()) {
+                    cfgNode.used_variables.emplace(i->org_1.name);
+                    cfgNode.used_variables.emplace(i->org_2.name);
+                    cfgNode.used_variables.emplace(i->target.name);
+                }
+            }
+            else //Other Instruction are here
+                if (cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end() &&
                 cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end() &&
                 cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end()) {
                 cfgNode.used_variables.emplace(i->org_1.name);
                 cfgNode.used_variables.emplace(i->org_2.name);
-                cfgNode.defined_variables.emplace(i->target.name);//optimize needed,O(n^2),slow
+                cfgNode.defined_variables.emplace(i->target.name);//Time Complexity O(log^2n)
             }
     }
 }
