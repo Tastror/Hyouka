@@ -5,14 +5,13 @@
 #include"backend_define.h"
 #include<string>
 #include<set>
-#include <algorithm>
+#include<algorithm>
 
 class BlockVariableFactory {
 
     static bool judgeOperator(const std::string &op) {
-        const std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod",
-                                                  "assign"};
-        return std::any_of(operats.begin(), operats.end(), [&op](const std::string &str) {
+        const std::vector<std::string> operats = {"jump","jumpn","jumpe","call"};
+        return std::none_of(operats.begin(), operats.end(), [&op](const std::string &str) {
             return str == op;
         });
     }

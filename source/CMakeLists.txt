@@ -38,5 +38,5 @@ add_executable(hyouka
         backend/Define/backend_define.cpp
         backend/CFG/CFG.cpp
         backend/ActivityAnalysis/ActivityAnalysis.cpp
-)
+        backend/AvailableExpression/include/AvailableExpression.h backend/AvailableExpression/AvailableExpression.cpp)
 
