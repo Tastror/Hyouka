@@ -24,6 +24,13 @@ struct CFG_node {
     std::set<std::string> defined_variables;
     //End ActivityAnalysis
 
+    //For ExpressionAnalysis
+    std::set<IR_PTR> in_expressions;
+    std::set<IR_PTR> out_expressions;
+    std::set<IR_PTR> generated_expressions;
+    std::set<IR_PTR> killed_expressions;
+    //End ExpressionAnalysis
+
     // save linear index of other basic block in the cfg
     std::vector<std::string> str_predecessor;
     std::vector<std::string> str_successor;

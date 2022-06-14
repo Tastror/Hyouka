@@ -22,6 +22,7 @@ void BlockVariableFactory::CalculateDefinedAndUsed(CFG_node &cfgNode) {
 }
 
 void BlockVariableFactory::CalculateActivity(CFG_node &cfgNode) {
+    CFGChange[cfgNode.index]=false;
     for (auto suc: cfgNode.successor) {
         cfgNode.out_variables.insert(suc->in_variables.begin(), suc->in_variables.end());
     }
@@ -33,7 +34,8 @@ void BlockVariableFactory::CalculateActivity(CFG_node &cfgNode) {
         std::set_union(cfgNode.used_variables.begin(),cfgNode.used_variables.end(),difference.begin(),difference.end(),
                        std::inserter(newIn,newIn.begin()));
         if(newIn!=cfgNode.in_variables){
-            change=true;
+            //change=true;
+            CFGChange[cfgNode.index]=true;
             cfgNode.in_variables=newIn;
         }//Complexity Up to n^2log(n)
 }
@@ -42,8 +44,8 @@ void CFGActivityTab::AnalyzeBlockVariables(std::vector<CFG_PTR > &list) {
     for (auto node0: list) {
         BlockVariableFactory::CalculateDefinedAndUsed(*node0);
     }
-    while (BlockVariableFactory::change){
-        BlockVariableFactory::change = false;
+    while (BlockVariableFactory::DetectChange()/*BlockVariableFactory::change*/){
+        //BlockVariableFactory::change = false;
         for (auto it=list.rbegin();it!=list.rend();it++) {
             BlockVariableFactory::CalculateActivity(**it);
         }

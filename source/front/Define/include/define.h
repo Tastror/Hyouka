@@ -389,6 +389,10 @@ struct IR_node {
 
     std::string comment;
 
+    //Operator Overloading for Using std::set
+    friend bool operator <(const IR_node& first,const IR_node& second){return first.index<second.index;}
+    friend bool operator ==(const IR_node& first,const IR_node& second){return first.index==second.index;}
+
     void print() const;
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
 };
