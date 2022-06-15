@@ -9,10 +9,18 @@
 
 class BlockVariableFactory {
 
-    static bool OperatorFilter(const std::string &op) {
-        /*This filters instruction: jump, jumpe, jumpn, call*/
-        const std::vector<std::string> operats = {"jump","jumpn","jumpe","call"};
-        return std::none_of(operats.begin(), operats.end(), [&op](const std::string &str) {
+    static bool OperatorFilter1(const std::string &op) {
+        /*This filters instruction: "alloca", "cast-float", "cast-int", "assign", "lw"*/
+        const std::vector<std::string> operats = {"alloca", "cast-float", "cast-int", "assign", "lw"};
+        return std::any_of(operats.begin(), operats.end(), [&op](const std::string &str) {
+            return str == op;
+        });
+    }
+
+    static bool OperatorFilter2(const std::string &op) {
+        /*This filters instruction: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"*/
+        const std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"};
+        return std::any_of(operats.begin(), operats.end(), [&op](const std::string &str) {
             return str == op;
         });
     }
