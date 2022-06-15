@@ -50,3 +50,25 @@ namespace CFG_safe {
     void RaiseError(const std::string& error_code);
     void RaiseWarning(const std::string& warning_code);
 }
+
+struct Expression{
+    std::string  opera;
+    std::string org_1,org_2;
+    Expression(const IR_node &node){
+        opera=node.opera;
+        org_1=node.org_1.name;
+        org_2=node.org_2.name;
+    }
+    Expression(){}
+    friend bool operator==(const Expression &first,const Expression &second){
+        return (first.opera==second.opera&&first.org_1==second.org_1&&first.org_2==second.org_2);
+    }
+    friend bool operator<(const Expression &first,const Expression &second){
+        if(first.opera<second.opera) return true;
+        else if(first.opera==second.opera)
+            if(first.org_1<second.org_1) return true;
+            else if(first.org_1==second.org_1)
+                if(first.org_2<second.org_2) return true;
+        return false;
+    }
+};
