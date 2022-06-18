@@ -16,7 +16,8 @@ include_directories(
 
         backend/Define/include
         backend/CFG/include
-#        backend/ActivityAnalysis/include
+        backend/ActivityAnalysis/include
+        backend/AvailableExpression/include
 )
 
 include_directories(
@@ -37,6 +38,6 @@ add_executable(hyouka
 
         backend/Define/backend_define.cpp
         backend/CFG/CFG.cpp
-#        backend/ActivityAnalysis/ActivityAnalysis.cpp
-)
+        backend/ActivityAnalysis/ActivityAnalysis.cpp
+        backend/AvailableExpression/AvailableExpression.cpp)
 
