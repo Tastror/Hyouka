@@ -6,39 +6,65 @@
 
 #include "define.h"
 
-#include "cmdline.h"
 #include <string>
 #include <iostream>
 
-void shell_input(int argc, char** argv, std::string& input_filename, std::string& output_filename, std::string& debug_mode, std::string& optimizer, bool& to_assembly) {
-    cmdline::parser cmd_parser;
-    cmd_parser.footer(
-            "filename\n"
-            "       filename can be put right after exe path, such as \"hyouka demo.cpp\"\n"
-            "examples: hyouka demo.cpp -S -o demo.s  # -o default is output.s\n"
-            "          hyouka demo.cpp --debug lex  # --debug default is none,\n"
-            "          hyouka demo.cpp -S -o demo.s -O 1  # optimizer can use -O 0 or -O 1");
-    cmd_parser.add<std::string>("out", 'o', "output file name, for example demo.s",
-                                false, "output.s");
-    cmd_parser.add<std::string>("debug", 'd', "use to cut down at: shell, lex, parse, sym, opt, optsym, ir, cfg",
-                                false, "none",
-                                cmdline::oneof<std::string>("shell", "lex", "parse", "sym", "opt", "optsym", "ir", "cfg", "none"));
-    cmd_parser.add("only-to-assembly", 'S', "only compile to assembly");
-    cmd_parser.add<std::string>("optimizer", 'O', "optimizer, use 0 or 1",
-                                false, "0",
-                                cmdline::oneof<std::string>("0", "1"));
-    cmd_parser.parse_check(argc, argv);
-    if (cmd_parser.rest().size() != 1) {
-        if (cmd_parser.rest().empty())
-            std::cout << "missing filename" << std::endl;
-        else
-            std::cout << "have too much arguments" << std::endl;
-        std::cout << cmd_parser.usage();
-    } else
-        input_filename = cmd_parser.rest()[0];
-    output_filename = cmd_parser.get<std::string>("out");
-    debug_mode = cmd_parser.get<std::string>("debug");
-    to_assembly = cmd_parser.exist("only-to-assembly");
-    optimizer = cmd_parser.get<std::string>("optimizer");
-    if (input_filename.empty()) Safe::GlobalError = true;
+void shell_input(int argc, char** argv, std::string& input_filename, std::string& output_filename, std::string& debug_mode, bool& optimize, bool& to_assembly) {
+    int normal_index = 0;
+    optimize = false; to_assembly = false;
+
+    if (argc <= 1) {
+        std::cout << std::endl
+                  << std::endl
+                  << "Welcome to use Hyouka Compiler!" << std::endl
+                  << std::endl
+                  << "Use" << std::endl
+                  << "    hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <identify_name>]" << std::endl
+                  << "        where debug_identify_name can be shell, lex, parse, sym, opt, optsym, ir, cfg" << std::endl
+                  << std::endl
+                  << std::endl;
+    }
+
+    for (int i = 1; i < argc; ++i) {
+        std::string name(argv[i]);
+
+        if (name.at(0) == '-') {
+
+            // --xxx
+            if (name.size() >= 2 && name.at(1) == '-') {
+                std::string slash_name = name.substr(2);
+                if (slash_name == "debug") {
+                    i++;
+                    if (i >= argc) return;
+                    std::string debug_name(argv[i]);
+                    debug_mode = debug_name;
+                }
+            }
+
+            // -xxx
+            else {
+                std::string slash_name = name.substr(1);
+                if (slash_name == "S") {
+                    to_assembly = true;
+                }
+                else if (slash_name == "O1") {
+                    optimize = true;
+                }
+                else if (slash_name == "o") {
+                    // pass
+                }
+            }
+        }
+
+        else {
+            switch (normal_index) {
+                case 0:
+                    input_filename = name; break;
+                case 1:
+                    output_filename = name; break;
+                default: break;
+            }
+            normal_index++;
+        }
+    }
 }
