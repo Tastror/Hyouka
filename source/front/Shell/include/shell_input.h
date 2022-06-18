@@ -19,8 +19,8 @@ void shell_input(int argc, char** argv, std::string& input_filename, std::string
                   << "Welcome to use Hyouka Compiler!" << std::endl
                   << std::endl
                   << "Use" << std::endl
-                  << "    hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <identify_name>]" << std::endl
-                  << "        where debug_identify_name can be shell, lex, parse, sym, opt, optsym, ir, cfg" << std::endl
+                  << "    hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <debug_mode>]" << std::endl
+                  << "        where debug_identify_name can be shell, lex, parse, sym, opt, optsym, ir, cfg, aa, etc." << std::endl
                   << std::endl
                   << std::endl;
     }

@@ -39,8 +39,8 @@ Hyouka 冰果（氷菓・ひょうか）
 
 当前实现为
 ```shell
-hyouka testcase.sysy -S -o testcase.s
-hyouka testcase.sysy -S -o testcase.s -O 1    # 解析器有问题(见3rd-party)，之后会更换
+hyouka testcase.sysy -S -o testcase.s [--debug <debug_mode>]
+hyouka testcase.sysy -S -o testcase.s -O1 [--debug <debug_mode>]
 ```
 
 **源代码**
