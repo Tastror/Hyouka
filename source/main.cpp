@@ -14,13 +14,16 @@ int main(int argc, char** argv) {
 
     // shell
 
-    std::string input_filename, output_filename, debug_mode, optimizer;
-    bool to_assembly;
-    shell_input(argc, argv, input_filename, output_filename, debug_mode, optimizer, to_assembly);
+    // right input: compiler testcase.sysy -S -o testcase.s -O1
+    // now input: hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <identify_name>]
+
+    std::string input_filename, output_filename, debug_mode;
+    bool to_assembly, optimize;
+    shell_input(argc, argv, input_filename, output_filename, debug_mode, optimize, to_assembly);
     if (debug_mode == "shell")
         std::cout << "input: " << input_filename << "\noutput: " << output_filename << "\ndebug: " << debug_mode
-                  << "\nwhether to assembly = " << to_assembly << "\nwhich optimizer = " << optimizer << std::endl;
-
+                  << "\nwhether to assembly = " << to_assembly << "\nwhether to optimize = " << optimize << std::endl;
+    if (input_filename.empty()) return 0;
     if (Safe::GlobalError) return 1;
 
 
