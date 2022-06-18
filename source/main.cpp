@@ -5,6 +5,7 @@
 #include "IRGen.h"
 #include "CFG.h"
 #include "ActivityAnalysis.h"
+#include "AvailableExpression.h"
 
 #include <string>
 #include <iostream>
@@ -82,9 +83,19 @@ int main(int argc, char **argv) {
 
     CFGActivityTab cfgActivityTab;
     cfgActivityTab.AnalyzeBlockVariables(cfg_builder.CFG_blocks_chain);
-    if (debug_mode == "aa")
+    if (debug_mode == "aa"){
         CFGActivityTab::print_all(cfg_list);
+    }
+
     if (Safe::GlobalError) return 1;
 
+    ExpressionFactory expressionFactory;
+    expressionFactory.AnalyzeExpressions(cfg_builder.CFG_blocks_chain);
+    if (debug_mode == "aa"){
+        ExpressionFactory::print_all(cfg_list);
+        std::cout<<std::endl;
+    }
+
+    if (Safe::GlobalError) return 1;
     return 0;
 } 

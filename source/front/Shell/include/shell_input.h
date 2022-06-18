@@ -22,7 +22,7 @@ void shell_input(int argc, char** argv, std::string& input_filename, std::string
                                 false, "output.s");
     cmd_parser.add<std::string>("debug", 'd', "use to cut down at: shell, lex, parse, sym, opt, optsym, ir, cfg",
                                 false, "none",
-                                cmdline::oneof<std::string>("shell", "lex", "parse", "sym", "opt", "optsym", "ir", "cfg","aa", "none"));
+                                cmdline::oneof<std::string>("shell", "lex", "parse", "sym", "opt", "optsym", "ir", "cfg","aa","exp", "none"));
     cmd_parser.add("only-to-assembly", 'S', "only compile to assembly");
     cmd_parser.add<std::string>("optimizer", 'O', "optimizer, use 0 or 1",
                                 false, "0",
