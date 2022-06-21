@@ -113,6 +113,8 @@ void IRGen::Generate() {
 void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
     AST_PTR now = now_AST->child;
     while (now != nullptr) {
+        if (now->is_static)
+            create_label("", "static_data");
         basic_generate(now);
         now = now->sister;
     }

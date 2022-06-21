@@ -5,7 +5,7 @@
 ```shell
 - main.cpp  # 编译器主函数
 
-- front  # 前端基本内容
+- frontend  # 前端基本内容
   - Shell  # 命令行输入
   - include  # 前端一切定义
   - Lexical  # 词法分析

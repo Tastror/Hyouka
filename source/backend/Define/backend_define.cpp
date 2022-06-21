@@ -38,7 +38,7 @@ void CFG_node::print() const{
     std::cout << std::endl;
 }
 
-void CFG_List::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_){
+void CFG_list::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_){
     for (const auto& mem : CFG_blocks_chain_) {
         mem->print();
         std::cout << std::endl;
