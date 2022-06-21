@@ -91,6 +91,6 @@ void CFGActivityTab::print_all(const std::vector<std::shared_ptr<CFG_node>> &CFG
         std::cout << "Out:" << std::endl;
         for (auto i: item->out_variables)
             std::cout << i << " ";
-        std::cout << std::endl;
+        std::cout << std::endl << std::endl;
     }
 }

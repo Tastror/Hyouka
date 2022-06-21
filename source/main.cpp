@@ -6,6 +6,7 @@
 #include "CFG.h"
 #include "ActivityAnalysis.h"
 #include "AvailableExpression.h"
+#include "RegisterAllocate.h"
 
 #include <string>
 #include <iostream>
@@ -18,6 +19,7 @@ int main(int argc, char **argv) {
 
     // right input: compiler testcase.sysy -S -o testcase.s -O1
     // now input: hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <identify_name>]
+    // such as: hyouka ../demo.cpp -o -S ../demo.s -O1 --debug shell
 
     std::string input_filename, output_filename, debug_mode;
     bool to_assembly, optimize;
@@ -26,7 +28,7 @@ int main(int argc, char **argv) {
         std::cout << "input: " << input_filename << "\noutput: " << output_filename << "\ndebug: " << debug_mode
                   << "\nwhether to assembly = " << to_assembly << "\nwhether to optimize = " << optimize << std::endl;
     if (input_filename.empty()) return 0;
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
 
     /***************  frontend  ***************/
@@ -39,7 +41,7 @@ int main(int argc, char **argv) {
     if (debug_mode == "lex")
         token_node::print_all(token_head);
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
     // AST && Symbol_Table
     Symtable symtable;
@@ -51,7 +53,7 @@ int main(int argc, char **argv) {
     if (debug_mode == "sym")
         Symtable::print_all();
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
     // Semantic Check && Frontend Optimize
     Front::Optimiser::Optimize(AST_head);
@@ -61,7 +63,7 @@ int main(int argc, char **argv) {
     if (debug_mode == "optsym")
         Symtable::print_all();
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
     // 4th-IR Generation
     IRGen ir_gen(optimized_AST_head);
@@ -70,7 +72,7 @@ int main(int argc, char **argv) {
     if (debug_mode == "ir")
         IR_node::print_all(IR_head);
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
 
     /***************  backend  ***************/
@@ -78,27 +80,33 @@ int main(int argc, char **argv) {
     // Control Flow Graph
     CFG_builder cfg_builder(IR_head);
     cfg_builder.Generate();
-    const std::vector<CFG_PTR > &cfg_list = cfg_builder.CFG_blocks_chain;
+    const std::vector<CFG_PTR> &cfg_list = cfg_builder.CFG_blocks_chain;
     if (debug_mode == "cfg")
-        CFG_List::print_all(cfg_list);
+        CFG_list::print_all(cfg_list);
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
     CFGActivityTab cfgActivityTab;
     cfgActivityTab.AnalyzeBlockVariables(cfg_builder.CFG_blocks_chain);
-    if (debug_mode == "aa"){
+    if (debug_mode == "aa")
         CFGActivityTab::print_all(cfg_list);
-    }
 
-    if (Safe::GlobalError) return 1;
+    if (Safe::GlobalError) return 0;
 
-    ExpressionFactory expressionFactory;
-    expressionFactory.AnalyzeExpressions(cfg_builder.CFG_blocks_chain);
-    if (debug_mode == "aa"){
-        ExpressionFactory::print_all(cfg_list);
-        std::cout<<std::endl;
-    }
+//    ExpressionFactory expressionFactory;
+//    expressionFactory.AnalyzeExpressions(cfg_builder.CFG_blocks_chain);
+//    if (debug_mode == "aa"){
+//        ExpressionFactory::print_all(cfg_list);
+//        std::cout<<std::endl;
+//    }
+//
+//    if (Safe::GlobalError) return 0;
 
-    if (Safe::GlobalError) return 1;
+    RegisterAllocator RegAllo(cfg_list);
+    if (debug_mode == "ra")
+        ; // pass
+
+    if (Safe::GlobalError) return 0;
+
     return 0;
 } 
