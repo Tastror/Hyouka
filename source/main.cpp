@@ -16,11 +16,16 @@
 int main(int argc, char **argv) {
 
 
-    // shell
 
-    // right input: compiler testcase.sysy -S -o testcase.s -O1
-    // now input: hyouka <file_name> [-o] [-S] <out_name> [-O1] [--debug <identify_name>]
-    // such as: hyouka ../demo.cpp -o -S ../demo.s -O1 --debug shell
+    /***************  shell  ***************/
+
+
+    // right input:
+    //     compiler <file_name> [-S] [-o] <out_name> [-O1]
+    // now input:
+    //     hyouka <file_name> [-S] [-o] <out_name> [-O1] [--debug <identify_name>]
+    // such as:
+    //     hyouka ../demo.cpp -S -o ../demo.s -O1 --debug shell
 
     std::string input_filename, output_filename, debug_mode;
     bool to_assembly, optimize;
@@ -30,6 +35,7 @@ int main(int argc, char **argv) {
                   << "\nwhether to assembly = " << to_assembly << "\nwhether to optimize = " << optimize << std::endl;
     if (input_filename.empty()) return 0;
     if (Safe::GlobalError) return 0;
+
 
 
     /***************  frontend  ***************/
@@ -44,6 +50,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+
     // AST && Symbol_Table
     Symtable symtable;
     ProgramAST program(token_head, symtable);
@@ -56,6 +63,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+
     // Semantic Check && Frontend Optimize
     Front::Optimiser::Optimize(AST_head);
     const AST_PTR &optimized_AST_head = AST_head;
@@ -65,6 +73,7 @@ int main(int argc, char **argv) {
         Symtable::print_all();
 
     if (Safe::GlobalError) return 0;
+
 
     // 4th-IR Generation
     IRGen ir_gen(optimized_AST_head);
@@ -76,7 +85,9 @@ int main(int argc, char **argv) {
     if (Safe::GlobalError) return 0;
 
 
+
     /***************  backend  ***************/
+
 
     // Control Flow Graph
     CFG_builder cfg_builder(IR_head);
@@ -88,6 +99,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+
     // Live Variable Analysis
     CFGActivityTab cfgActivityTab;
     for (auto& [name, mul_block_chain] : cfg_mul_function_chain)
@@ -96,6 +108,7 @@ int main(int argc, char **argv) {
         CFGActivityTab::print_all(cfg_mul_function_chain);
 
     if (Safe::GlobalError) return 0;
+
 
 //    ExpressionFactory expressionFactory;
 //    expressionFactory.AnalyzeExpressions(cfg_builder.CFG_blocks_chain);
@@ -114,6 +127,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+
     // Instruction Allocation
     // InstructionAllocator InsAllo(RegAllo.CFG_pro_blocks_chain);
     // InsAllo.Generate();
@@ -121,6 +135,7 @@ int main(int argc, char **argv) {
     //     ARM_code::print_all(InsAllo.ARM_node_chain);
 
     // if (Safe::GlobalError) return 0;
+
 
     // Dump armv7 code to .s file
     //    if (to_assembly)   // FIXME: fixed
@@ -131,6 +146,8 @@ int main(int argc, char **argv) {
 
     //  executed by qemu:
     //        qemu-arm -L /usr/arm-linux-gnueabihf/ ./test
+
+
 
     return 0;
 } 
