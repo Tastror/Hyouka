@@ -19,7 +19,7 @@ void CFG_node::print() const {
     }
     std::cout << std::endl;
 
-    std::cout << index << ", " << name << ", " << this << std::endl;
+    std::cout << "No." << index << ", " << name << ", " << this << std::endl;
 
     for (const auto& mem : content) {
         mem->print();
@@ -36,6 +36,14 @@ void CFG_node::print() const {
         std::cout << " " << mem;
     }
     std::cout << std::endl;
+}
+
+void CFG_list::print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain_) {
+    for (const auto& [name, blocks_chain] : function_chain_) {
+        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
+        print_all(blocks_chain);
+        std::cout << std::endl << std::endl;
+    }
 }
 
 void CFG_list::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_){
@@ -72,14 +80,6 @@ void IR_node_pro::print() const {
         else if (opera == "jumpr")
             std::cout << opera << " -> "
                       << target.to_string(false) << " *" << register_name_str[src1] << "*";
-        else if (opera == "jumper")
-            std::cout << opera << " -> "
-                      << target.to_string(false) << " *" << register_name_str[tar] << "* if "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "* == zero";
-        else if (opera == "jumpnr")
-            std::cout << opera << " -> "
-                      << target.to_string(false) << " *" << register_name_str[tar] << "* if "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "* != zero";
         else if (opera == "assign" || opera == "sw" || opera == "lw" || opera == "cast-int" || opera == "cast-float")
             std::cout << target.to_string() << " *" << register_name_str[tar] << "*" << " = "
                       << opera << ", "
@@ -96,7 +96,15 @@ void IR_node_pro::print() const {
     std::cout << (comment.empty() ? "" : "\t# " + comment)  << std::endl;
 }
 
-void CFGP_list::print_all(const std::vector<CFGP_PTR>& CFG_pro_blocks_chain_){
+void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain_) {
+    for (const auto& [name, blocks_pro_chain] : function_pro_chain_) {
+        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
+        print_all(blocks_pro_chain);
+        std::cout << std::endl << std::endl;
+    }
+}
+
+void CFG_pro_list::print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain_){
     for (const auto& mem : CFG_pro_blocks_chain_) {
         mem->print();
         std::cout << std::endl;
@@ -117,7 +125,7 @@ void CFG_pro_node::print() const {
     }
     std::cout << std::endl;
 
-    std::cout << index << ", " << name << ", " << this << std::endl;
+    std::cout << "No." << index << ", " << name << ", " << this << std::endl;
 
     for (const auto& mem : content_pro) {
         mem->print();
