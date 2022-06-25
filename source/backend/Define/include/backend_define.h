@@ -122,7 +122,27 @@ struct CFG_pro_node : public CFG_node {
 
 #define CFG_pro_PTR std::shared_ptr<CFG_pro_node>
 
+<<<<<<< HEAD
 namespace CFG_pro_list {
     void print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain_);
     void print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain_);
+||||||| 47f70f2
+namespace CFGP_list {
+    void print_all(const std::vector<CFGP_PTR> &CFG_pro_blocks_chain_);
+=======
+namespace CFGP_list {
+    void print_all(const std::vector<CFGP_PTR> &CFG_pro_blocks_chain_);
+}
+
+struct ARM_node : public CFG_pro_node {
+    void print() const override;
+    virtual void dump() const;
+};
+
+#define ARM_PTR std::shared_ptr<ARM_node>
+
+namespace ARM_code {
+    void print_all(const std::vector<ARM_PTR> &ARM_node_chain_);
+    void dump_all(const std::vector<ARM_PTR> &ARM_node_chain_, std::string output_file);
+>>>>>>> 2227e4ec745a15beb82937ba1167e00749cccc17
 }
