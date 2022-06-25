@@ -677,7 +677,10 @@ void IR_node::print() const {
             std::cout << opera << " -> "
                       << target.to_string(false) << " if "
                       << org_1.to_string() << " != zero";
-        else if (opera == "assign" || opera == "sw" || opera == "lw" || opera == "cast-int" || opera == "cast-float")
+        else if (opera == "assign" || opera == "sw" || opera == "lw" ||
+                 opera == "cast-int" || opera == "cast-float" ||
+                 opera == "not" ||
+                 opera == "alloc-static" || opera == "alloc-stack")
             std::cout << target.to_string() << " = "
                       << opera << ", "
                       << org_1.to_string();

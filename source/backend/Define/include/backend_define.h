@@ -73,7 +73,7 @@ struct CFG_node {
     std::vector<std::shared_ptr<CFG_node>> predecessor;
     std::vector<std::shared_ptr<CFG_node>> successor;
 
-    void print() const;
+    virtual void print() const;
 };
 
 #define CFG_PTR std::shared_ptr<CFG_node>
@@ -95,16 +95,27 @@ enum register_name {
     no_name
 };
 
+const std::string register_name_str[] = {
+        "a1", "a2", "a3", "a4",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8",
+        "sb", "ip", "sp", "lr", "pc",
+        "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
+        "R8","R9", "R10", "R11", "R12", "R13", "R14", "R15",
+        "no_name"
+};
+
 struct IR_node_pro : public IR_node {
     register_name tar = no_name;
     register_name src1 = no_name;
     register_name src2 = no_name;
+    void print() const override;
 };
 
 #define IRP_PTR std::shared_ptr<IR_node_pro>
 
 struct CFG_pro_node : public CFG_node {
     std::vector<IRP_PTR> content_pro;
+    void print() const override;
 };
 
 #define CFGP_PTR std::shared_ptr<CFG_pro_node>

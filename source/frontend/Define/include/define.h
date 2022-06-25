@@ -389,7 +389,7 @@ struct IR_node {
 
     std::string comment;
 
-    void print() const;
+    virtual void print() const;
     static void print_all(const std::shared_ptr<IR_node>& IR_head);
 };
 

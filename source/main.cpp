@@ -103,8 +103,9 @@ int main(int argc, char **argv) {
 //    if (Safe::GlobalError) return 0;
 
     RegisterAllocator RegAllo(cfg_list);
+    RegAllo.Generate();
     if (debug_mode == "ra")
-        ; // pass
+        CFGP_list::print_all(RegAllo.CFG_pro_blocks_chain);
 
     if (Safe::GlobalError) return 0;
 
