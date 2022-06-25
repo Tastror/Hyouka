@@ -132,5 +132,6 @@ struct ARM_node : public CFG_pro_node {
 #define ARM_PTR std::shared_ptr<ARM_node>
 
 namespace ARM_code {
-    void print_all(const std::vector<ARM_PTR> &ARM_code_chain_);
+    void print_all(const std::vector<ARM_PTR> &ARM_node_chain_);
+    void dump_all(const std::vector<ARM_PTR> &ARM_node_chain_, std::string output_file);
 }
