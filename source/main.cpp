@@ -7,6 +7,7 @@
 #include "ActivityAnalysis.h"
 #include "AvailableExpression.h"
 #include "RegisterAllocate.h"
+#include "InstructionAllocate.h"
 
 #include <string>
 #include <iostream>
@@ -86,6 +87,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+    // Live Variable Analysis
     CFGActivityTab cfgActivityTab;
     cfgActivityTab.AnalyzeBlockVariables(cfg_builder.CFG_blocks_chain);
     if (debug_mode == "aa")
@@ -102,12 +104,24 @@ int main(int argc, char **argv) {
 //
 //    if (Safe::GlobalError) return 0;
 
+    // Register Allocation
     RegisterAllocator RegAllo(cfg_list);
     RegAllo.Generate();
     if (debug_mode == "ra")
         CFGP_list::print_all(RegAllo.CFG_pro_blocks_chain);
 
     if (Safe::GlobalError) return 0;
+
+    // Instruction Allocation
+    //InstructionAllocator InsAllo(RegAllo.CFG_pro_blocks_chain);
+    //InsAllo.Generate();
+    //if (debug_mode == "arm")
+    //    ARM_code::print_all(InsAllo.ARM_node_chain);
+
+    //if (Safe::GlobalError) return 0;
+
+    // -S
+    //ARM_code::dump_all(InsAllo.ARM_node_chain, output_filename);
 
     return 0;
 } 

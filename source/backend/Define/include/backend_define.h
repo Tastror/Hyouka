@@ -123,3 +123,14 @@ struct CFG_pro_node : public CFG_node {
 namespace CFGP_list {
     void print_all(const std::vector<CFGP_PTR> &CFG_pro_blocks_chain_);
 }
+
+struct ARM_node : public CFG_pro_node {
+    void print() const override;
+    virtual void dump() const;
+};
+
+#define ARM_PTR std::shared_ptr<ARM_node>
+
+namespace ARM_code {
+    void print_all(const std::vector<ARM_PTR> &ARM_code_chain_);
+}
