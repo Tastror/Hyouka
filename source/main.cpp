@@ -7,6 +7,7 @@
 #include "ActivityAnalysis.h"
 #include "AvailableExpression.h"
 #include "RegisterAllocate.h"
+#include "InstructionAllocate.h"
 
 #include <string>
 #include <iostream>
@@ -87,6 +88,7 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
+    // Live Variable Analysis
     CFGActivityTab cfgActivityTab;
     for (auto& [name, mul_block_chain] : cfg_mul_function_chain)
         cfgActivityTab.AnalyzeBlockVariables(mul_block_chain);
@@ -104,12 +106,31 @@ int main(int argc, char **argv) {
 //
 //    if (Safe::GlobalError) return 0;
 
+
     RegisterAllocator RegAllo(cfg_function_chain);
     RegAllo.Generate();
     if (debug_mode == "ra")
         CFG_pro_list::print_all(RegAllo.CFG_pro_function_chain);
 
     if (Safe::GlobalError) return 0;
+
+    // Instruction Allocation
+    // InstructionAllocator InsAllo(RegAllo.CFG_pro_blocks_chain);
+    // InsAllo.Generate();
+    // if (debug_mode == "arm")
+    //     ARM_code::print_all(InsAllo.ARM_node_chain);
+
+    // if (Safe::GlobalError) return 0;
+
+    // Dump armv7 code to .s file
+    //    if (to_assembly)   // FIXME: fixed
+    //        ARM_code::dump_all(InsAllo.ARM_node_chain, output_filename);
+
+    //  link .s and .a into exe:
+    //        arm-linux-gnueabihf-gcc test.s libsysy.a -o test
+
+    //  executed by qemu:
+    //        qemu-arm -L /usr/arm-linux-gnueabihf/ ./test
 
     return 0;
 } 

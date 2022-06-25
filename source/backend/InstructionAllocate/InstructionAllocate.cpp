@@ -3,3 +3,7 @@
 //
 
 #include "InstructionAllocate.h"
+
+void InstructionAllocator::Generate(){
+    ;
+}
