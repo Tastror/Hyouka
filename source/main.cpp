@@ -80,16 +80,18 @@ int main(int argc, char **argv) {
     // Control Flow Graph
     CFG_builder cfg_builder(IR_head);
     cfg_builder.Generate();
-    const std::vector<CFG_PTR> &cfg_list = cfg_builder.CFG_blocks_chain;
+    const auto& cfg_function_chain = cfg_builder.get_result_function_chain();
+    auto cfg_mul_function_chain = cfg_builder.get_result_function_chain();
     if (debug_mode == "cfg")
-        CFG_list::print_all(cfg_list);
+        CFG_list::print_all(cfg_function_chain);
 
     if (Safe::GlobalError) return 0;
 
     CFGActivityTab cfgActivityTab;
-    cfgActivityTab.AnalyzeBlockVariables(cfg_builder.CFG_blocks_chain);
+    for (auto& [name, mul_block_chain] : cfg_mul_function_chain)
+        cfgActivityTab.AnalyzeBlockVariables(mul_block_chain);
     if (debug_mode == "aa")
-        CFGActivityTab::print_all(cfg_list);
+        CFGActivityTab::print_all(cfg_mul_function_chain);
 
     if (Safe::GlobalError) return 0;
 
@@ -102,10 +104,10 @@ int main(int argc, char **argv) {
 //
 //    if (Safe::GlobalError) return 0;
 
-    RegisterAllocator RegAllo(cfg_list);
+    RegisterAllocator RegAllo(cfg_function_chain);
     RegAllo.Generate();
     if (debug_mode == "ra")
-        CFGP_list::print_all(RegAllo.CFG_pro_blocks_chain);
+        CFG_pro_list::print_all(RegAllo.CFG_pro_function_chain);
 
     if (Safe::GlobalError) return 0;
 

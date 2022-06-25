@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <unordered_map>
 #include <ostream>
 
@@ -79,7 +80,8 @@ struct CFG_node {
 #define CFG_PTR std::shared_ptr<CFG_node>
 
 namespace CFG_list {
-    void print_all(const std::vector<CFG_PTR> &CFG_blocks_chain_);
+    void print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain_);
+    void print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_);
 }
 
 namespace CFG_safe {
@@ -111,15 +113,16 @@ struct IR_node_pro : public IR_node {
     void print() const override;
 };
 
-#define IRP_PTR std::shared_ptr<IR_node_pro>
+#define IR_pro_PTR std::shared_ptr<IR_node_pro>
 
 struct CFG_pro_node : public CFG_node {
-    std::vector<IRP_PTR> content_pro;
+    std::vector<IR_pro_PTR> content_pro;
     void print() const override;
 };
 
-#define CFGP_PTR std::shared_ptr<CFG_pro_node>
+#define CFG_pro_PTR std::shared_ptr<CFG_pro_node>
 
-namespace CFGP_list {
-    void print_all(const std::vector<CFGP_PTR> &CFG_pro_blocks_chain_);
+namespace CFG_pro_list {
+    void print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain_);
+    void print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain_);
 }

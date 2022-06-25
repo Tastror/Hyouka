@@ -666,7 +666,7 @@ void IR_node::print() const {
     std::cout << index << "\t";
     if (ir_type == ir_forth) {
         std::cout << "    ";
-        if (opera == "jump" || opera == "call")
+        if (opera == "jump" || opera == "jumpr" || opera == "call")
             std::cout << opera << " -> "
                       << target.to_string(false);
         else if (opera == "jumpe")

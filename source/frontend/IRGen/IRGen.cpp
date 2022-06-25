@@ -180,7 +180,7 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
-    now_AST->declaration_bound_sym_node->label_name = "label_" + now_AST->only_name.substr(1);
+    now_AST->declaration_bound_sym_node->label_name = now_AST->only_name;
     create_label("", now_AST->declaration_bound_sym_node->label_name);
     type_storage func_type = now_AST->IVTT.return_type();
     AST_PTR para = now_AST->child->sister->child;
