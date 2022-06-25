@@ -5,6 +5,7 @@
 #pragma once
 
 #include "define.h"
+#include <stack>
 
 
 class IRGen {
@@ -15,6 +16,9 @@ public:
     static int line_num;
     static int label_num;
     static int now_register;
+
+    std::stack<std::string> now_continue;
+    std::stack<std::string> now_break;
 
     explicit IRGen(const std::shared_ptr<AST_node>& AST_head);
 
@@ -35,6 +39,9 @@ public:
     void single_define_generate(const std::shared_ptr<AST_node>& now_AST);
     void array_define_generate(const std::shared_ptr<AST_node>& now_AST);
     void if_generate(const std::shared_ptr<AST_node>& now_AST);
+    void while_generate(const std::shared_ptr<AST_node>& now_AST);
+    void break_generate(const std::shared_ptr<AST_node>& now_AST);
+    void continue_generate(const std::shared_ptr<AST_node>& now_AST);
     IR_tuple function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());
     IR_tuple array_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down);
     IR_tuple expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down = IR_tuple());

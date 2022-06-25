@@ -59,13 +59,13 @@ void CFG_builder::first_generate() {
 
         // call will not make it apart
 
-        if (i->opera == "jump") {
+        if (i->opera == "jump" || i->opera == "jumpr") {
             delay = true;
             new_jump = true;
             add_successor_to_now(i->target.name);
         }
 
-        if (i->opera == "jumpe" ||  i->opera == "jumpn") {
+        if (i->opera == "jumpe" ||  i->opera == "jumpn" || i->opera == "jumper" ||  i->opera == "jumpnr") {
             delay = true;
             remember = true;
             add_successor_to_now(i->target.name);
