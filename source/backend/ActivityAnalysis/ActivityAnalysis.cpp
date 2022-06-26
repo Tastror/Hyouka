@@ -10,30 +10,30 @@ bool BlockVariableFactory::change = true;
 
 void BlockVariableFactory::CalculateDefinedAndUsed(CFG_node &cfgNode) {
     for (auto i: cfgNode.content) {
+        /*IMPORTANT!! Every condition should consider origin rather than target*/
         if (i->opera == "sw") {
             /*Instruction sw is used to put a data into where i->target points at, so i->target is a used variable rather than a defined one*/
-            if (i->target.is_name && cfgNode.defined_variables.find(i->target.name) == cfgNode.defined_variables.end())
-                cfgNode.used_variables.emplace(i->target.name);
             if (i->org_1.is_name && cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end())
                 cfgNode.used_variables.emplace(i->org_1.name);
-
+            if (i->target.is_name && cfgNode.defined_variables.find(i->target.name) == cfgNode.defined_variables.end())
+                cfgNode.used_variables.emplace(i->target.name);
 
         } else if (OperatorFilter1(i->opera)) {
             /*Filter operators with 1 org*/
-            if (i->target.is_name && cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end())
-                cfgNode.defined_variables.emplace(i->target.name);
             if (i->org_1.is_name && cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end())
                 cfgNode.used_variables.emplace(i->org_1.name);
+            if (i->target.is_name && cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end())
+                cfgNode.defined_variables.emplace(i->target.name);
             //Time Complexity O(log^n)
 
         } else if (OperatorFilter2(i->opera)) {
             /*Filter operators with 2 orgs*/
-            if (i->target.is_name && cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end())
-                cfgNode.defined_variables.emplace(i->target.name);
             if (i->org_1.is_name && cfgNode.defined_variables.find(i->org_1.name) == cfgNode.defined_variables.end())
                 cfgNode.used_variables.emplace(i->org_1.name);
             if (i->org_2.is_name && cfgNode.defined_variables.find(i->org_2.name) == cfgNode.defined_variables.end())
                 cfgNode.used_variables.emplace(i->org_2.name);
+            if (i->target.is_name && cfgNode.used_variables.find(i->target.name) == cfgNode.used_variables.end())
+                cfgNode.defined_variables.emplace(i->target.name);
             //Time Complexity O(log^n)
         }
 
