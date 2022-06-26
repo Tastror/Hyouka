@@ -114,7 +114,7 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 #### 8，指令选择与调度
 
 - `source/backend/InstructionAllocate`，armv7 汇编序列
-- `debug_mode: ins`
+- `debug_mode: arm`
 - 负责者：
 - 无错误类型
 

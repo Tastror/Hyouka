@@ -129,25 +129,24 @@ int main(int argc, char **argv) {
 
 
     // Instruction Allocation
-    // InstructionAllocator InsAllo(RegAllo.CFG_pro_blocks_chain);
-    // InsAllo.Generate();
-    // if (debug_mode == "arm")
-    //     ARM_code::print_all(InsAllo.ARM_node_chain);
+    InstructionAllocator InsAllo(RegAllo.CFG_pro_function_chain);
+    InsAllo.Generate();
+    if (debug_mode == "arm")
+         ARM_node::print_all(InsAllo.ARM_node_chain);
 
     // if (Safe::GlobalError) return 0;
 
 
     // Dump armv7 code to .s file
-    //    if (to_assembly)
-    //        ARM_code::dump_all(InsAllo.ARM_node_chain, output_filename);
+
+    if (to_assembly)
+        ARM_node::dump_all(InsAllo.ARM_node_chain, output_filename);
 
     //  link .s and .a into exe:
     //        arm-linux-gnueabihf-gcc test.s libsysy.a -o test
 
     //  executed by qemu:
     //        qemu-arm -L /usr/arm-linux-gnueabihf/ ./test
-
-
 
     return 0;
 } 
