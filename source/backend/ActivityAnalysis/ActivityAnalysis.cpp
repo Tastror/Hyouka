@@ -73,24 +73,32 @@ void CFGActivityTab::AnalyzeBlockVariables(std::vector<CFG_PTR > &list) {
 
 }
 
-void CFGActivityTab::print_all(const std::vector<std::shared_ptr<CFG_node>> &CFG_blocks_chain) {
-    for (auto item: CFG_blocks_chain) {
+void CFGActivityTab::print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain) {
+    for (const auto& [name, blocks_chain] : function_chain) {
+        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
+        CFGActivityTab::print_all(blocks_chain);
+        std::cout << std::endl << std::endl;
+    }
+}
+
+void CFGActivityTab::print_all(const std::vector<std::shared_ptr<CFG_node>>& CFG_blocks_chain) {
+    for (const auto& item: CFG_blocks_chain) {
         item->print();
         std::cout << "Defined:" << std::endl;
-        for (auto i: item->defined_variables)
+        for (const auto& i: item->defined_variables)
             std::cout << i << " ";
         std::cout << std::endl;
         std::cout << "Used:" << std::endl;
-        for (auto i: item->used_variables)
+        for (const auto& i: item->used_variables)
             std::cout << i << " ";
         std::cout << std::endl;
         std::cout << "In:" << std::endl;
-        for (auto i: item->in_variables)
+        for (const auto& i: item->in_variables)
             std::cout << i << " ";
         std::cout << std::endl;
         std::cout << "Out:" << std::endl;
-        for (auto i: item->out_variables)
+        for (const auto& i: item->out_variables)
             std::cout << i << " ";
-        std::cout << std::endl;
+        std::cout << std::endl << std::endl;
     }
 }

@@ -113,6 +113,8 @@ void IRGen::Generate() {
 void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
     AST_PTR now = now_AST->child;
     while (now != nullptr) {
+        if (now->is_static)
+            create_label("", "static_data");
         basic_generate(now);
         now = now->sister;
     }
@@ -160,7 +162,14 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
     // Expression
 
     else if (now_AST->type == KeywordStatement) {
-        ;
+        if (now_AST->data == "while")
+            while_generate(now_AST);
+        else if (now_AST->data == "if" || now_AST->data == "if-else")
+            if_generate(now_AST);
+        else if (now_AST->data == "break")
+            break_generate(now_AST);
+        else if (now_AST->data == "continue")
+            continue_generate(now_AST);
     }
     else if (now_AST->type == NormalStatement) {
         expr_generate(now_AST);
@@ -171,7 +180,7 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 
 void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
-    now_AST->declaration_bound_sym_node->label_name = "label_" + now_AST->only_name.substr(1);
+    now_AST->declaration_bound_sym_node->label_name = now_AST->only_name;
     create_label("", now_AST->declaration_bound_sym_node->label_name);
     type_storage func_type = now_AST->IVTT.return_type();
     AST_PTR para = now_AST->child->sister->child;
@@ -198,7 +207,7 @@ void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
                 IR_tuple res = expr_generate(block_child->child, ret);
                 create_cast_or_assign("", ret, res);
             }
-            create_forth("", (std::string)"$ra", "jump");
+            create_forth("", (std::string)"$ra", "jumpr");
 
             // ! important
             // this break is an optimizer, can be removed
@@ -274,10 +283,14 @@ void IRGen::array_define_generate(const std::shared_ptr<AST_node>& now_AST) {
     IR_tuple assign_target(now_AST->only_name);
     assign_target.IVTT = now_AST->IVTT;
 
+    int volume = 1;
+    for (int i : now_AST->declaration_bound_sym_node->IVTT.array_length)
+        volume *= i;
+
     if (now_AST->is_static) {
-        create_forth("", assign_target, "assign", (std::string)"(static memory address)");
+        create_forth("", assign_target, "alloc-static", (int)volume * 4);
     } else {
-        create_forth("", assign_target, "assign", (std::string)"(stack memory address)");
+        create_forth("", assign_target, "alloc-stack", (int)volume * 4);
     }
 
     if (now_AST->last_child->type != Index) {
@@ -340,6 +353,71 @@ void IRGen::array_assign_generate(const std::shared_ptr<AST_node>& now_AST) {
     create_forth("", assign_unit, "sw", res);
 }
 
+
+
+void IRGen::if_generate(const std::shared_ptr<AST_node>& now_AST) {
+
+    auto now = now_AST->child;
+
+    // if
+    if (now_AST->data == "if") {
+        IR_tuple condition_res("%" + std::to_string(++now_register));
+        IR_tuple res = expr_generate(now->child, condition_res);
+        create_forth("", "if_end_" + std::to_string(++label_num), "jumpn", res);
+        now = now->sister;
+        basic_generate(now);
+        create_label("", "if_end_" + std::to_string(label_num));
+    }
+
+    // if-else
+    else {
+        IR_tuple condition_res("%" + std::to_string(++now_register));
+        IR_tuple res = expr_generate(now->child, condition_res);
+        create_forth("", "if_wrong_" + std::to_string(++label_num), "jumpn", res);
+        now = now->sister;
+        basic_generate(now);
+        create_forth("", "if_end_" + std::to_string(++label_num), "jump");
+        now = now->sister;
+        create_label("", "if_wrong_" + std::to_string(label_num - 1));
+        basic_generate(now);
+        create_label("", "if_end_" + std::to_string(label_num));
+    }
+}
+
+
+
+void IRGen::while_generate(const std::shared_ptr<AST_node>& now_AST) {
+
+    auto now = now_AST->child;
+
+    std::string continue_label_name = "while_continue_" + std::to_string(++label_num);
+    std::string break_label_name = "while_break_" + std::to_string(label_num);
+    now_continue.push(continue_label_name);
+    now_break.push(break_label_name);
+
+    create_label("", now_continue.top());
+    IR_tuple condition_res("%" + std::to_string(++now_register));
+    IR_tuple res = expr_generate(now->child, condition_res);
+    create_forth("", now_break.top(), "jumpn", res);
+
+    now = now->sister;
+    basic_generate(now);
+
+    create_label("", now_break.top());
+    now_continue.pop();
+    now_break.pop();
+}
+
+
+void IRGen::break_generate(const std::shared_ptr<AST_node>& now_AST) {
+    auto now = now_AST->child;
+    create_forth("", now_continue.top(), "jump");
+}
+
+void IRGen::continue_generate(const std::shared_ptr<AST_node>& now_AST) {
+    auto now = now_AST->child;
+    create_forth("", now_break.top(), "jump");
+}
 
 
 IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST, const IR_tuple& passing_down) {
@@ -502,50 +580,53 @@ IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR
             else if (now_AST->data == "+unary")
                 --now_register;
             else if (now_AST->data == "!") {
-                create_cast_or_assign("", ans, 0);
-                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", ans_2);
-                create_cast_or_assign("", ans, 1);
-                create_label("! operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+//                create_cast_or_assign("", ans, 0);
+//                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", ans_2);
+//                create_cast_or_assign("", ans, 1);
+//                create_label("! operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+                create_forth("", ans, "not", ans_1);
             }
             else if (now_AST->data == "==") {
-                create_cast_or_assign("", ans, 0);
-                IR_tuple foo("%" + std::to_string(++now_register));
-                foo.IVTT = Optimize_Useful::implicit_conversion(ans_1.IVTT, ans_2.IVTT);
-                std::string end_f_addi;
-                if (foo.IVTT.self_basic_type() == basic_float)
-                    end_f_addi = "f";
-                ans_1 = create_cast_or_not("", ans_1, foo);
-                ans_2 = create_cast_or_not("", ans_2, foo);
-                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
-                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", foo);
-                create_cast_or_assign("", ans, 1);
-                create_label("== operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+//                create_cast_or_assign("", ans, 0);
+//                IR_tuple foo("%" + std::to_string(++now_register));
+//                foo.IVTT = Optimize_Useful::implicit_conversion(ans_1.IVTT, ans_2.IVTT);
+//                std::string end_f_addi;
+//                if (foo.IVTT.self_basic_type() == basic_float)
+//                    end_f_addi = "f";
+//                ans_1 = create_cast_or_not("", ans_1, foo);
+//                ans_2 = create_cast_or_not("", ans_2, foo);
+//                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
+//                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpn", foo);
+//                create_cast_or_assign("", ans, 1);
+//                create_label("== operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+                create_forth("", ans, "eq", ans_1, ans_2);
             }
             else if (now_AST->data == "!=") {
-                create_cast_or_assign("", ans, 0);
-                IR_tuple foo("%" + std::to_string(++now_register));
-                foo.IVTT = Optimize_Useful::implicit_conversion(ans_1.IVTT, ans_2.IVTT);
-                std::string end_f_addi;
-                if (foo.IVTT.self_basic_type() == basic_float)
-                    end_f_addi = "f";
-                ans_1 = create_cast_or_not("", ans_1, foo);
-                ans_2 = create_cast_or_not("", ans_2, foo);
-                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
-                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpe", foo);
-                create_cast_or_assign("", ans, 1);
-                create_label("!= operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+//                create_cast_or_assign("", ans, 0);
+//                IR_tuple foo("%" + std::to_string(++now_register));
+//                foo.IVTT = Optimize_Useful::implicit_conversion(ans_1.IVTT, ans_2.IVTT);
+//                std::string end_f_addi;
+//                if (foo.IVTT.self_basic_type() == basic_float)
+//                    end_f_addi = "f";
+//                ans_1 = create_cast_or_not("", ans_1, foo);
+//                ans_2 = create_cast_or_not("", ans_2, foo);
+//                create_forth("", foo, "sub" + end_f, ans_1, ans_2);
+//                create_forth("", "temp_label_" + std::to_string(++label_num), "jumpe", foo);
+//                create_cast_or_assign("", ans, 1);
+//                create_label("!= operator exit, ans is " + ans.name, "temp_label_" + std::to_string(label_num));
+                create_forth("", ans, "neq", ans_1, ans_2);
             }
             else if (now_AST->data == ">=") {
-                create_forth("", ans, "goe" + end_f, ans_1, ans_2);
+                create_forth("", ans, "gre", ans_1, ans_2);
             }
             else if (now_AST->data == "<=") {
-                create_forth("", ans, "loe" + end_f, ans_1, ans_2);
+                create_forth("", ans, "lee", ans_1, ans_2);
             }
             else if (now_AST->data == ">") {
-                create_forth("", ans, "great" + end_f, ans_1, ans_2);
+                create_forth("", ans, "gr", ans_1, ans_2);
             }
             else if (now_AST->data == "<"){
-                create_forth("", ans, "less" + end_f, ans_1, ans_2);
+                create_forth("", ans, "le", ans_1, ans_2);
             }
             else {
 
