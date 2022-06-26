@@ -12,6 +12,7 @@ int main() {
     float rea;
     res[0] = -.1;
     res[-1] = 1.23;
+    a[1][2] = 3;
 
     while (i < 20) {
         float block;
