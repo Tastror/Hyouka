@@ -4,7 +4,7 @@ A repository for Huawei Bisheng Cup by team Hyouka from NWPU
 
 
 ## 队名来源
-Hyouka 冰果（氷菓・ひょうか）
+Hyouka 冰菓（氷菓・ひょうか）
 
 
 
@@ -39,8 +39,8 @@ Hyouka 冰果（氷菓・ひょうか）
 
 当前实现为
 ```shell
-hyouka testcase.sysy -S -o testcase.s [--debug <debug_mode>]
-hyouka testcase.sysy -S -o testcase.s -O1 [--debug <debug_mode>]
+功能测试: compiler testcase.sysy -S -o testcase.s [--debug <debug_mode>]
+性能测试: compiler testcase.sysy -S -o testcase.s -O1 [--debug <debug_mode>]
 ```
 
 **源代码**

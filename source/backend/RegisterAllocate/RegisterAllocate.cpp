@@ -5,8 +5,12 @@
 #include "RegisterAllocate.h"
 
 void RegisterAllocator::Generate() {
-    reg_var_vec.reserve(32);
     init();
+    for (auto& [name, block_chain] : CFG_pro_function_chain) {
+        function_map_reg_var_vec[name].reserve(32);
+        function_map_var_reg_map[name].clear();
+        generate_graph(name, block_chain);
+    }
 }
 
 void RegisterAllocator::init() {
@@ -59,18 +63,18 @@ void RegisterAllocator::init() {
 // there are defined, used, in, out
 
 
-void RegisterAllocator::generate_graph() {
+void RegisterAllocator::generate_graph(const std::string& name, std::vector<CFG_pro_PTR>& block_chain) {
 
 }
 
-void RegisterAllocator::generate_single_ir_pro(const IR_pro_PTR& ir_pro) {
+void RegisterAllocator::generate_single_ir_pro(const std::string& name, const IR_pro_PTR& ir_pro) {
 
     // todo: calculate name
 
     if (ir_pro->org_1.is_name)
-        ir_pro->src1 = var_reg_map[ir_pro->org_1.name];
+        ir_pro->src1 = function_map_var_reg_map[name][ir_pro->org_1.name];
     if (ir_pro->org_2.is_name)
-        ir_pro->src2 = var_reg_map[ir_pro->org_2.name];
+        ir_pro->src2 = function_map_var_reg_map[name][ir_pro->org_2.name];
 
     // todo: update name
 }

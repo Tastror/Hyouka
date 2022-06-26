@@ -32,8 +32,8 @@ public:
     // normal methods
     explicit CFG_builder(const IR_PTR& IR_head);
     void Generate();
-    std::map<std::string, std::vector<CFG_PTR>> get_result_function_chain() const { return function_chain; }
-    std::vector<std::vector<CFG_PTR>> get_result_static_chain() const { return static_chain; }
+    [[nodiscard]] std::map<std::string, std::vector<CFG_PTR>> get_result_function_chain() const { return function_chain; }
+    [[nodiscard]] std::vector<std::vector<CFG_PTR>> get_result_static_chain() const { return static_chain; }
 
 private:
     // middle methods
