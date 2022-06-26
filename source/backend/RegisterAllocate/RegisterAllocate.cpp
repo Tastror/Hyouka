@@ -4,12 +4,29 @@
 
 #include "RegisterAllocate.h"
 
+#include <iostream>
+
 void RegisterAllocator::Generate() {
     init();
-    for (auto& [name, block_chain] : CFG_pro_function_chain) {
-        function_map_reg_var_vec[name].reserve(32);
+    for (const auto& [name, block_chain] : CFG_pro_function_chain) {
+        function_map_reg_var_vec[name].reserve(16);
         function_map_var_reg_map[name].clear();
-        generate_graph(name, block_chain);
+        generate_global_graph(name, block_chain);
+
+        for (const auto& single_block : block_chain) {
+            generate_single_block(name, single_block);
+        }
+
+        // debug-output
+        if (debug)
+            for (const auto& [n, d] : function_map_neighbor_form[name]) {
+                std::cout << n << std::endl;
+                for (const auto& m : d) {
+                    std::cout << m << ", ";
+                }
+                std::cout << std::endl;
+            }
+
     }
 }
 
@@ -25,7 +42,7 @@ void RegisterAllocator::init() {
 
             now_CFG->index = mem->index;
             now_CFG->name = mem->name;
-    //        now_CFG->content = mem->content;
+            //* now_CFG->content = mem->content; *//
             now_CFG->in_variables = mem->in_variables;
             now_CFG->out_variables = mem->out_variables;
             now_CFG->used_variables = mem->used_variables;
@@ -62,9 +79,38 @@ void RegisterAllocator::init() {
 // in each CFG_pro_block
 // there are defined, used, in, out
 
+void RegisterAllocator::generate_global_graph(const std::string& name, const std::vector<CFG_pro_PTR>& block_chain) {
+    for (const auto& mem : block_chain) {
+        const auto& in = mem->in_variables;
+        for (const auto& var : in) {
+            for (const auto& var_2 : in) {
+                if (var != var_2)
+                    function_map_neighbor_form[name][var].insert(var_2);
+            }
+        }
+    }
+}
 
-void RegisterAllocator::generate_graph(const std::string& name, std::vector<CFG_pro_PTR>& block_chain) {
+void RegisterAllocator::generate_single_block(const std::string& name, const CFG_pro_PTR& single_block) {
+    std::map<std::string, std::set<std::string>> single_block_neighbor_form;
+    for (const auto& sen : single_block->content_pro) {
+        if (sen->org_1.is_name && !sen->org_1.name.empty() && sen->org_2.is_name && !sen->org_2.name.empty()) {
+            single_block_neighbor_form[sen->org_1.name].insert(sen->org_2.name);
+            single_block_neighbor_form[sen->org_2.name].insert(sen->org_1.name);
+        }
+    }
 
+    // debug-output
+    if (debug)
+        for (const auto& [n, d] : single_block_neighbor_form) {
+            std::cout << "single_block: " << n << std::endl;
+            for (const auto& m : d) {
+                std::cout << m << ", ";
+            }
+            std::cout << std::endl;
+        }
+
+    function_map_var_reg_map[name];
 }
 
 void RegisterAllocator::generate_single_ir_pro(const std::string& name, const IR_pro_PTR& ir_pro) {

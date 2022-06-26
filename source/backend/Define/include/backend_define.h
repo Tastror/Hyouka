@@ -13,6 +13,10 @@
 #include <unordered_map>
 #include <ostream>
 
+
+
+
+
 struct BackExpression {
     static std::set<BackExpression> AllExpressions;
     std::string opera;
@@ -48,6 +52,10 @@ struct BackExpression {
 
 #define EXP_PTR std::shared_ptr<BackExpression>
 
+
+
+
+
 struct CFG_node {
     int index = -1;
     std::string name;
@@ -80,8 +88,9 @@ struct CFG_node {
 #define CFG_PTR std::shared_ptr<CFG_node>
 
 namespace CFG_list {
-    void print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain_);
-    void print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_);
+    void print_all(const std::vector<CFG_PTR>& CFG_blocks_chain);
+    void print_all(const std::vector<std::vector<CFG_PTR>>& static_chain);
+    void print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain);
 }
 
 namespace CFG_safe {
@@ -89,17 +98,21 @@ namespace CFG_safe {
     void RaiseWarning(const std::string &warning_code);
 }
 
+
+
+
+
 enum register_name {
     a1, a2, a3, a4,
-    v1, v2, v3, v4, v5, v6, v7, v8,
-    sb, ip, sp, lr, pc,
+    v1, v2, v3, v4, v5, v6, v7,
+    fp, ip, sp, lr, pc,
     no_name
 };
 
 const std::string register_name_str[] = {
         "a1", "a2", "a3", "a4",
-        "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8",
-        "sb", "ip", "sp", "lr", "pc",
+        "v1", "v2", "v3", "v4", "v5", "v6", "v7",
+        "fp", "ip", "sp", "lr", "pc",
         "no_name"
 };
 
@@ -120,51 +133,23 @@ struct CFG_pro_node : public CFG_node {
 #define CFG_pro_PTR std::shared_ptr<CFG_pro_node>
 
 namespace CFG_pro_list {
-    void print_all(const std::map<std::string, std::vector<CFG_pro_PTR>> &function_pro_chain_);
-    void print_all(const std::vector<CFG_pro_PTR > &CFG_pro_blocks_chain_);
+    void print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain);
+    void print_all(const std::vector<std::vector<CFG_pro_PTR>>& static_chain);
+    void print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain);
 }
+
+
+
 
 
 // ARM node design
 // ref: https://developer.arm.com/documentation/ddi0406/latest
 
-enum ARM_tuple_type {
-    reg, mem, imm
-};
+typedef std::vector<std::string> ARM_code_vec;
 
-struct ARM_tuple {
-    ARM_tuple_type tuple_type = reg;
-
-    ARM_tuple();
-    ARM_tuple(register_name reg);
-    ARM_tuple(std::string);
-    ARM_tuple(const int num);
-
-};
-
-enum ARM_node_type {
-    ins, label
-};
-
-struct ARM_node {
-
-    int index = -1;
-    ARM_node_type node_type = label;
-    std::shared_ptr<ARM_node> next = nullptr;
-
-    std::string ins;
-    ARM_tuple dst;
-    ARM_tuple src_1;
-    ARM_tuple src_2;
-    ARM_tuple imm;
-
-    std::string comment;
-
-    virtual void print() const;
-    static void print_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_);
-
-    virtual void dump() const;
-    static void dump_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_, std::string output_filename);
+namespace ARM {
+    void print_all(const ARM_code_vec& ARM_code);
+    void dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename);
 };
 
 #define ARM_PTR std::shared_ptr<ARM_node>

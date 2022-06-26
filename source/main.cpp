@@ -93,8 +93,11 @@ int main(int argc, char **argv) {
     CFG_builder cfg_builder(IR_head);
     cfg_builder.Generate();
     auto cfg_mul_function_chain = cfg_builder.get_result_function_chain();
-    if (debug_mode == "cfg")
+    auto cfg_mul_static_chain = cfg_builder.get_result_static_chain();
+    if (debug_mode == "cfg") {
+        CFG_list::print_all(cfg_mul_static_chain);
         CFG_list::print_all(cfg_mul_function_chain);
+    }
 
     if (Safe::GlobalError) return 0;
 
@@ -110,7 +113,7 @@ int main(int argc, char **argv) {
 
 
     // Register Allocation
-    RegisterAllocator RegAllo(cfg_mul_function_chain);
+    RegisterAllocator RegAllo(cfg_mul_function_chain, debug_mode == "reg");
     RegAllo.Generate();
     const auto& reg_pro_function_chain = RegAllo.get_result_pro_function_chain();
     if (debug_mode == "reg")
@@ -123,14 +126,14 @@ int main(int argc, char **argv) {
     InstructionAllocator InsAllo(reg_pro_function_chain);
     InsAllo.Generate();
     if (debug_mode == "arm")
-         ARM_node::print_all(InsAllo.ARM_node_chain);
+         ARM::print_all(InsAllo.ARM_code);
 
     if (Safe::GlobalError) return 0;
 
 
     // Dump armv7 code to .s file
     if (to_assembly)
-        ARM_node::dump_all(InsAllo.ARM_node_chain, output_filename);
+        ARM::dump_all(InsAllo.ARM_code, output_filename);
 
 
     //  link .s and .a into exe:

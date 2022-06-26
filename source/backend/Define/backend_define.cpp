@@ -5,6 +5,10 @@
 #include "backend_define.h"
 #include <iostream>
 
+
+
+
+
 void CFG_node::print() const {
 
     std::cout << "str predecessor:";
@@ -38,18 +42,26 @@ void CFG_node::print() const {
     std::cout << std::endl;
 }
 
-void CFG_list::print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain_) {
-    for (const auto& [name, blocks_chain] : function_chain_) {
-        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
-        print_all(blocks_chain);
+void CFG_list::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain) {
+    for (const auto& mem : CFG_blocks_chain) {
+        mem->print();
+        std::cout << std::endl;
+    }
+}
+
+void CFG_list::print_all(const std::vector<std::vector<CFG_PTR>>& static_chain) {
+    for (const auto& mem : static_chain) {
+        std::cout << "## STATIC ## " << std::endl << std::endl;
+        print_all(mem);
         std::cout << std::endl << std::endl;
     }
 }
 
-void CFG_list::print_all(const std::vector<CFG_PTR>& CFG_blocks_chain_){
-    for (const auto& mem : CFG_blocks_chain_) {
-        mem->print();
-        std::cout << std::endl;
+void CFG_list::print_all(const std::map<std::string, std::vector<CFG_PTR>>& function_chain) {
+    for (const auto& [name, blocks_chain] : function_chain) {
+        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
+        print_all(blocks_chain);
+        std::cout << std::endl << std::endl;
     }
 }
 
@@ -61,6 +73,10 @@ void CFG_safe::RaiseError(const std::string &error_code) {
 void CFG_safe::RaiseWarning(const std::string& warning_code) {
     std::cout << "CFG Warning: " << warning_code << std::endl;
 }
+
+
+
+
 
 void IR_node_pro::print() const {
     std::cout << index << "\t";
@@ -96,21 +112,6 @@ void IR_node_pro::print() const {
     std::cout << (comment.empty() ? "" : "\t# " + comment)  << std::endl;
 }
 
-void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain_) {
-    for (const auto& [name, blocks_pro_chain] : function_pro_chain_) {
-        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
-        print_all(blocks_pro_chain);
-        std::cout << std::endl << std::endl;
-    }
-}
-
-void CFG_pro_list::print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain_){
-    for (const auto& mem : CFG_pro_blocks_chain_) {
-        mem->print();
-        std::cout << std::endl;
-    }
-}
-
 void CFG_pro_node::print() const {
 
     std::cout << "str predecessor:";
@@ -144,10 +145,36 @@ void CFG_pro_node::print() const {
     std::cout << std::endl;
 }
 
-void ARM_node::print_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_){
+void CFG_pro_list::print_all(const std::vector<CFG_pro_PTR>& CFG_pro_blocks_chain) {
+    for (const auto& mem : CFG_pro_blocks_chain) {
+        mem->print();
+        std::cout << std::endl;
+    }
+}
+void CFG_pro_list::print_all(const std::vector<std::vector<CFG_pro_PTR>>& static_chain) {
+    for (const auto& mem : static_chain) {
+        std::cout << "## STATIC ## " << std::endl << std::endl;
+        print_all(mem);
+        std::cout << std::endl << std::endl;
+    }
+}
+
+void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR>>& function_pro_chain) {
+    for (const auto& [name, blocks_pro_chain] : function_pro_chain) {
+        std::cout << "## FUNCTION ## " << name << std::endl << std::endl;
+        print_all(blocks_pro_chain);
+        std::cout << std::endl << std::endl;
+    }
+}
+
+
+
+
+
+void ARM::print_all(const ARM_code_vec& ARM_code){
     std::cout << "TODO: print arm code" << std::endl;
 }
 
-void ARM_node::dump_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_, std::string output_filename){
+void ARM::dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename){
     std::cout << "TODO: dump arm code" << std::endl;
 }
