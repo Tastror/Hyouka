@@ -128,18 +128,46 @@ namespace CFG_pro_list {
 }
 
 
-// FIXME: WARNING
-//  - you should not inherit from CFG_pro_node, cause it's the same framework as IR-FORTH
-//  - instead, make a new node which accord with ARM assembly
+// ARM node design
+// ref: https://developer.arm.com/documentation/ddi0406/latest
 
-//struct ARM_node : public CFG_pro_node {
-//    void print() const override;
-//    virtual void dump() const;
-//};
+enum ARM_tuple_type {
+    reg, mem, imm
+};
 
-//#define ARM_PTR std::shared_ptr<ARM_node>
-//
-//namespace ARM_code {
-//    void print_all(const std::vector<ARM_PTR> &ARM_node_chain_);
-//    void dump_all(const std::vector<ARM_PTR> &ARM_node_chain_, std::string output_file);
-//}
+struct ARM_tuple {
+    ARM_tuple_type tuple_type = reg;
+
+    ARM_tuple();
+    ARM_tuple(register_name reg);
+    ARM_tuple(std::string);
+    ARM_tuple(const int num);
+
+};
+
+enum ARM_node_type {
+    ins, label
+};
+
+struct ARM_node {
+
+    int index = -1;
+    ARM_node_type node_type = label;
+    std::shared_ptr<ARM_node> next = nullptr;
+
+    std::string ins;
+    ARM_tuple dst;
+    ARM_tuple src_1;
+    ARM_tuple src_2;
+    ARM_tuple imm;
+
+    std::string comment;
+
+    virtual void print() const;
+    static void print_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_);
+
+    virtual void dump() const;
+    static void dump_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_, std::string output_filename);
+};
+
+#define ARM_PTR std::shared_ptr<ARM_node>

@@ -143,3 +143,11 @@ void CFG_pro_node::print() const {
     }
     std::cout << std::endl;
 }
+
+void ARM_node::print_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_){
+    std::cout << "TODO: print arm code" << std::endl;
+}
+
+void ARM_node::dump_all(const std::vector<std::shared_ptr<ARM_node>> &ARM_chain_, std::string output_filename){
+    std::cout << "TODO: dump arm code" << std::endl;
+}
