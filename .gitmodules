@@ -1,3 +1,0 @@
-[submodule "source/3rd-party/cmdline"]
-	path = source/3rd-party/cmdline
-	url = https://github.com/tanakh/cmdline.git
