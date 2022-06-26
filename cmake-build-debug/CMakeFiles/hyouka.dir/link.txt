@@ -1,0 +1,3 @@
+"D:\Program Files\JetBrains\CLion 2022.1\bin\cmake\win\bin\cmake.exe" -E rm -f CMakeFiles\hyouka.dir/objects.a
+D:\Library\MinGW\x86_64-8.1.0\mingw64\bin\ar.exe qc CMakeFiles\hyouka.dir/objects.a @CMakeFiles\hyouka.dir\objects1.rsp
+D:\Library\MinGW\x86_64-8.1.0\mingw64\bin\g++.exe -g -static-libgcc -static-libstdc++ -Wl,--whole-archive CMakeFiles\hyouka.dir/objects.a -Wl,--no-whole-archive -o hyouka.exe -Wl,--out-implib,libhyouka.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\hyouka.dir\linklibs.rsp

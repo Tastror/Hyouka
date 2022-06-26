@@ -23,9 +23,9 @@ int main(int argc, char **argv) {
     // right input:
     //     compiler <file_name> [-S] [-o] <out_name> [-O1]
     // now input:
-    //     hyouka <file_name> [-S] [-o] <out_name> [-O1] [--debug <identify_name>]
+    //     compiler <file_name> [-S] [-o] <out_name> [-O1] [--debug <debug_mode>]
     // such as:
-    //     hyouka ../demo.cpp -S -o ../demo.s -O1 --debug shell
+    //     compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug shell
 
     std::string input_filename, output_filename, debug_mode;
     bool to_assembly, optimize;
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 
     RegisterAllocator RegAllo(cfg_function_chain);
     RegAllo.Generate();
-    if (debug_mode == "ra")
+    if (debug_mode == "reg")
         CFG_pro_list::print_all(RegAllo.CFG_pro_function_chain);
 
     if (Safe::GlobalError) return 0;
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
 
 
     // Dump armv7 code to .s file
-    //    if (to_assembly)   // FIXME: fixed
+    //    if (to_assembly)
     //        ARM_code::dump_all(InsAllo.ARM_node_chain, output_filename);
 
     //  link .s and .a into exe:
