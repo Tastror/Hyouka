@@ -1,4 +1,0 @@
-"D:\Program Files\JetBrains\CLion 2022.1\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=D:/Library/MinGW/x86_64-8.1.0/mingw64/bin/mingw32-make.exe -DCMAKE_C_COMPILER=D:/Library/MinGW/x86_64-8.1.0/mingw64/bin/gcc.exe -DCMAKE_CXX_COMPILER=D:/Library/MinGW/x86_64-8.1.0/mingw64/bin/g++.exe -G "CodeBlocks - MinGW Makefiles" -S "F:\# 5 Develop\Hyouka Doc\Hyouka" -B "F:\# 5 Develop\Hyouka Doc\Hyouka\cmake-build-debug"
--- Configuring done
--- Generating done
--- Build files have been written to: F:/# 5 Develop/Hyouka Doc/Hyouka/cmake-build-debug
