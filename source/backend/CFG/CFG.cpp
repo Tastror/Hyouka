@@ -69,6 +69,10 @@ void CFG_builder::first_generate() {
             add_successor_to_now(i->target.name);
         }
 
+        if (i->opera == "call") {
+            new_block_due_to_jump = true;
+        }
+
         add_to_now(i);
         index++;
 
