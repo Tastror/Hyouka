@@ -7,14 +7,28 @@
 #include <iostream>
 
 void RegisterAllocator::Generate() {
+
     init();
+
+    // generate graph
     for (const auto& [name, block_chain] : CFG_pro_function_chain) {
+
         function_map_reg_var_vec[name].reserve(16);
         function_map_var_reg_map[name].clear();
         generate_global_graph(name, block_chain);
 
         for (const auto& single_block : block_chain) {
-            generate_single_block(name, single_block);
+            generate_local_graph(name, single_block);
+
+            // debug-output
+            if (debug)
+                for (const auto& [n, d] : function_map_local_neighbor_form[name][single_block->name]) {
+                    std::cout << "single_block: " << n << std::endl;
+                    for (const auto& m : d) {
+                        std::cout << m << ", ";
+                    }
+                    std::cout << std::endl;
+                }
         }
 
         // debug-output
@@ -28,6 +42,49 @@ void RegisterAllocator::Generate() {
             }
 
     }
+
+    // handle graph, generate register
+    for (const auto& [name, block_chain] : CFG_pro_function_chain) {
+
+        // in graph
+        int counter[20] = {0};
+        handle_global_graph(name, block_chain, counter);
+        for (const auto& single_block : block_chain) {
+            handle_local_graph(name, single_block, counter);
+        }
+
+        // not in graph
+        for (const auto& [n, s] : function_map_weight[name]) {
+            if (n.substr(0, 4) == "$par") {
+                int k = std::stoi(n.substr(4)) - 1;
+                if (k < 4)
+                    function_map_var_reg_map[name][n] = (register_name) k;
+                else
+                    function_map_var_reg_map[name][n] = spill;
+            }
+            else if (function_map_var_reg_map[name][n] == no_name)
+                function_map_var_reg_map[name][n] = a1;
+        }
+
+        // debug-output
+        if (debug)
+            for (const auto& [n, d] : function_map_var_reg_map[name]) {
+                std::cout << n << ": *" << register_name_str[d] << "*" << std::endl;
+            }
+    }
+
+    // add register to ir_forth
+    for (const auto& [name, block_chain] : CFG_pro_function_chain) {
+        for (const auto& single_block : block_chain) {
+            for (auto& x : single_block->content_pro) {
+                generate_single_ir_pro(name, x);
+            }
+        }
+    }
+
+    // generate IR_pro_PTR chain
+    generate_ir_pro_chain();
+
 }
 
 void RegisterAllocator::init() {
@@ -80,8 +137,33 @@ void RegisterAllocator::init() {
 // there are defined, used, in, out
 
 void RegisterAllocator::generate_global_graph(const std::string& name, const std::vector<CFG_pro_PTR>& block_chain) {
+
+    function_map_var_reg_map[name]["$ra"] = lr;
+
     for (const auto& mem : block_chain) {
+
         const auto& in = mem->in_variables;
+        const auto& out = mem->out_variables;
+        const auto& def = mem->defined_variables;
+        const auto& use = mem->used_variables;
+
+        for (const auto& var : in) {
+            function_map_var_reg_map[name][var] = no_name;
+            function_map_weight[name][var] = 0;
+        }
+        for (const auto& var : out) {
+            function_map_var_reg_map[name][var] = no_name;
+            function_map_weight[name][var] = 0;
+        }
+        for (const auto& var : def) {
+            function_map_var_reg_map[name][var] = no_name;
+            function_map_weight[name][var] = 0;
+        }
+        for (const auto& var : use) {
+            function_map_var_reg_map[name][var] = no_name;
+            function_map_weight[name][var] = 0;
+        }
+
         for (const auto& var : in) {
             for (const auto& var_2 : in) {
                 if (var != var_2)
@@ -91,36 +173,67 @@ void RegisterAllocator::generate_global_graph(const std::string& name, const std
     }
 }
 
-void RegisterAllocator::generate_single_block(const std::string& name, const CFG_pro_PTR& single_block) {
-    std::map<std::string, std::set<std::string>> single_block_neighbor_form;
+void RegisterAllocator::generate_local_graph(const std::string& name, const CFG_pro_PTR& single_block) {
+
+    std::map<std::string, std::set<std::string>> local_neighbor_form;
+
     for (const auto& sen : single_block->content_pro) {
         if (sen->org_1.is_name && !sen->org_1.name.empty() && sen->org_2.is_name && !sen->org_2.name.empty()) {
-            single_block_neighbor_form[sen->org_1.name].insert(sen->org_2.name);
-            single_block_neighbor_form[sen->org_2.name].insert(sen->org_1.name);
+            local_neighbor_form[sen->org_1.name].insert(sen->org_2.name);
+            local_neighbor_form[sen->org_2.name].insert(sen->org_1.name);
         }
     }
 
-    // debug-output
-    if (debug)
-        for (const auto& [n, d] : single_block_neighbor_form) {
-            std::cout << "single_block: " << n << std::endl;
-            for (const auto& m : d) {
-                std::cout << m << ", ";
-            }
-            std::cout << std::endl;
-        }
+    function_map_local_neighbor_form[name][single_block->name] = local_neighbor_form;
+}
 
-    function_map_var_reg_map[name];
+void RegisterAllocator::handle_global_graph(const std::string& name, const std::vector<CFG_pro_PTR>& block_chain, int* counter) {
+    const std::map<std::string, std::set<std::string>>& global_neighbor_form = function_map_neighbor_form[name];
+    for (const auto& [n, s] : global_neighbor_form) {
+        for (const auto& r : s) {
+            counter[function_map_var_reg_map[name][r]]++;
+        }
+        int i;
+        for (i = v2; i <= v7; ++i) {
+            if (counter[i] == 0)
+                break;
+        }
+        if (i > v7) i = spill;
+        function_map_var_reg_map[name][n] = (register_name)i;
+    }
+}
+
+void RegisterAllocator::handle_local_graph(const std::string& name, const CFG_pro_PTR& single_block, const int* counter) {
+    const std::map<std::string, std::set<std::string>>& local_neighbor_form = function_map_local_neighbor_form[name][single_block->name];
+    for (const auto& [n, s] : local_neighbor_form) {
+        int temp[20];
+        for (int i = 0; i < 20; ++i) temp[i] = counter[i];
+        for (const auto& r : s) {
+            temp[function_map_var_reg_map[name][r]]++;
+        }
+        int i;
+        for (i = v1; i <= v7; ++i) {
+            if (temp[i] == 0)
+                break;
+        }
+        if (i > v7) i = spill;
+        function_map_var_reg_map[name][n] = (register_name)i;
+    }
 }
 
 void RegisterAllocator::generate_single_ir_pro(const std::string& name, const IR_pro_PTR& ir_pro) {
 
-    // todo: calculate name
+    if (ir_pro->ir_type == ir_forth) {
+        if (ir_pro->target.is_name)
+            ir_pro->tar = function_map_var_reg_map[name][ir_pro->target.name];
+        if (ir_pro->org_1.is_name)
+            ir_pro->src1 = function_map_var_reg_map[name][ir_pro->org_1.name];
+        if (ir_pro->org_2.is_name)
+            ir_pro->src2 = function_map_var_reg_map[name][ir_pro->org_2.name];
+    }
 
-    if (ir_pro->org_1.is_name)
-        ir_pro->src1 = function_map_var_reg_map[name][ir_pro->org_1.name];
-    if (ir_pro->org_2.is_name)
-        ir_pro->src2 = function_map_var_reg_map[name][ir_pro->org_2.name];
+}
 
-    // todo: update name
+void RegisterAllocator::generate_ir_pro_chain() {
+
 }
