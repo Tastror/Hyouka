@@ -95,8 +95,11 @@ void IR_node_pro::print() const {
                       << org_1.to_string() << " *" << register_name_str[src1] << "* != zero";
         else if (opera == "jumpr")
             std::cout << opera << " -> "
-                      << target.to_string(false) << " *" << register_name_str[src1] << "*";
-        else if (opera == "assign" || opera == "sw" || opera == "lw" || opera == "cast-int" || opera == "cast-float")
+                      << target.to_string(false) << " *" << register_name_str[tar] << "*";
+        else if (opera == "assign" || opera == "sw" || opera == "lw" ||
+                 opera == "cast-int" || opera == "cast-float" ||
+                 opera == "not" ||
+                 opera == "alloc-static" || opera == "alloc-stack")
             std::cout << target.to_string() << " *" << register_name_str[tar] << "*" << " = "
                       << opera << ", "
                       << org_1.to_string() << " *" << register_name_str[src1] << "*";
