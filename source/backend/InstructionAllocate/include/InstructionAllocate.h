@@ -7,10 +7,20 @@
 #include "backend_define.h"
 
 class InstructionAllocator {
-public:
 
-    std::vector<CFG_pro_PTR> CFG_pro_blocks_chain;
+public:
+    std::vector<IR_pro_PTR> ir_pro_normal_chain;
+    std::vector<IR_PTR> ir_static_chain;
     ARM_code_vec ARM_code;
-    explicit InstructionAllocator(const std::map<std::string, std::vector<CFG_pro_PTR>>& CFG_pro_function_chain) {}
+
+public:
+    explicit InstructionAllocator(
+        std::vector<IR_pro_PTR> ir_pro_normal_chain,
+        std::vector<IR_PTR> ir_static_chain
+    ):  ir_pro_normal_chain(std::move(ir_pro_normal_chain)),
+        ir_static_chain(std::move(ir_static_chain)) {}
+
+public:
     void Generate();
+
 };
