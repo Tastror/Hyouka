@@ -247,8 +247,6 @@ void RegisterAllocator::generate_ir_pro_chain() {
     for (const auto& n : CFG_function_name) {
         for (const auto& b : CFG_pro_function_chain[n]) {
             for (const auto& i : b->content_pro) {
-                i->print();
-                std::cout << std::endl;
                 IR_pro_normal_chain.push_back(i);
             }
         }
@@ -257,8 +255,6 @@ void RegisterAllocator::generate_ir_pro_chain() {
     for (const auto& s : CFG_static_chain) {
         for (const auto& b : s) {
             for (const auto& i : b->content) {
-                i->print();
-                std::cout << std::endl;
                 IR_static_chain.push_back(i);
             }
         }
