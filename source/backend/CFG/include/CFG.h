@@ -25,6 +25,7 @@ private:
 public:
     // result
     std::map<std::string, std::vector<CFG_PTR>> function_chain;
+    std::vector<std::string> function_name;
     std::vector<std::vector<CFG_PTR>> static_chain;
 
 
@@ -33,6 +34,7 @@ public:
     explicit CFG_builder(const IR_PTR& IR_head);
     void Generate();
     [[nodiscard]] std::map<std::string, std::vector<CFG_PTR>> get_result_function_chain() const { return function_chain; }
+    [[nodiscard]] std::vector<std::string> get_result_function_name() const { return function_name; }
     [[nodiscard]] std::vector<std::vector<CFG_PTR>> get_result_static_chain() const { return static_chain; }
 
 private:

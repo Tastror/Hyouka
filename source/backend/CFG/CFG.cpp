@@ -133,6 +133,7 @@ void CFG_builder::create_new_static(const IR_PTR& connect_IR, int ir_index) {
 void CFG_builder::create_new_function(const IR_PTR& connect_IR, int ir_index) {
     last_CFG = nullptr;
     now_CFG = nullptr;
+    function_name.push_back(connect_IR->target.name);
     function_chain[connect_IR->target.name] = std::vector<CFG_PTR>();
     now_CFG_blocks_chain_ptr = &function_chain[connect_IR->target.name];
 }

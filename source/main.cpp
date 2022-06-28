@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
     cfg_builder.Generate();
     auto cfg_mul_function_chain = cfg_builder.get_result_function_chain();
     auto cfg_mul_static_chain = cfg_builder.get_result_static_chain();
+    auto cfg_function_name = cfg_builder.get_result_function_name();
     if (debug_mode == "cfg") {
         CFG_list::print_all(cfg_mul_static_chain);
         CFG_list::print_all(cfg_mul_function_chain);
@@ -113,17 +114,24 @@ int main(int argc, char **argv) {
 
 
     // Register Allocation
-    RegisterAllocator RegAllo(cfg_mul_function_chain, debug_mode == "reg");
+    RegisterAllocator RegAllo(
+        cfg_mul_function_chain,
+        cfg_mul_static_chain,
+        cfg_function_name,
+        debug_mode == "reg"
+    );
     RegAllo.Generate();
-    const auto& reg_pro_function_chain = RegAllo.get_result_pro_function_chain();
+    auto ir_pro_normal_chain = RegAllo.get_result_IR_pro_normal_chain();
+    auto ir_static_chain = RegAllo.get_result_IR_static_chain();
     if (debug_mode == "reg")
         CFG_pro_list::print_all(RegAllo.get_result_pro_function_chain());
+
 
     if (Safe::GlobalError) return 0;
 
 
     // Instruction Allocation
-    InstructionAllocator InsAllo(reg_pro_function_chain);
+    InstructionAllocator InsAllo(ir_pro_normal_chain, ir_static_chain);
     InsAllo.Generate();
     if (debug_mode == "arm")
          ARM::print_all(InsAllo.ARM_code);
