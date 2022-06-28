@@ -152,4 +152,3 @@ namespace ARM {
     void dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename);
 };
 
-#define ARM_PTR std::shared_ptr<ARM_node>
