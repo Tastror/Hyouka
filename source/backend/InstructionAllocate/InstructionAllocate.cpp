@@ -53,8 +53,20 @@ InstructionAllocator::InstructionAllocator(const std::map<std::string, std::vect
 
 void InstructionAllocator::Generate() {
 
-    for(auto &it : CFG_map){
-       std::cout << it.first << std::endl;      //for debug
+    if (CFG_map.empty()) return;
+    program_generate(CFG_map);
+
+}
+
+void InstructionAllocator::program_generate(const std::map<std::string, std::vector<CFG_pro_PTR>>& CFG_pro_function_chain){
+
+    for(auto &it :CFG_pro_function_chain){
+        ARM_code.push_back(it.first + ":");     //label
+        function_generate(it.second);   //content
     }
+}
+
+void InstructionAllocator::function_generate(const std::vector<std::shared_ptr<CFG_pro_node>>& now_CFG){
+    ;
 }
 
