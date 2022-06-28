@@ -175,9 +175,13 @@ void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR
 
 
 void ARM::print_all(const ARM_code_vec& ARM_code){
-    std::cout << "TODO: print arm code" << std::endl;
+
+    for (int i = 0; i < ARM_code.size(); i++) {
+        std::cout << i << "           " << ARM_code[i] << std::endl;
+    }
 }
 
 void ARM::dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename){
+    //TODO
     std::cout << "TODO: dump arm code" << std::endl;
 }

@@ -23,6 +23,13 @@ public:
 public:
     void Generate();
     void normal_generate();
+    void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
+    void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
     void static_generate();
     [[nodiscard]] ARM_code_vec get_result_ARM_code() const { return ARM_code; };
 

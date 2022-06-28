@@ -131,17 +131,18 @@ int main(int argc, char **argv) {
 
     // Instruction Allocation
     InstructionAllocator InsAllo(ir_pro_normal_chain, ir_static_chain);
-    InsAllo.Generate();
-    const auto& ARM_code = InsAllo.get_result_ARM_code();
+    //InsAllo.Generate();
+    //const auto& ARM_code = InsAllo.get_result_ARM_code();
     if (debug_mode == "arm")
-         ARM::print_all(ARM_code);
+        //ARM::print_all(ARM_code);
+
 
     if (Safe::GlobalError) return 0;
 
 
     // Dump armv7 code to .s file
     if (to_assembly)
-        ARM::dump_all(ARM_code, output_filename);
+        //ARM::dump_all(ARM_code, output_filename);
 
 
     //  link .s and .a into exe:
