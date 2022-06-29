@@ -144,8 +144,6 @@ int main(int argc, char **argv) {
         ARM::dump_all(ARM_code, output_filename);
 
 
-
-
     //  link .s and .a into exe:
     //        arm-linux-gnueabihf-gcc test.s libsysy.a -o test
 

@@ -140,9 +140,6 @@ namespace CFG_pro_list {
 }
 
 
-
-
-
 // ARM node design
 // ref: https://developer.arm.com/documentation/ddi0406/latest
 
