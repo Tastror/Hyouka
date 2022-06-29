@@ -25,7 +25,8 @@ public:
     void normal_generate();
 
     void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void return_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);

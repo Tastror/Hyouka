@@ -23,6 +23,27 @@ void InstructionAllocator::normal_generate() {
 
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
+    // entry of function
+    function_entry_generate(now_IR_pro);
+
+    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
+            if_generate(ir_pro_normal_chain[i]);
+        }
+
+        // exit of function
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpr") {  //FIXME
+            function_exit_generate(ir_pro_normal_chain[i]);
+            break;
+        }
+
+    }
+
+}
+
+void InstructionAllocator::function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
     ARM_node now_ARM;
 
     // only save function name since '@' means comment in ARM,
@@ -38,27 +59,9 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
     now_ARM.type = arm_ins;
     now_ARM.instruction = "mov     r0, #0";
     ARM_chain.push_back(now_ARM);
-
-    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
-
-        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpr") {
-            return_generate(ir_pro_normal_chain[i]);
-        }
-
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
-            if_generate(ir_pro_normal_chain[i]);
-        }
-
-        // exit of function
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.at(0) == '@') {
-            break;
-        }
-    }
-
-
 }
 
-void InstructionAllocator::return_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     ARM_node now_ARM;
 
