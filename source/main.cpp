@@ -136,13 +136,14 @@ int main(int argc, char **argv) {
     if (debug_mode == "arm")
         ARM::print_all(ARM_code);
 
-
     if (Safe::GlobalError) return 0;
 
 
     // Dump armv7 code to .s file
     if (to_assembly)
         ARM::dump_all(ARM_code, output_filename);
+
+
 
 
     //  link .s and .a into exe:

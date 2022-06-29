@@ -13,6 +13,7 @@ void InstructionAllocator::Generate() {
 
 void InstructionAllocator::normal_generate() {
     for (const auto& it : ir_pro_normal_chain) {
+
         // entry of function
         if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
             function_generate(it);
@@ -23,6 +24,7 @@ void InstructionAllocator::normal_generate() {
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     //'@' is deleted since it means comment in ARM
+
     auto function_entry = now_IR_pro->target.name.erase(0,1) + ":";
     ARM_code.push_back(function_entry);
 
@@ -55,6 +57,7 @@ void InstructionAllocator::if_generate(const std::shared_ptr<IR_node_pro>& now_I
             break;
         }
     }
+
 }
 
 void InstructionAllocator::while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
