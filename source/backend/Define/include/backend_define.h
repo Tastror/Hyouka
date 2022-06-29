@@ -143,10 +143,19 @@ namespace CFG_pro_list {
 // ARM node design
 // ref: https://developer.arm.com/documentation/ddi0406/latest
 
-typedef std::vector<std::string> ARM_code_vec;
+enum arm_type{
+    arm_func_label, arm_block_label, arm_ins
+};
+
+struct ARM_node{
+    int index=-1;
+    arm_type type = arm_ins;
+    std::string instruction;
+    std::string comment;
+};
 
 namespace ARM {
-    void print_all(const ARM_code_vec& ARM_code);
-    void dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename);
+    void print_all(const std::vector<ARM_node>& ARM_code);
+    void dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename);
 };
 

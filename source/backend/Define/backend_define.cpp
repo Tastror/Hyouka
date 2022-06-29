@@ -174,14 +174,17 @@ void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR
 
 
 
-void ARM::print_all(const ARM_code_vec& ARM_code){
+void ARM::print_all(const std::vector<ARM_node>& ARM_code){
 
     for (int i = 0; i < ARM_code.size(); i++) {
-        std::cout << i << "           " << ARM_code[i] << std::endl;
+        if(ARM_code[i].type == arm_ins)
+            std::cout << i << "                     " << ARM_code[i].instruction << std::endl;
+        else
+            std::cout << i << "           " << ARM_code[i].instruction << std::endl;
     }
 }
 
-void ARM::dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename){
+void ARM::dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename){
     //TODO
     std::cout << "TODO: dump arm code" << std::endl;
 }

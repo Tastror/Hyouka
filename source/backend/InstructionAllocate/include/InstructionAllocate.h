@@ -11,7 +11,7 @@ class InstructionAllocator {
 public:
     std::vector<IR_pro_PTR> ir_pro_normal_chain;
     std::vector<IR_PTR> ir_static_chain;
-    ARM_code_vec ARM_code;
+    std::vector<ARM_node> ARM_chain;
 
 public:
     explicit InstructionAllocator(
@@ -23,7 +23,9 @@ public:
 public:
     void Generate();
     void normal_generate();
+
     void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void return_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
@@ -31,6 +33,6 @@ public:
     void continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void static_generate();
-    [[nodiscard]] ARM_code_vec get_result_ARM_code() const { return ARM_code; };
+    [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };
 
 };

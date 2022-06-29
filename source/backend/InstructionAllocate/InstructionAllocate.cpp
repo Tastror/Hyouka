@@ -23,11 +23,27 @@ void InstructionAllocator::normal_generate() {
 
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
-    //'@' is deleted since it means comment in ARM
-    auto function_entry = now_IR_pro->target.name.erase(0,1) + ":";
-    ARM_code.push_back(function_entry);
+    ARM_node now_ARM;
+
+    // only save function name since '@' means comment in ARM,
+    // for example: @0_main -> main:
+    now_ARM.type = arm_func_label;
+    now_ARM.instruction = now_IR_pro->target.name.erase(0,3) + ":";
+    ARM_chain.push_back(now_ARM);
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = "sub     sp, sp, #4";
+    ARM_chain.push_back(now_ARM);
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = "mov     r0, #0";
+    ARM_chain.push_back(now_ARM);
 
     for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpr") {
+            return_generate(ir_pro_normal_chain[i]);
+        }
 
         if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
             if_generate(ir_pro_normal_chain[i]);
@@ -42,11 +58,38 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
 
 }
 
+void InstructionAllocator::return_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = "str     r0, [sp]";
+    ARM_chain.push_back(now_ARM);
+
+    if(now_IR_pro->org_2.to_string() != "0"){
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "mov     r0, #3";
+        ARM_chain.push_back(now_ARM);
+    }
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = "add     sp, sp, #4";
+    ARM_chain.push_back(now_ARM);
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = "bx      lr";
+    ARM_chain.push_back(now_ARM);
+
+}
+
 void InstructionAllocator::if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
+    ARM_node now_ARM;
+
     //'.' is added since it means block entry in ARM
-    auto if_entry = "." + now_IR_pro->target.name + ":";
-    ARM_code.push_back(if_entry);
+    now_ARM.type = arm_func_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
 
     for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
 
