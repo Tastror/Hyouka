@@ -32,8 +32,6 @@ public:
 
     void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void static_generate();
     [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };

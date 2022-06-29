@@ -25,22 +25,27 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
 
     // entry of function
     function_entry_generate(now_IR_pro);
+    //std::cout << now_IR_pro->index << "start" << std::endl;
 
     // content of function
-    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+    for(int i=now_IR_pro->index + 1 - ir_pro_normal_chain[0]->index; i<ir_pro_normal_chain.size(); i++){
 
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "call") {
-            //call_generate(ir_pro_normal_chain[i]);
+            call_generate(ir_pro_normal_chain[i]);
         }
 
         if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
-            //if_generate(ir_pro_normal_chain[i]);
+            if_generate(ir_pro_normal_chain[i]);
         }
 
-    // exit of function
-        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->target.to_string(false) == "$ret") {  //FIXME
-            function_exit_generate(ir_pro_normal_chain[i]);
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,5) == "while") {
+            while_generate(ir_pro_normal_chain[i]);
+        }
 
+        //std::cout << ir_pro_normal_chain[i]->index << "middle" << std::endl;
+    // exit of function
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->target.to_string(false) == "$ret") {
+            function_exit_generate(ir_pro_normal_chain[i]);
             break;
         }
 
@@ -59,8 +64,10 @@ void InstructionAllocator::function_entry_generate(const std::shared_ptr<IR_node
     now_ARM.instruction = now_IR_pro->target.name.erase(0,3) + ":";
     ARM_chain.push_back(now_ARM);
 
+    // for main: 4 * number of (param + local var + (ret = 1))
+    // for other: 4 * number of (param + local var)
     now_ARM.type = arm_ins;
-    now_ARM.instruction = "sub     sp, sp, #4";
+    now_ARM.instruction = "sub     sp, sp, #4";     //FIXME: how to calculate space for sp to descend
     ARM_chain.push_back(now_ARM);
 
     now_ARM.type = arm_ins;
@@ -78,12 +85,12 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
 
     if(now_IR_pro->org_2.to_string() != "0"){
         now_ARM.type = arm_ins;
-        now_ARM.instruction = "mov     r0, #3";
+        now_ARM.instruction = "mov     r0, #3";     //FIXME
         ARM_chain.push_back(now_ARM);
     }
 
     now_ARM.type = arm_ins;
-    now_ARM.instruction = "add     sp, sp, #4";
+    now_ARM.instruction = "add     sp, sp, #4";     //FIXME
     ARM_chain.push_back(now_ARM);
 
     now_ARM.type = arm_ins;
@@ -128,15 +135,22 @@ void InstructionAllocator::if_generate(const std::shared_ptr<IR_node_pro>& now_I
 }
 
 void InstructionAllocator::while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-    //TODO
-}
+    ARM_node now_ARM;
 
-void InstructionAllocator::break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-    //TODO
-}
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_func_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
 
-void InstructionAllocator::continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-    //TODO
+    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+
+        //TODO
+
+        // exit of while
+        if (ir_pro_normal_chain[i]->ir_type == ir_label) {
+            break;
+        }
+    }
 }
 
 void InstructionAllocator::static_generate() {
