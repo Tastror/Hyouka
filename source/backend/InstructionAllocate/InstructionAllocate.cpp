@@ -14,7 +14,7 @@ void InstructionAllocator::Generate() {
 void InstructionAllocator::normal_generate() {
 
     for (const auto& it : ir_pro_normal_chain) {
-        // entry of function
+
         if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
             function_generate(it);
         }
@@ -26,15 +26,21 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
     // entry of function
     function_entry_generate(now_IR_pro);
 
+    // content of function
     for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
 
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
-            if_generate(ir_pro_normal_chain[i]);
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "call") {
+            //call_generate(ir_pro_normal_chain[i]);
         }
 
-        // exit of function
-        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpr") {  //FIXME
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
+            //if_generate(ir_pro_normal_chain[i]);
+        }
+
+    // exit of function
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->target.to_string(false) == "$ret") {  //FIXME
             function_exit_generate(ir_pro_normal_chain[i]);
+
             break;
         }
 
@@ -42,6 +48,7 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
 
 }
 
+// reg a1-a4 stores params, more params will be stored on stack, which needed to reload using ldr
 void InstructionAllocator::function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     ARM_node now_ARM;
@@ -81,6 +88,20 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
 
     now_ARM.type = arm_ins;
     now_ARM.instruction = "bx      lr";
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
+    // TODO:save context
+
+    // jump to callee
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_ins;
+    std::string call_string = "b     ";
+    now_ARM.instruction = call_string + " " + now_IR_pro->target.name.erase(0,3);
     ARM_chain.push_back(now_ARM);
 
 }

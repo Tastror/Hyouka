@@ -171,7 +171,12 @@ void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR
 }
 
 
+void ARM::print_normal_chain(std::vector<std::shared_ptr<IR_node_pro>> normal_chain) {
 
+    for (int i = 0; i < normal_chain.size(); i++) {
+        normal_chain[i]->print();
+    }
+}
 
 
 void ARM::print_all(const std::vector<ARM_node>& ARM_code){

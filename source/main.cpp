@@ -133,8 +133,11 @@ int main(int argc, char **argv) {
     InstructionAllocator InsAllo(ir_pro_normal_chain, ir_static_chain);
     InsAllo.Generate();
     const auto& ARM_code = InsAllo.get_result_ARM_code();
-    if (debug_mode == "arm")
+    if (debug_mode == "arm") {
+        ARM::print_normal_chain(ir_pro_normal_chain);   //debug
+        std::cout << "********************** ir chain above, arm chain below ***********************" << std::endl;
         ARM::print_all(ARM_code);
+    }
 
     if (Safe::GlobalError) return 0;
 

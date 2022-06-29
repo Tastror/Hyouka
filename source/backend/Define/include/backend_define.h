@@ -155,6 +155,7 @@ struct ARM_node{
 };
 
 namespace ARM {
+    void print_normal_chain(std::vector<IR_pro_PTR> normal_chain);
     void print_all(const std::vector<ARM_node>& ARM_code);
     void dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename);
 };
