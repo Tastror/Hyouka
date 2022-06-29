@@ -120,6 +120,7 @@ struct IR_node_pro : public IR_node {
     register_name tar = no_name;
     register_name src1 = no_name;
     register_name src2 = no_name;
+
     void print() const override;
 };
 

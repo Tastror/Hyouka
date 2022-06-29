@@ -13,7 +13,7 @@ void InstructionAllocator::Generate() {
 
 void InstructionAllocator::normal_generate() {
     for (const auto& it : ir_pro_normal_chain) {
-        // is function
+        // entry of function
         if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
             function_generate(it);
         }
@@ -23,28 +23,38 @@ void InstructionAllocator::normal_generate() {
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     //'@' is deleted since it means comment in ARM
-    now_IR_pro->target.name = now_IR_pro->target.name.erase(0,1);
-    ARM_code.push_back(now_IR_pro->target.name + ":");
-    //auto now_IR_pro = std::make_shared<IR_node_pro>();
-    //now_IR_pro = now_IR_pro->next;
+    auto function_entry = now_IR_pro->target.name.erase(0,1) + ":";
+    ARM_code.push_back(function_entry);
 
-    IR_pro_PTR it =now_IR_pro;
-    while (it != nullptr) {
-        // is block
-        if (it->ir_type == ir_label && it->target.name.substr(0,2) == "if") {
-            if_generate(it);
+    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,2) == "if") {
+            if_generate(ir_pro_normal_chain[i]);
+
         }
-        // end of function
-        if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
+        // exit of function
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.at(0) == '@') {
             break;
         }
-
-        //it = it->next;      //FIXME
     }
+
+
 }
 
 void InstructionAllocator::if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-    //TODO
+
+    //'.' is added since it means block entry in ARM
+    auto if_entry = "." + now_IR_pro->target.name + ":";
+    ARM_code.push_back(if_entry);
+
+    for(int i=now_IR_pro->index + 1; i<ir_pro_normal_chain.size(); i++){
+
+        //TODO
+
+        // exit of if
+        if (ir_pro_normal_chain[i]->ir_type == ir_label) {
+            break;
+        }
+    }
 }
 
 void InstructionAllocator::while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){

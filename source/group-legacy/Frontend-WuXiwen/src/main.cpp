@@ -39,8 +39,7 @@ int main(int argc, const char *argv[]) {
     }
     
     // Ignore Semantic Check
-    
-    // TODO: IR generation
+
     if(mode == "IR"){
 	    std::cout << "--------print IR--------" << std::endl;
 	    std::cout << "TODO: IR generation!!!" << std::endl;
