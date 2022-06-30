@@ -25,9 +25,10 @@ public:
     void normal_generate();
 
     void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
+    void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
 
+    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);

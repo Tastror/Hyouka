@@ -1,11 +1,11 @@
-//
-// Created by Simon on 2022/6/29.
-//
+int a;
 
-//test add
-int main(){
-    int a, b, c, d;
-    a = 10;
-    //b = -1;
-    return 0;
+int fun()
+{
+    int a=1;
+    int b= -2;
+    int c=3;
+    int d= -1;
+    return -1;
 }
+
