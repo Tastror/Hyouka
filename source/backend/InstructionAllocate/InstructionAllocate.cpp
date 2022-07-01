@@ -354,7 +354,7 @@ void InstructionAllocator::load_generate(const std::shared_ptr<IR_node_pro>& now
     now_ARM.type = arm_ins;
     std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
     now_ARM.instruction = "ldr     "
-                            + register_name_str[now_IR_pro->tar]
+                            + register_name_str[now_IR_pro->tar.type]
                             + ", [r7, #"
                             + oprand1_str
                             + "]" ;
@@ -369,7 +369,7 @@ void InstructionAllocator::store_generate(const std::shared_ptr<IR_node_pro>& no
     now_ARM.type = arm_ins;
     std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
     now_ARM.instruction = "str     "
-                          + register_name_str[now_IR_pro->tar]
+                          + register_name_str[now_IR_pro->tar.type]
                           + ", [r7, #"
                           + oprand1_str
                           + "]" ;
