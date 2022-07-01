@@ -23,6 +23,9 @@ public:
 public:
     void Generate();
     void normal_generate();
+    void static_generate();
+
+    void global_generate(const std::shared_ptr<IR_node>& now_IR);
 
     void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
@@ -34,7 +37,6 @@ public:
     void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
-    void static_generate();
     [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };
 
 };

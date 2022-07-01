@@ -146,7 +146,7 @@ namespace CFG_pro_list {
 // ref: https://developer.arm.com/documentation/ddi0406/latest
 
 enum arm_type{
-    arm_func_label, arm_block_label, arm_ins
+    arm_global_label, arm_func_label, arm_block_label, arm_ins
 };
 
 struct ARM_node{
@@ -158,6 +158,7 @@ struct ARM_node{
 
 namespace ARM {
     void print_normal_chain(std::vector<IR_pro_PTR> normal_chain);
+    void print_static_chain(std::vector<IR_PTR> static_chain);
     void print_all(const std::vector<ARM_node>& ARM_code);
     void dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename);
 };

@@ -7,8 +7,8 @@
 #include <iostream>
 
 void InstructionAllocator::Generate() {
-    normal_generate();      //functions
     static_generate();      //global variable
+    normal_generate();      //functions
 }
 
 void InstructionAllocator::normal_generate() {
@@ -18,6 +18,41 @@ void InstructionAllocator::normal_generate() {
         if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
             function_generate(it);
         }
+    }
+}
+
+void InstructionAllocator::static_generate() {
+
+    for (const auto& it : ir_static_chain) {
+
+        if (it->ir_type != ir_label) {
+            global_generate(it);
+        }
+    }
+}
+
+void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_IR) {
+
+    ARM_node now_ARM;
+    if(now_IR->opera == "assign"){
+
+        now_ARM.type = arm_global_label;
+        now_ARM.instruction = now_IR->target.name.erase(0,3) + ":";
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        if(now_IR->org_1.IVTT.self_type().represent_type == basic_int)
+            now_ARM.instruction = ".word    "
+                    + std::to_string(now_IR->org_1.IVTT.self_get_int_value());
+        else    //FIXME: how to deal with float
+            now_ARM.instruction = ".word    "
+                    + std::to_string(now_IR->org_1.IVTT.self_get_float_value());
+        ARM_chain.push_back(now_ARM);
+    }
+    else{
+        now_ARM.type = arm_global_label;
+        now_ARM.instruction = now_IR->target.name.erase(0,3) + ":";
+        ARM_chain.push_back(now_ARM);
     }
 }
 
@@ -233,9 +268,5 @@ void InstructionAllocator::while_generate(const std::shared_ptr<IR_node_pro>& no
             break;
         }
     }
-}
-
-void InstructionAllocator::static_generate() {
-    // TODO
 }
 

@@ -1,11 +1,19 @@
-int a;
+int k = 100;
+float g = 2.981;
+int aa[100];
 
 int fun()
 {
-    int a=1;
-    int b= -2;
-    int c=3;
-    int d= -1;
-    return -1;
+    int a= -1;
+    return a;
+}
+
+int main()
+{
+    int b;
+
+    b=fun();
+
+    return 2000;
 }
 

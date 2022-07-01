@@ -3,7 +3,9 @@
 //
 
 #include "backend_define.h"
+
 #include <iostream>
+#include <fstream>
 
 
 
@@ -178,6 +180,12 @@ void ARM::print_normal_chain(std::vector<std::shared_ptr<IR_node_pro>> normal_ch
     }
 }
 
+void ARM::print_static_chain(std::vector<std::shared_ptr<IR_node>> static_chain) {
+
+    for (int i = 0; i < static_chain.size(); i++) {
+        static_chain[i]->print();
+    }
+}
 
 void ARM::print_all(const std::vector<ARM_node>& ARM_code){
 
@@ -190,6 +198,22 @@ void ARM::print_all(const std::vector<ARM_node>& ARM_code){
 }
 
 void ARM::dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename){
-    //TODO
-    std::cout << "TODO: dump arm code" << std::endl;
+
+    std::ofstream file;
+
+    //default: erase existed content in the file and then write in new content
+    file.open(output_filename);
+
+    if(file.fail()){
+        std::cout << "ERROR: object file doesn't exist!!!" << std::endl;
+    }
+    else{
+        for (int i = 0; i < ARM_code.size(); i++) {
+            if(ARM_code[i].type == arm_ins)
+                file << "       " << ARM_code[i].instruction << std::endl;
+            else
+                file << ARM_code[i].instruction << std::endl;
+        }
+    }
+
 }
