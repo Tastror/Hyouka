@@ -67,7 +67,7 @@ void RegisterAllocator::Generate() {
                 function_map_var_reg_map[name][n] = lr;
             }
             else if (n == "$ret") {
-                function_map_var_reg_map[name][n] = spill;
+                function_map_var_reg_map[name][n] = a1;
             }
             else if (function_map_var_reg_map[name][n] == no_name) {
                 function_map_var_reg_map[name][n] = a1;
