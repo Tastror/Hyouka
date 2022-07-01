@@ -1,3 +1,8 @@
+k:
+       .word    100
+g:
+       .word    2.981000
+aa:
 fun:
        push     {r7}
        add     r7, sp, #0
