@@ -1,35 +1,9 @@
-int FourWhile() {
-    int a;
-    a = 5;
-    int b;
-    int c;
-    b=a;
-    b = 6;
-    b=a;
-    c = 7;
-    int d;
-    d = 10;
-    while (a < 20) {
-        a = a + 3;
-        while(b < 10){
-            b = b + 1;
-            while(c == 7){
-                c = c - 1;
-                while(d < 20){
-                    d = d + 3;
-                }
-                d = d - 1;
-            }
-            c = c + 1;
-        }
-        b = b - 2;
-    }
-
-    return (a + (b + d) + c);
-}
-
-int main() {
-    int kkk;
-    kkk = FourWhile();
-    return kkk;
+//test array define
+int main(){
+    int a[4][2] = {};
+    int b[4][2] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int c[4][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+    int d[4][2] = {1, 2, {3}, {5}, 7 , 8};
+    int e[4][2] = {{d[2][1], c[2][1]}, {3, 4}, {5, 6}, {7, 8}};
+    return e[3][1] + e[0][0] + e[0][1] + a[2][0];
 }

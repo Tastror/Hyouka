@@ -33,13 +33,21 @@ public:
 
     void if_wrong_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void if_end_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void while_break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
     void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
+    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
+    void load_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void store_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    //todo: allock-stack
+    //todo: cast-int
+    //todo: float
 
     [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };
 

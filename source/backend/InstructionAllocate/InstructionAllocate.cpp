@@ -44,7 +44,7 @@ void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_I
         if(now_IR->org_1.IVTT.self_type().represent_type == basic_int)
             now_ARM.instruction = ".word    "
                     + std::to_string(now_IR->org_1.IVTT.self_get_int_value());
-        else    //FIXME: how to deal with float
+        else
             now_ARM.instruction = ".word    "
                     + std::to_string(now_IR->org_1.IVTT.self_get_float_value());
         ARM_chain.push_back(now_ARM);
@@ -134,6 +134,16 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
                 || ir_pro_normal_chain[i]->opera == "div"
                 || ir_pro_normal_chain[i]->opera == "mod")) {
             arithmetic_generate(ir_pro_normal_chain[i]);
+        }
+
+        // load
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "lw") {
+            load_generate(ir_pro_normal_chain[i]);
+        }
+
+        // store
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "sw") {
+            store_generate(ir_pro_normal_chain[i]);
         }
 
     }
@@ -276,7 +286,6 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
 
     ARM_node now_ARM;
 
-    //TODO: float
     if(now_IR_pro->org_1.is_name){
         now_ARM.type = arm_ins;
         now_ARM.instruction = "mov     "
@@ -334,5 +343,35 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
             + register_name_str[now_IR_pro->src1.type]
             + ", "
             + operand2_str;
+    ARM_chain.push_back(now_ARM);
+}
+
+void InstructionAllocator::load_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    ARM_node now_ARM;
+
+    //{name}[[unused]]%15 *a2* = lw, {name}[[int*<2>] len(4)(2)]%17 *a1*
+    //ldr     r3, [r7, #144]
+    now_ARM.type = arm_ins;
+    std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
+    now_ARM.instruction = "ldr     "
+                            + register_name_str[now_IR_pro->tar]
+                            + ", [r7, #"
+                            + oprand1_str
+                            + "]" ;
+    ARM_chain.push_back(now_ARM);
+}
+
+void InstructionAllocator::store_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    ARM_node now_ARM;
+
+    //{name}[[int]]%5 *a1* = sw, [int] 5 *no_name*
+    //str     r3, [r7, #24]
+    now_ARM.type = arm_ins;
+    std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
+    now_ARM.instruction = "str     "
+                          + register_name_str[now_IR_pro->tar]
+                          + ", [r7, #"
+                          + oprand1_str
+                          + "]" ;
     ARM_chain.push_back(now_ARM);
 }
