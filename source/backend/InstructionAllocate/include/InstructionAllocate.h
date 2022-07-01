@@ -22,8 +22,8 @@ public:
 
 public:
     void Generate();
-    void normal_generate();
     void static_generate();
+    void normal_generate();
 
     void global_generate(const std::shared_ptr<IR_node>& now_IR);
 
@@ -31,11 +31,15 @@ public:
     void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
     void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
 
-    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void if_wrong_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void if_end_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-
-    void if_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void while_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };
 
