@@ -101,13 +101,17 @@ namespace CFG_safe {
 
 
 
-
 enum register_name {
     a1, a2, a3, a4,
     v1, v2, v3, v4, v5, v6, v7,
     fp, ip, sp, lr, pc,
     spill,
     no_name
+};
+
+struct register_id {
+    register_name type = no_name;
+    int spill_len = 0;
 };
 
 const std::string register_name_str[] = {
@@ -119,9 +123,9 @@ const std::string register_name_str[] = {
 };
 
 struct IR_node_pro : public IR_node {
-    register_name tar = no_name;
-    register_name src1 = no_name;
-    register_name src2 = no_name;
+    register_id tar;
+    register_id src1;
+    register_id src2;
 
     void print() const override;
 };

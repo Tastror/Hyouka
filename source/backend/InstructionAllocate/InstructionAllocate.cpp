@@ -196,14 +196,14 @@ void InstructionAllocator::compare_generate(const std::shared_ptr<IR_node_pro>& 
     std::string operand2_str;
 
     if(now_IR_pro->org_2.is_name)
-        operand2_str = register_name_str[now_IR_pro->src2];
+        operand2_str = register_name_str[now_IR_pro->src2.type];
     else if(now_IR_pro->org_2.IVTT.self_type().represent_type == basic_int)
         operand2_str = "#" + std::to_string(now_IR_pro->org_2.IVTT.self_get_int_value());
     else
         operand2_str = "#" + std::to_string(now_IR_pro->org_2.IVTT.self_get_float_value());
 
     now_ARM.instruction = "cmp     "
-                          + register_name_str[now_IR_pro->src1]
+                          + register_name_str[now_IR_pro->src1.type]
                           + ", "
                           + operand2_str;
     ARM_chain.push_back(now_ARM);
@@ -280,16 +280,16 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
     if(now_IR_pro->org_1.is_name){
         now_ARM.type = arm_ins;
         now_ARM.instruction = "mov     "
-                              + register_name_str[now_IR_pro->tar]
+                              + register_name_str[now_IR_pro->tar.type]
                               + ", "
-                              + register_name_str[now_IR_pro->src1];
+                              + register_name_str[now_IR_pro->src1.type];
         ARM_chain.push_back(now_ARM);
     }
     else{
         if(now_IR_pro->org_1.IVTT.self_get_int_value() >= 0){
             now_ARM.type = arm_ins;
             now_ARM.instruction = "movs    "
-                                  + register_name_str[now_IR_pro->tar]
+                                  + register_name_str[now_IR_pro->tar.type]
                                   + ", #"
                                   + std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value());
             ARM_chain.push_back(now_ARM);
@@ -297,7 +297,7 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
         else if(now_IR_pro->org_1.IVTT.self_get_int_value() == -1){
             now_ARM.type = arm_ins;
             now_ARM.instruction = "mov     "
-                                  + register_name_str[now_IR_pro->tar]
+                                  + register_name_str[now_IR_pro->tar.type]
                                   + ", #"
                                   + std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value());
             ARM_chain.push_back(now_ARM);
@@ -305,7 +305,7 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
         else {
             now_ARM.type = arm_ins;
             now_ARM.instruction = "mvn     "
-                                  + register_name_str[now_IR_pro->tar]
+                                  + register_name_str[now_IR_pro->tar.type]
                                   + ", #"
                                   + std::to_string(-now_IR_pro->org_1.IVTT.self_get_int_value() - 1);
             ARM_chain.push_back(now_ARM);
@@ -321,7 +321,7 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
     std::string operand2_str;
 
     if(now_IR_pro->org_2.is_name)
-        operand2_str = register_name_str[now_IR_pro->src2];
+        operand2_str = register_name_str[now_IR_pro->src2.type];
     else if(now_IR_pro->org_2.IVTT.self_type().represent_type == basic_int)
         operand2_str = "#" + std::to_string(now_IR_pro->org_2.IVTT.self_get_int_value());
     else
@@ -329,9 +329,9 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
 
     now_ARM.instruction = now_IR_pro->opera
             + "     "
-            + register_name_str[now_IR_pro->tar]
+            + register_name_str[now_IR_pro->tar.type]
             + ", "
-            + register_name_str[now_IR_pro->src1]
+            + register_name_str[now_IR_pro->src1.type]
             + ", "
             + operand2_str;
     ARM_chain.push_back(now_ARM);

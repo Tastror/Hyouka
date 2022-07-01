@@ -36,9 +36,10 @@ public:
     [[nodiscard]] std::vector<IR_pro_PTR> get_result_IR_pro_normal_chain() const { return IR_pro_normal_chain; };
 private:
     bool debug;
+    std::map<std::string, int> function_stack;
     std::map<std::string, std::map<std::string, int>> function_map_weight;
     std::map<std::string, std::map<std::string, std::set<std::string>>> function_map_neighbor_form;
     std::map<std::string, std::map<std::string, std::map<std::string, std::set<std::string>>>> function_map_local_neighbor_form;
     std::map<std::string, std::vector<std::string>> function_map_reg_var_vec;
-    std::map<std::string, std::unordered_map<std::string, register_name>> function_map_var_reg_map;
+    std::map<std::string, std::unordered_map<std::string, register_id>> function_map_var_reg_map;
 };

@@ -59,18 +59,21 @@ void RegisterAllocator::Generate() {
             if (n.substr(0, 4) == "$par") {
                 int k = std::stoi(n.substr(4)) - 1;
                 if (k < 4)
-                    function_map_var_reg_map[name][n] = (register_name) k;
-                else
-                    function_map_var_reg_map[name][n] = spill;
+                    function_map_var_reg_map[name][n].type = (register_name) k;
+                else {
+                    function_map_var_reg_map[name][n].type = spill;
+                    function_map_var_reg_map[name][n].spill_len = function_stack[name];
+                    function_stack[name] += 4;
+                }
             }
             else if (n == "$ra") {
-                function_map_var_reg_map[name][n] = lr;
+                function_map_var_reg_map[name][n].type = lr;
             }
             else if (n == "$ret") {
-                function_map_var_reg_map[name][n] = a1;
+                function_map_var_reg_map[name][n].type = a1;
             }
-            else if (function_map_var_reg_map[name][n] == no_name) {
-                function_map_var_reg_map[name][n] = a1;
+            else if (function_map_var_reg_map[name][n].type == no_name) {
+                function_map_var_reg_map[name][n].type = a1;
             }
 
         }
@@ -78,7 +81,7 @@ void RegisterAllocator::Generate() {
         // debug-output
         if (debug)
             for (const auto& [n, d] : function_map_var_reg_map[name]) {
-                std::cout << n << ": *" << register_name_str[d] << "*" << std::endl;
+                std::cout << n << ": *" << register_name_str[d.type] << d.spill_len << "*" << std::endl;
             }
     }
 
@@ -101,6 +104,7 @@ void RegisterAllocator::init() {
     for (auto& [name, block_chain] : CFG_function_chain) {
 
         CFG_pro_function_chain[name] = std::vector<CFG_pro_PTR>();
+        function_stack[name] = 0;
 
         for (auto& mem : block_chain) {
 
@@ -155,19 +159,19 @@ void RegisterAllocator::generate_global_graph(const std::string& name, const std
         const auto& use = mem->used_variables;
 
         for (const auto& var : in) {
-            function_map_var_reg_map[name][var] = no_name;
+            function_map_var_reg_map[name][var].type = no_name;
             function_map_weight[name][var] = 0;
         }
         for (const auto& var : out) {
-            function_map_var_reg_map[name][var] = no_name;
+            function_map_var_reg_map[name][var].type = no_name;
             function_map_weight[name][var] = 0;
         }
         for (const auto& var : def) {
-            function_map_var_reg_map[name][var] = no_name;
+            function_map_var_reg_map[name][var].type = no_name;
             function_map_weight[name][var] = 0;
         }
         for (const auto& var : use) {
-            function_map_var_reg_map[name][var] = no_name;
+            function_map_var_reg_map[name][var].type = no_name;
             function_map_weight[name][var] = 0;
         }
 
@@ -201,34 +205,42 @@ void RegisterAllocator::handle_global_graph(const std::string& name, const std::
     for (const auto& [n, s] : global_neighbor_form) {
         if (n == "$ra" || n == "$ret") continue;
         for (const auto& r : s) {
-            counter[function_map_var_reg_map[name][r]]++;
+            counter[function_map_var_reg_map[name][r].type]++;
         }
         int i;
         for (i = v1; i <= v7; ++i) {
             if (counter[i] == 0)
                 break;
         }
-        if (i > v7) i = spill;
-        function_map_var_reg_map[name][n] = (register_name)i;
+        if (i > v7) {
+            i = spill;
+            function_map_var_reg_map[name][n].spill_len = function_stack[name];
+            function_stack[name] += 4;
+        }
+        function_map_var_reg_map[name][n].type = (register_name)i;
     }
 }
 
 void RegisterAllocator::handle_local_graph(const std::string& name, const CFG_pro_PTR& single_block, const int* counter) {
     const std::map<std::string, std::set<std::string>>& local_neighbor_form = function_map_local_neighbor_form[name][single_block->name];
     for (const auto& [n, s] : local_neighbor_form) {
-        if (function_map_var_reg_map[name][n] != no_name) continue;
+        if (function_map_var_reg_map[name][n].type != no_name) continue;
         int temp[20];
         for (int i = 0; i < 20; ++i) temp[i] = counter[i];
         for (const auto& r : s) {
-            temp[function_map_var_reg_map[name][r]]++;
+            temp[function_map_var_reg_map[name][r].type]++;
         }
         int i;
         for (i = a1; i <= v7; ++i) {
             if (temp[i] == 0)
                 break;
         }
-        if (i > v7) i = spill;
-        function_map_var_reg_map[name][n] = (register_name)i;
+        if (i > v7) {
+            i = spill;
+            function_map_var_reg_map[name][n].spill_len = function_stack[name];
+            function_stack[name] += 4;
+        }
+        function_map_var_reg_map[name][n].type = (register_name)i;
     }
 }
 

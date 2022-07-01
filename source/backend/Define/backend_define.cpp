@@ -90,26 +90,26 @@ void IR_node_pro::print() const {
         else if (opera == "jumpe")
             std::cout << opera << " -> "
                       << target.to_string(false) << " if "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "* == zero";
+                      << org_1.to_string() << " *" << register_name_str[src1.type] << (src1.type == spill ? std::to_string(tar.spill_len) : "") << "* == zero";
         else if (opera == "jumpn")
             std::cout << opera << " -> "
                       << target.to_string(false) << " if "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "* != zero";
+                      << org_1.to_string() << " *" << register_name_str[src1.type] << (src1.type == spill ? std::to_string(tar.spill_len) : "") << "* != zero";
         else if (opera == "jumpr")
             std::cout << opera << " -> "
-                      << target.to_string(false) << " *" << register_name_str[tar] << "*";
+                      << target.to_string(false) << " *" << register_name_str[tar.type] << (tar.type == spill ? std::to_string(tar.spill_len) : "") << "*";
         else if (opera == "assign" || opera == "sw" || opera == "lw" ||
                  opera == "cast-int" || opera == "cast-float" ||
                  opera == "not" ||
                  opera == "alloc-static" || opera == "alloc-stack")
-            std::cout << target.to_string() << " *" << register_name_str[tar] << "*" << " = "
+            std::cout << target.to_string() << " *" << register_name_str[tar.type] << (tar.type == spill ? std::to_string(tar.spill_len) : "") << "*" << " = "
                       << opera << ", "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "*";
+                      << org_1.to_string() << " *" << register_name_str[src1.type] << (src1.type == spill ? std::to_string(src1.spill_len) : "") << "*";
         else
-            std::cout << target.to_string() << " *" << register_name_str[tar] << "*" << " = "
+            std::cout << target.to_string() << " *" << register_name_str[tar.type] << (tar.type == spill ? std::to_string(tar.spill_len) : "") << "*" << " = "
                       << opera << ", "
-                      << org_1.to_string() << " *" << register_name_str[src1] << "*" << ", "
-                      << org_2.to_string() << " *" << register_name_str[src2] << "*";
+                      << org_1.to_string() << " *" << register_name_str[src1.type] << (src1.type == spill ? std::to_string(src1.spill_len) : "") << "*" << ", "
+                      << org_2.to_string() << " *" << register_name_str[src2.type] << (src2.type == spill ? std::to_string(src2.spill_len) : "") << "*";
     }
     else if (ir_type == ir_label) {
         std::cout << target.to_string(false) << ":";

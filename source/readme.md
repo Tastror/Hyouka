@@ -115,7 +115,7 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 
 - `source/backend/InstructionAllocate`，armv7 汇编序列
 - `debug_mode: arm`
-- 负责者：
+- 负责者：wxw
 - 无错误类型
 
 ### （三）静态库链接
