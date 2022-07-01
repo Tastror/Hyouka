@@ -105,14 +105,16 @@ namespace CFG_safe {
 enum register_name {
     a1, a2, a3, a4,
     v1, v2, v3, v4, v5, v6, v7,
-    fp, ip, sp, lr, pc, spill,
+    fp, ip, sp, lr, pc,
+    spill,
     no_name
 };
 
 const std::string register_name_str[] = {
         "a1", "a2", "a3", "a4",
         "v1", "v2", "v3", "v4", "v5", "v6", "v7",
-        "fp", "ip", "sp", "lr", "pc", "spill",
+        "fp", "ip", "sp", "lr", "pc",
+        "spill",
         "no_name"
 };
 
@@ -120,6 +122,7 @@ struct IR_node_pro : public IR_node {
     register_name tar = no_name;
     register_name src1 = no_name;
     register_name src2 = no_name;
+
     void print() const override;
 };
 
@@ -139,17 +142,24 @@ namespace CFG_pro_list {
 }
 
 
-
-
-
 // ARM node design
 // ref: https://developer.arm.com/documentation/ddi0406/latest
 
-typedef std::vector<std::string> ARM_code_vec;
-
-namespace ARM {
-    void print_all(const ARM_code_vec& ARM_code);
-    void dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename);
+enum arm_type{
+    arm_global_label, arm_func_label, arm_block_label, arm_ins
 };
 
-#define ARM_PTR std::shared_ptr<ARM_node>
+struct ARM_node{
+    int index=-1;
+    arm_type type = arm_ins;
+    std::string instruction;
+    std::string comment;
+};
+
+namespace ARM {
+    void print_normal_chain(std::vector<IR_pro_PTR> normal_chain);
+    void print_static_chain(std::vector<IR_PTR> static_chain);
+    void print_all(const std::vector<ARM_node>& ARM_code);
+    void dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename);
+};
+

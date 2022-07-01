@@ -133,8 +133,14 @@ int main(int argc, char **argv) {
     InstructionAllocator InsAllo(ir_pro_normal_chain, ir_static_chain);
     InsAllo.Generate();
     const auto& ARM_code = InsAllo.get_result_ARM_code();
-    if (debug_mode == "arm")
-         ARM::print_all(ARM_code);
+    if (debug_mode == "arm") {
+        std::cout << "********************** static chain ***********************" << std::endl;
+        ARM::print_static_chain(ir_static_chain);
+        std::cout << "********************** normal chain ***********************" << std::endl;
+        ARM::print_normal_chain(ir_pro_normal_chain);
+        std::cout << "********************** arm chain ***********************" << std::endl;
+        ARM::print_all(ARM_code);
+    }
 
     if (Safe::GlobalError) return 0;
 
@@ -144,7 +150,7 @@ int main(int argc, char **argv) {
         ARM::dump_all(ARM_code, output_filename);
 
 
-    //  link .s and .a into exe:
+    //  link .s and .a into .exe:
     //        arm-linux-gnueabihf-gcc test.s libsysy.a -o test
 
     //  executed by qemu:

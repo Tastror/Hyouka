@@ -3,7 +3,9 @@
 //
 
 #include "backend_define.h"
+
 #include <iostream>
+#include <fstream>
 
 
 
@@ -171,13 +173,47 @@ void CFG_pro_list::print_all(const std::map<std::string, std::vector<CFG_pro_PTR
 }
 
 
+void ARM::print_normal_chain(std::vector<std::shared_ptr<IR_node_pro>> normal_chain) {
 
-
-
-void ARM::print_all(const ARM_code_vec& ARM_code){
-    std::cout << "TODO: print arm code" << std::endl;
+    for (int i = 0; i < normal_chain.size(); i++) {
+        normal_chain[i]->print();
+    }
 }
 
-void ARM::dump_all(const ARM_code_vec& ARM_code, const std::string& output_filename){
-    std::cout << "TODO: dump arm code" << std::endl;
+void ARM::print_static_chain(std::vector<std::shared_ptr<IR_node>> static_chain) {
+
+    for (int i = 0; i < static_chain.size(); i++) {
+        static_chain[i]->print();
+    }
+}
+
+void ARM::print_all(const std::vector<ARM_node>& ARM_code){
+
+    for (int i = 0; i < ARM_code.size(); i++) {
+        if(ARM_code[i].type == arm_ins)
+            std::cout << i << "                     " << ARM_code[i].instruction << std::endl;
+        else
+            std::cout << i << "           " << ARM_code[i].instruction << std::endl;
+    }
+}
+
+void ARM::dump_all(const std::vector<ARM_node>& ARM_code, const std::string& output_filename){
+
+    std::ofstream file;
+
+    //default: erase existed content in the file and then write in new content
+    file.open(output_filename);
+
+    if(file.fail()){
+        std::cout << "ERROR: object file doesn't exist!!!" << std::endl;
+    }
+    else{
+        for (int i = 0; i < ARM_code.size(); i++) {
+            if(ARM_code[i].type == arm_ins)
+                file << "       " << ARM_code[i].instruction << std::endl;
+            else
+                file << ARM_code[i].instruction << std::endl;
+        }
+    }
+
 }

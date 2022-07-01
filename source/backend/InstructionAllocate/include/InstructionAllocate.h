@@ -11,7 +11,7 @@ class InstructionAllocator {
 public:
     std::vector<IR_pro_PTR> ir_pro_normal_chain;
     std::vector<IR_PTR> ir_static_chain;
-    ARM_code_vec ARM_code;
+    std::vector<ARM_node> ARM_chain;
 
 public:
     explicit InstructionAllocator(
@@ -22,8 +22,25 @@ public:
 
 public:
     void Generate();
-    void normal_generate();
     void static_generate();
-    [[nodiscard]] ARM_code_vec get_result_ARM_code() const { return ARM_code; };
+    void normal_generate();
+
+    void global_generate(const std::shared_ptr<IR_node>& now_IR);
+
+    void function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
+    void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
+
+    void if_wrong_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void if_end_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+
+    [[nodiscard]] std::vector<ARM_node> get_result_ARM_code() const { return ARM_chain; };
 
 };
