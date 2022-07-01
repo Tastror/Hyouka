@@ -196,6 +196,8 @@ void RegisterAllocator::generate_local_graph(const std::string& name, const CFG_
 
 void RegisterAllocator::handle_global_graph(const std::string& name, const std::vector<CFG_pro_PTR>& block_chain, int* counter) {
     const std::map<std::string, std::set<std::string>>& global_neighbor_form = function_map_neighbor_form[name];
+
+    // TODO: re-allocate using the priority weight, not the alphabet (in map)
     for (const auto& [n, s] : global_neighbor_form) {
         if (n == "$ra" || n == "$ret") continue;
         for (const auto& r : s) {
