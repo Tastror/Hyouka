@@ -345,7 +345,60 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
 }
 
 void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
     ARM_node now_ARM;
+
+    if(now_IR_pro->org_1.name.substr(1,1) == "0"){
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "movw    "
+                              + register_name_str[now_IR_pro->src1.type]
+                              + ", "
+                              + "#:lower16:"
+                              + now_IR_pro->org_1.name.erase(0,3);
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "movt    "
+                              + register_name_str[now_IR_pro->src1.type]
+                              + ", "
+                              + "#:upper16:"
+                              + now_IR_pro->org_1.name;
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "ldr     "
+                              + register_name_str[now_IR_pro->src1.type]
+                              + ", ["
+                              + register_name_str[now_IR_pro->src1.type]
+                              + "]";
+        ARM_chain.push_back(now_ARM);
+    }
+
+    if(now_IR_pro->org_2.name.substr(1,1) == "0"){
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "movw    "
+                              + register_name_str[now_IR_pro->src2.type]
+                              + ", "
+                              + "#:lower16:"
+                              + now_IR_pro->org_2.name.erase(0,3);
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "movt    "
+                              + register_name_str[now_IR_pro->src2.type]
+                              + ", "
+                              + "#:upper16:"
+                              + now_IR_pro->org_2.name;
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "ldr     "
+                              + register_name_str[now_IR_pro->src2.type]
+                              + ", ["
+                              + register_name_str[now_IR_pro->src2.type]
+                              + "]";
+        ARM_chain.push_back(now_ARM);
+    }
 
     now_ARM.type = arm_ins;
     std::string operand2_str;
