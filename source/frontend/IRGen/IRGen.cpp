@@ -238,19 +238,20 @@ void IRGen::single_define_generate(const std::shared_ptr<AST_node>& now_AST) {
 
 }
 
-
-
-void IRGen::count_array_init_block(
+int IRGen::count_array_init_block(
         const std::shared_ptr<AST_node>& init,
         const std::vector<int>& index_list,
         const IR_tuple& assign_unit,
         const IR_tuple& assign_target,
         int stair, int offset_base
 ) {
+
+    int start_offset = offset_base;
+
     std::shared_ptr<AST_node> ini = init;
     if (stair > (int) index_list.size()) {
         IR_safe::RaiseError("array index initial blocks are too much");
-        return;
+        return 0;
     }
 
     int up = 1;
@@ -267,13 +268,18 @@ void IRGen::count_array_init_block(
                 create_forth("", assign_unit, "add", assign_target, offset_base * 4);
                 create_forth("", assign_unit, "sw", res);
             }
+            offset_base += 1;
         }
         else if (ini->type == ArrayInitialBlock) {
-            count_array_init_block(ini->child, index_list, assign_unit, assign_target, stair + 1, offset_base);
+            offset_base = ((offset_base - start_offset + (up - 1)) / up) * up + start_offset;
+            offset_base = count_array_init_block(ini->child, index_list, assign_unit, assign_target, stair + 1, offset_base);
+            offset_base++;
         }
-        offset_base += up;
         ini = ini->sister;
     }
+
+    offset_base = ((offset_base - start_offset + (up - 1)) / up) * up + start_offset;
+    return offset_base;
 }
 
 
