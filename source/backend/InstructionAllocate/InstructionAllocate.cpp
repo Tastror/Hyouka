@@ -15,7 +15,7 @@ void InstructionAllocator::static_generate() {
 
     for (const auto& it : ir_static_chain) {
 
-        if (it->ir_type != ir_label) {
+        if (it->ir_type == ir_forth && (it->opera == "assign" || it->opera == "alloc-static")) {
             global_generate(it);
         }
     }
@@ -34,7 +34,7 @@ void InstructionAllocator::normal_generate() {
 void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_IR) {
 
     ARM_node now_ARM;
-    if(now_IR->opera == "assign"){
+    if(now_IR->opera == "assign"){  //int or float
 
         now_ARM.type = arm_global_label;
         now_ARM.instruction = now_IR->target.name.erase(0,3) + ":";
@@ -49,10 +49,25 @@ void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_I
                     + std::to_string(now_IR->org_1.IVTT.self_get_float_value());
         ARM_chain.push_back(now_ARM);
     }
-    else{
+    else {  // FIXME:array
         now_ARM.type = arm_global_label;
         now_ARM.instruction = now_IR->target.name.erase(0,3) + ":";
         ARM_chain.push_back(now_ARM);
+
+        auto it = now_IR->next;
+        while (it != nullptr){
+            if(it->opera == "sw"){
+                now_ARM.type = arm_ins;
+                if(it->org_1.IVTT.self_type().represent_type == basic_int)
+                    now_ARM.instruction = ".word    "
+                                          + std::to_string(it->org_1.IVTT.self_get_int_value());
+                else
+                    now_ARM.instruction = ".word    "
+                                          + std::to_string(it->org_1.IVTT.self_get_float_value());
+                ARM_chain.push_back(now_ARM);
+            }
+            it = it->next;
+        }
     }
 }
 
@@ -116,9 +131,9 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
             call_generate(ir_pro_normal_chain[i]);
         }
 
-        // jump
-        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpn") {
-            //jump_generate(ir_pro_normal_chain[i]);
+        // jump inside function
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jump") {
+            jump_generate(ir_pro_normal_chain[i]);
         }
 
         // assign
@@ -162,8 +177,13 @@ void InstructionAllocator::function_entry_generate(const std::shared_ptr<IR_node
     ARM_chain.push_back(now_ARM);
 
     if(!isLeaf){
+        //FIXME
         now_ARM.type = arm_ins;
-        now_ARM.instruction = "push    {r3, lr}";
+        now_ARM.instruction = "push    {r7, lr}";
+        ARM_chain.push_back(now_ARM);
+
+        now_ARM.type = arm_ins;
+        now_ARM.instruction = "add     r7, sp, #0";
         ARM_chain.push_back(now_ARM);
     }
 
@@ -173,6 +193,7 @@ void InstructionAllocator::function_entry_generate(const std::shared_ptr<IR_node
 
 void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf){
 
+    //FIXME
     ARM_node now_ARM;
 
     if(isLeaf){
@@ -182,7 +203,7 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
     }
     else{
         now_ARM.type = arm_ins;
-        now_ARM.instruction = "pop     {r3, pc}";
+        now_ARM.instruction = "pop     {r7, pc}";
         ARM_chain.push_back(now_ARM);
     }
 
@@ -221,10 +242,10 @@ void InstructionAllocator::compare_generate(const std::shared_ptr<IR_node_pro>& 
     auto next_IR = now_IR_pro->next;
     now_ARM.type = arm_ins;
     std::string jump_str = "bne     ";
-    if(now_IR_pro->opera == "le")
-        jump_str = "bgt     ";
-    else if(now_IR_pro->opera == "eq")
-        jump_str = "bne     ";
+    if(now_IR_pro->opera == "le")   // <
+        jump_str = "bge     ";      // >=
+    else if(now_IR_pro->opera == "eq")  // ==
+        jump_str = "bne     ";      // !=
     now_ARM.instruction = jump_str + "." + next_IR->target.name;
     ARM_chain.push_back(now_ARM);
 }
@@ -277,7 +298,7 @@ void InstructionAllocator::jump_generate(const std::shared_ptr<IR_node_pro>& now
     ARM_node now_ARM;
 
     now_ARM.type = arm_ins;
-    std::string jump_string = "bne     ";
+    std::string jump_string = "b       ";
     now_ARM.instruction = jump_string + "." + now_IR_pro->target.name;
     ARM_chain.push_back(now_ARM);
 }
@@ -349,13 +370,13 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
 void InstructionAllocator::load_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
     ARM_node now_ARM;
 
-    //{name}[[unused]]%15 *a2* = lw, {name}[[int*<2>] len(4)(2)]%17 *a1*
-    //ldr     r3, [r7, #144]
     now_ARM.type = arm_ins;
     std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
     now_ARM.instruction = "ldr     "
                             + register_name_str[now_IR_pro->tar.type]
-                            + ", [r7, #"
+                            + ", ["
+                            + register_name_str[now_IR_pro->src1.type]
+                            + ", #"
                             + oprand1_str
                             + "]" ;
     ARM_chain.push_back(now_ARM);
@@ -370,7 +391,9 @@ void InstructionAllocator::store_generate(const std::shared_ptr<IR_node_pro>& no
     std::string oprand1_str = std::to_string(now_IR_pro->org_1.IVTT.self_get_int_value() * 4);
     now_ARM.instruction = "str     "
                           + register_name_str[now_IR_pro->tar.type]
-                          + ", [r7, #"
+                          + ", ["
+                          + register_name_str[now_IR_pro->src1.type]
+                          + ", #"
                           + oprand1_str
                           + "]" ;
     ARM_chain.push_back(now_ARM);
