@@ -262,11 +262,14 @@ int IRGen::count_array_init_block(
     while (ini != nullptr) {
         if (ini->type == Expression) {
             IR_tuple res = expr_generate(ini, assign_unit);
+            IR_tuple value("%" + std::to_string(++now_register));
             if (offset_base == 0) {
-                create_forth("", assign_target, "sw", res);
+                create_forth("", value, "assign", res);
+                create_forth("", assign_target, "sw", value);
             } else {
                 create_forth("", assign_unit, "add", assign_target, offset_base * 4);
-                create_forth("", assign_unit, "sw", res);
+                create_forth("", value, "assign", res);
+                create_forth("", assign_unit, "sw", value);
             }
             offset_base += 1;
         }
@@ -356,7 +359,9 @@ void IRGen::array_assign_generate(const std::shared_ptr<AST_node>& now_AST) {
     assign_unit.IVTT = now_AST->declaration_bound_sym_node->IVTT;
     create_forth("", assign_unit, "add", assign_target, offset);
     IR_tuple res = expr_generate(now_AST->last_child, assign_target);
-    create_forth("", assign_unit, "sw", res);
+    IR_tuple value("%" + std::to_string(++now_register));
+    create_forth("", value, "assign", res);
+    create_forth("", assign_unit, "sw", value);
 }
 
 

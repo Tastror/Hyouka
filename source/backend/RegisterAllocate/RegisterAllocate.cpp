@@ -193,6 +193,10 @@ void RegisterAllocator::generate_local_graph(const std::string& name, const CFG_
             local_neighbor_form[sen->org_1.name].insert(sen->org_2.name);
             local_neighbor_form[sen->org_2.name].insert(sen->org_1.name);
         }
+        if (sen->opera == "sw" || sen->opera == "lw") {
+            local_neighbor_form[sen->target.name].insert(sen->org_1.name);
+            local_neighbor_form[sen->org_1.name].insert(sen->target.name);
+        }
     }
 
     function_map_local_neighbor_form[name][single_block->name] = local_neighbor_form;
