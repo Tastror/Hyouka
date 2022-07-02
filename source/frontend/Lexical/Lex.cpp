@@ -5,6 +5,7 @@
 #include "Lex.h"
 
 std::vector<char> Lexical::operator_begin_list = {'|', '&', '<', '>', '=', '!', '+', '-', '*', '/', '%', '[', ']', '(', ')'};
+std::vector<char> Lexical::operator_end_list = {'|', '&', '=', '/', '*'};
 std::vector<char> Lexical::double_operator_begin_list = {'|', '&', '<', '>', '=', '!', '/'};
 std::vector<std::string> Lexical::single_operator_list = {"<", ">", "=", "!", "+", "-", "*", "/", "%", "[", "]", "(", ")"};
 std::vector<std::string> Lexical::double_operator_list = {"||", "&&", "<=", ">=", "==", "!="};

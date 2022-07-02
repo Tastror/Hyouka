@@ -25,6 +25,7 @@ protected:
     // begin list and true list
 
     static std::vector<char> operator_begin_list;
+    static std::vector<char> operator_end_list;
     static std::vector<char> double_operator_begin_list;
     static std::vector<std::string> single_operator_list;
     static std::vector<std::string> double_operator_list;
@@ -141,7 +142,7 @@ public:
         std::string buff;
         buff.push_back((char)current_char);
         if (in_list((char) current_char, double_operator_begin_list) &&
-            in_list((char) look_ahead, operator_begin_list)) {
+            in_list((char) look_ahead, operator_end_list)) {
             GetNext(false);
             buff.push_back((char)current_char);
             if (in_list(buff, double_operator_list)) {
