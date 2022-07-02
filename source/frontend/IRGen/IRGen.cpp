@@ -109,7 +109,6 @@ void IRGen::Generate() {
 }
 
 
-
 void IRGen::program_generate(const std::shared_ptr<AST_node>& now_AST) {
     AST_PTR now = now_AST->child;
     while (now != nullptr) {
@@ -373,25 +372,37 @@ void IRGen::if_generate(const std::shared_ptr<AST_node>& now_AST) {
     // if
     if (now_AST->data == "if") {
         IR_tuple condition_res("%" + std::to_string(++now_register));
-        IR_tuple res = expr_generate(now->child, condition_res);
-        create_forth("", "if_end_" + std::to_string(++label_num), "jumpn", res);
+        IR_tuple res;
+        if (now->count_expr_ending)
+            res.IVTT = now->IVTT;
+        else
+            res = expr_generate(now->child, condition_res);
+        int buff_1 = label_num + 1;
+        label_num++;
+        create_forth("", "if_end_" + std::to_string(buff_1), "jumpn", res);
         now = now->sister;
         basic_generate(now);
-        create_label("", "if_end_" + std::to_string(label_num));
+        create_label("", "if_end_" + std::to_string(buff_1));
     }
 
     // if-else
     else {
         IR_tuple condition_res("%" + std::to_string(++now_register));
-        IR_tuple res = expr_generate(now->child, condition_res);
-        create_forth("", "if_wrong_" + std::to_string(++label_num), "jumpn", res);
+        IR_tuple res;
+        if (now->count_expr_ending)
+            res.IVTT = now->IVTT;
+        else
+            res = expr_generate(now->child, condition_res);
+        int buff_1 = label_num + 1, buff_2 = label_num + 2;
+        label_num += 2;
+        create_forth("", "if_wrong_" + std::to_string(buff_1), "jumpn", res);
         now = now->sister;
         basic_generate(now);
-        create_forth("", "if_end_" + std::to_string(++label_num), "jump");
+        create_forth("", "if_end_" + std::to_string(buff_2), "jump");
         now = now->sister;
-        create_label("", "if_wrong_" + std::to_string(label_num - 1));
+        create_label("", "if_wrong_" + std::to_string(buff_1));
         basic_generate(now);
-        create_label("", "if_end_" + std::to_string(label_num));
+        create_label("", "if_end_" + std::to_string(buff_2));
     }
 }
 
@@ -408,7 +419,11 @@ void IRGen::while_generate(const std::shared_ptr<AST_node>& now_AST) {
 
     create_label("", now_continue.top());
     IR_tuple condition_res("%" + std::to_string(++now_register));
-    IR_tuple res = expr_generate(now->child, condition_res);
+    IR_tuple res;
+    if (now->count_expr_ending)
+        res.IVTT = now->IVTT;
+    else
+        res = expr_generate(now->child, condition_res);
     create_forth("", now_break.top(), "jumpn", res);
 
     now = now->sister;

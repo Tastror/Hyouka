@@ -94,8 +94,8 @@ void CFG_builder::second_generate() {
                     else
                         CFG_safe::RaiseError("CFG_maps.find(ir) can not find");
                 } else {
-                    if (i != "$ra")
-                        CFG_safe::RaiseWarning("using undefined function");
+                    // if (i != "$ra")
+                        // CFG_safe::RaiseWarning("using undefined function " + i);
                 }
             }
         }
@@ -115,8 +115,8 @@ void CFG_builder::third_generate() {
                     else
                         CFG_safe::RaiseError("CFG_maps.find(ir) can not find");
                 } else {
-                    if (i != "$ra")
-                        CFG_safe::RaiseWarning("using undefined function");
+                    // if (i != "$ra")
+                        // CFG_safe::RaiseWarning("using undefined function " + i);
                 }
             }
         }

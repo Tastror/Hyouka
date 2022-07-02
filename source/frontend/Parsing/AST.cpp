@@ -847,6 +847,8 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
     func_block_symtable.my_head->rename("function_block");
     // ^ --- sym change --- ^ //
 
+    auto func_block_symtable_ptr = std::make_shared<Symtable>(func_block_symtable);
+
     GoNext();
 
     if (token_safe::data(now_token) != "(") {
@@ -855,7 +857,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
     }
     GoNext();
 
-    FunctionParamsAST func_para(now_token, func_block_symtable);
+    FunctionParamsAST func_para(now_token, func_block_symtable_ptr);
     AST_node::connect_child(head, func_para.head);
     now_token = func_para.Parse();
     next_token = token_safe::next(now_token);
@@ -876,7 +878,7 @@ TOKEN_PTR FunctionDefinitionAST::Parse() {
     }
     GoNext();
 
-    BlockStatementAST func_block(now_token, func_block_symtable);
+    BlockStatementAST func_block(now_token, func_block_symtable_ptr);
     AST_node::connect_child(head, func_block.head);
     func_block.head->data = "FunctionBlock";
     now_token = func_block.Parse();

@@ -74,7 +74,6 @@ int main(int argc, char **argv) {
 
     if (Safe::GlobalError) return 0;
 
-
     // 4th-IR Generation
     IRGen ir_gen(optimized_AST_head);
     ir_gen.Generate();
