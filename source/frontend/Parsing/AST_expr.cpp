@@ -116,12 +116,15 @@ TOKEN_PTR FunctionUsageAST::Parse() {
     // v --- sym search & attribution --- v //
     SYM_PTR temp_sym_node = AST_safe::search_id_name(token_safe::data(now_token), symtable_ptr);
     if (temp_sym_node == nullptr) {
-        AST_safe::RaiseError("Usage without definition", now_token);
-        GoNext(); // ! important
-        return now_token;
+        // NOP, C can use before define
+        // AST_safe::RaiseError("Usage without definition", now_token);
+        // GoNext(); // ! important
+        // return now_token;
     }
-    head->absorb_sym_attribution(temp_sym_node);
-    head->declaration_bound_sym_node = temp_sym_node;
+    else {
+        head->absorb_sym_attribution(temp_sym_node);
+        head->declaration_bound_sym_node = temp_sym_node;
+    }
     // ^ --- sym search & attribution--- ^ //
 
     AST_PTR var_name = std::make_shared<AST_node>();

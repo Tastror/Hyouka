@@ -178,8 +178,8 @@ void IRGen::basic_generate(const std::shared_ptr<AST_node>& now_AST) {
 }
 
 
-
 void IRGen::function_generate(const std::shared_ptr<AST_node>& now_AST) {
+
     now_AST->declaration_bound_sym_node->label_name = now_AST->only_name;
     create_label("", now_AST->declaration_bound_sym_node->label_name);
     type_storage func_type = now_AST->IVTT.return_type();
@@ -431,26 +431,43 @@ IR_tuple IRGen::function_usage_generate(const std::shared_ptr<AST_node>& now_AST
         ans.name = passing_down.name;
     }
 
-    AST_tuple test = AST_safe::count_child_number(now_AST);
-    if (test.count - 1 != now_AST->declaration_bound_sym_node->IVTT.parameter_num()) {
-        IR_safe::RaiseError("function parameters' number does not match");
-        return ans;
+    if (now_AST->declaration_bound_sym_node != nullptr) {
+        AST_tuple test = AST_safe::count_child_number(now_AST);
+        if (test.count - 1 != now_AST->declaration_bound_sym_node->IVTT.parameter_num()) {
+            IR_safe::RaiseError("function parameters' number does not match");
+            return ans;
+        }
+
+        int in = 0;
+        AST_PTR para = now_AST->child->sister;
+        for (const auto& i : now_AST->IVTT.additional_storage_vector) {
+            IR_tuple par("$par" + std::to_string(++in));
+            par.IVTT = i;
+            IR_tuple giving_target = expr_generate(para, par);
+            giving_target.IVTT = para->IVTT;
+            create_cast_or_assign("", par, giving_target);
+            para = para->sister;
+        }
+
+        create_forth("", (std::string)now_AST->declaration_bound_sym_node->label_name, "call");
+
+        create_cast_or_assign("", ans, ret);
     }
 
-    int in = 0;
-    AST_PTR para = now_AST->child->sister;
-    for (const auto& i : now_AST->IVTT.additional_storage_vector) {
-        IR_tuple par("$par" + std::to_string(++in));
-        par.IVTT = i;
-        IR_tuple giving_target = expr_generate(para, par);
-        giving_target.IVTT = para->IVTT;
-        create_cast_or_assign("", par, giving_target);
-        para = para->sister;
+    // such as putin()
+    else {
+        int in = 0;
+        AST_PTR para = now_AST->child->sister;
+        while (para != nullptr) {
+            IR_tuple par("$par" + std::to_string(++in));
+            IR_tuple giving_target = expr_generate(para, par);
+            create_cast_or_assign("", par, giving_target);
+            para = para->sister;
+        }
+        create_forth("", (std::string)("@out_" + now_AST->child->data), "call");
+        create_cast_or_assign("", ans, ret);
     }
 
-    create_forth("", (std::string)now_AST->declaration_bound_sym_node->label_name, "call");
-
-    create_cast_or_assign("", ans, ret);
     return ans;
 }
 
