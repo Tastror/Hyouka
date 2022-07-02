@@ -1,14 +1,9 @@
-//test domain of global var define and local define
-int a = 3;
-int b = 5;
-int c = -1;
-int d = -200;
-
+//test array define
 int main(){
-    //int a = 5;
-    int x1[5][3] = {1, 2, 3};
-    int x2[5][3] = {1, 2, 3, 4};
-    int x3[5][3] = {1, 2, 3, 4, 5, 6};
-    int x4[5][3] = {1, 2, 3, {4, 5}, 6};
-    return a + b + c + d ;
+    int a[4][2] = {};
+    int b[4][2] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int c[4][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+    int d[4][2] = {1, 2, {3}, {5}, 7 , 8};
+    int e[4][2] = {{d[2][1], c[2][1]}, {3, 4}, {5, 6}, {7, 8}};
+    return e[3][1] + e[0][0] + e[0][1] + a[2][0];
 }

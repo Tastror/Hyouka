@@ -45,7 +45,8 @@ public:
 
     void load_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void store_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    //todo: allock-stack
+
+    void alloc_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     //todo: cast-int
     //todo: float
 
