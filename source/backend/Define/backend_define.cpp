@@ -190,7 +190,7 @@ void ARM::print_static_chain(std::vector<std::shared_ptr<IR_node>> static_chain)
 void ARM::print_all(const std::vector<ARM_node>& ARM_code){
 
     for (int i = 0; i < ARM_code.size(); i++) {
-        if(ARM_code[i].type == arm_ins)
+        if(ARM_code[i].type == arm_ins || ARM_code[i].type == arm_section)
             std::cout << i << "                     " << ARM_code[i].instruction << std::endl;
         else
             std::cout << i << "           " << ARM_code[i].instruction << std::endl;
@@ -209,7 +209,7 @@ void ARM::dump_all(const std::vector<ARM_node>& ARM_code, const std::string& out
     }
     else{
         for (int i = 0; i < ARM_code.size(); i++) {
-            if(ARM_code[i].type == arm_ins)
+            if(ARM_code[i].type == arm_ins || ARM_code[i].type == arm_section)
                 file << "       " << ARM_code[i].instruction << std::endl;
             else
                 file << ARM_code[i].instruction << std::endl;

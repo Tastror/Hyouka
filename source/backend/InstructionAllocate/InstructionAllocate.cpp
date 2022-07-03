@@ -7,11 +7,31 @@
 #include <iostream>
 
 void InstructionAllocator::Generate() {
-    normal_generate();      //functions
-    static_generate();      //global variable
+    text_section_generate();
+    global_section_generate();
+    code_section_generate();
+    data_section_generate();
 }
 
-void InstructionAllocator::static_generate() {
+void InstructionAllocator::text_section_generate() {
+
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_section;
+    now_ARM.instruction = ".text";
+    ARM_chain.push_back(now_ARM);
+}
+
+void InstructionAllocator::global_section_generate() {
+
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_section;
+    now_ARM.instruction = ".global      main";
+    ARM_chain.push_back(now_ARM);
+}
+
+void InstructionAllocator::data_section_generate() {
 
     for (const auto& it : ir_static_chain) {
 
@@ -21,7 +41,7 @@ void InstructionAllocator::static_generate() {
     }
 }
 
-void InstructionAllocator::normal_generate() {
+void InstructionAllocator::code_section_generate() {
 
     for (const auto& it : ir_pro_normal_chain) {
 

@@ -147,10 +147,9 @@ namespace CFG_pro_list {
 
 
 // ARM node design
-// ref: https://developer.arm.com/documentation/ddi0406/latest
 
 enum arm_type{
-    arm_global_label, arm_func_label, arm_block_label, arm_ins
+    arm_global_label, arm_func_label, arm_block_label, arm_ins, arm_section
 };
 
 struct ARM_node{
