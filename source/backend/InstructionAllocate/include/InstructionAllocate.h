@@ -22,8 +22,11 @@ public:
 
 public:
     void Generate();
-    void static_generate();
-    void normal_generate();
+
+    void text_section_generate();
+    void global_section_generate();
+    void code_section_generate();
+    void data_section_generate();
 
     void global_generate(const std::shared_ptr<IR_node>& now_IR);
 

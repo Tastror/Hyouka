@@ -137,7 +137,7 @@ int main(int argc, char **argv) {
         ARM::print_static_chain(ir_static_chain);
         std::cout << "********************** normal chain ***********************" << std::endl;
         ARM::print_normal_chain(ir_pro_normal_chain);
-        std::cout << "********************** arm chain ***********************" << std::endl;
+        std::cout << "**********************  arm chain   ***********************" << std::endl;
         ARM::print_all(ARM_code);
     }
 
@@ -147,13 +147,6 @@ int main(int argc, char **argv) {
     // Dump armv7 code to .s file
     if (to_assembly)
         ARM::dump_all(ARM_code, output_filename);
-
-
-    //  link .s and .a into .exe:
-    //        arm-linux-gnueabihf-gcc test.s libsysy.a -o test
-
-    //  executed by qemu:
-    //        qemu-arm -L /usr/arm-linux-gnueabihf/ ./test
 
 
     return 0;
