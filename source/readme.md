@@ -110,6 +110,8 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 - `debug_mode: reg`
 - 负责者：ss
 - 无错误类型
+- 备注
+  - 使用图染色算法进行优化，其中图染色的顺序权值由活跃度的引用数决定
 
 #### 8，指令选择与调度
 
