@@ -43,6 +43,20 @@ Hyouka 冰菓（氷菓・ひょうか）
 性能测试: compiler testcase.sysy -S -o testcase.s -O1 [--debug <debug_mode>]
 ```
 
+链接命令：
+
+```shell
+arm-linux-gnueabihf-gcc -static libsysy.a testcase.s -o testcase
+```
+
+
+执行命令：
+
+```shell
+qemu-arm testcase
+```
+
+
 **源代码**
 
 源码与编译相关内容，请打开 `source` 文件夹查看 `readme`。
