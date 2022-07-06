@@ -57,7 +57,7 @@ arm-linux-gnueabihf-gcc -static libsysy.a testcase.s -o testcase
 执行命令：
 
 ```shell
-qemu-arm testcase
+qemu-arm testcase [< testcase.in]
 ```
 
 
