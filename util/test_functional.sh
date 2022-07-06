@@ -1,9 +1,12 @@
 COMPILER='../cmake-build-debug/compiler'
 TEST_PATH='../testcase/functional'
 LIB_PATH='../runtime_lib'
+LOG_FILE='./log_functional.txt'
+
 AC=0
 CE=0
 WA=0
+
 for source_file in $(ls $(find $TEST_PATH -name '*.sy'))
 do
 	if [ ${source_file%.*} == $TEST_PATH/sylib ];
@@ -33,7 +36,9 @@ do
 		cmp -s ${source_file%.*}.out ${source_file%.*}.ans
 		if [ $? == 0 ];
 		then
+			ac_info="\e[32m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Accepted]" ${source_file%.*} "$result" "$answer"
 			printf "\e[32m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Accepted]" ${source_file%.*} "$result" "$answer"
+			echo $ac_info > $LOG_FILE
 			AC=$((AC + 1))
 		else
 			printf "\e[31m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Wrong Answer]" ${source_file%.*} "$result" "$answer"
