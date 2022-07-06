@@ -21,8 +21,6 @@
   - ActivityAnalysis  # 活跃变量分析
   - RegisterAllocate  # 寄存器分配
   - InstructionAllocate  # 指令分配
-
-- group-legacy  # 已废弃或待完善的代码
 ```
 
 ## 二、使用方式
@@ -35,6 +33,7 @@ compiler <file_name> [-S] [-o] <out_name> [-O1] [--debug <debug_mode>]
 ```shell
 compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 ```
+来查看生成的ir
 
 
 ## 三、详细架构
@@ -74,7 +73,7 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 - 错误类型
     - 语义错误：隐式强制转换不合规范、% 使用浮点、（优化时）除0等。
 - 优化内容
-    - 常量计算
+    - 常量折叠
     - constexpr 计算（constexpr 指在编译阶段就能确定值的 const）
 - 备注
     - 数组的优化还没写，防止炸。
@@ -104,7 +103,7 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 - 负责者：tly
 - 无错误类型
 
-#### 7，寄存器优化
+#### 7，寄存器分配
 
 - `source/backend/RegisterAllocate`，含已分配寄存器编号的控制流块
 - `debug_mode: reg`
@@ -113,9 +112,12 @@ compiler ../test/demo.cpp -S -o ../test/demo.s -O1 --debug ir
 - 备注
   - 使用图染色算法进行优化，其中图染色的顺序权值由活跃度的引用数决定
 
-#### 8，指令选择与调度
+#### 8，指令选择
 
 - `source/backend/InstructionAllocate`，armv7 汇编序列
 - `debug_mode: arm`
 - 负责者：wxw
 - 无错误类型
+- 备注
+  - 暂未支持超大数字，浮点数，强制类型转换，寄存器溢出处理
+  - 暂未完善函数调用处理，start_time等外部库函数处理
