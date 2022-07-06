@@ -10,7 +10,7 @@ do
 	then
 		continue
 	fi
-	$COMPILER ${source_file%.*}.sy > ${source_file%.*}.s
+	$COMPILER ${source_file%.*}.sy -S -o ${source_file%.*}.s -O1
 	if [ $? == 0 ];
 	then
 		arm-linux-gnueabihf-gcc -static $LIB_PATH/libsysy.a ${source_file%.*}.s -o ${source_file%.*}.tmp
