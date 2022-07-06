@@ -1,7 +1,7 @@
 COMPILER='../cmake-build-debug/compiler'
 TEST_PATH='../testcase/performance'
 LIB_PATH='../runtime_lib'
-LOG_FILE='./log_performance.log'
+LOG_FILE='../debug/log_performance.log'
 
 AC=0
 CE=0
@@ -53,4 +53,5 @@ do
 		CE=$((CE + 1))
 	fi
 done
+
 echo -e "\e[32mAC: $AC/$((AC + WA + CE))          \e[31mWA: $WA/$((AC + WA + CE))          \e[33mCE: $CE/$((AC + WA + CE))\e\e[0m"
