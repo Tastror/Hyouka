@@ -37,7 +37,7 @@ do
 		if [ $? == 0 ];
 		then
 			printf "\e[32m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Accepted]" ${source_file%.*} "$result" "$answer"
-			echo ${source_file%.*} > $LOG_FILE
+			echo ${source_file%.*} >> $LOG_FILE
 			AC=$((AC + 1))
 		else
 			printf "\e[31m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Wrong Answer]" ${source_file%.*} "$result" "$answer"
