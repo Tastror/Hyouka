@@ -1,6 +1,6 @@
 COMPILER='../cmake-build-debug/compiler'
 TEST_PATH='../testcase/functional'
-LIB_PATH = '../runtime_lib'
+LIB_PATH='../runtime_lib'
 AC=0
 CE=0
 WA=0
