@@ -124,12 +124,17 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
             break;
         }
 
+        // entry of temp
+        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,4) == "temp") {
+            temp_generate(ir_pro_normal_chain[i]);
+        }
+
         // entry of if
         if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,8) == "if_wrong") {
             if_wrong_generate(ir_pro_normal_chain[i]);
         }
 
-        // entry of if
+        // compare
         if (ir_pro_normal_chain[i]->ir_type == ir_forth
             && (ir_pro_normal_chain[i]->opera == "le"
                 || ir_pro_normal_chain[i]->opera == "eq")) {
@@ -236,6 +241,17 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
         now_ARM.instruction = "pop     {r7, pc}";
         ARM_chain.push_back(now_ARM);
     }
+
+}
+
+void InstructionAllocator::temp_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
+    ARM_node now_ARM;
+
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_block_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
 
 }
 

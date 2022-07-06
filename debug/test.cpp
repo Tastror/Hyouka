@@ -1,7 +1,25 @@
-//test div
+// test if-else-if
+int ifElseIf() {
+    int a;
+    a = 5;
+    int b;
+    b = 10;
+    if(a == 6 || b == 0xb) {
+        return a;
+    }
+    else {
+        if (b == 10 && a == 1)
+            a = 25;
+        else if (b == 10 && a == -5)
+            a = a + 15;
+        else
+            a = -+a;
+    }
+
+    return a;
+}
+
 int main(){
-    int a, b;
-    a = 10;
-    b = 5;
-    return a / b;
+    putint(ifElseIf());
+    return 0;
 }
