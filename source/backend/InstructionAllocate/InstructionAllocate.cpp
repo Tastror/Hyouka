@@ -439,7 +439,13 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
     else
         operand2_str = "#" + std::to_string(now_IR_pro->org_2.IVTT.self_get_float_value());
 
-    now_ARM.instruction = now_IR_pro->opera
+    std::string opera_str;
+    if(now_IR_pro->opera == "div")
+        opera_str = "sdiv";     //signed division
+    else
+        opera_str = now_IR_pro->opera;
+
+    now_ARM.instruction = opera_str
             + "     "
             + register_name_str[now_IR_pro->tar.type]
             + ", "

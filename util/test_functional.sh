@@ -18,7 +18,7 @@ do
 	$COMPILER ${source_file%.*}.sy -S -o ${source_file%.*}.s
 	if [ $? == 0 ];
 	then
-		arm-linux-gnueabihf-gcc -static $LIB_PATH/libsysy.a ${source_file%.*}.s -o ${source_file%.*}.tmp
+		arm-linux-gnueabihf-gcc -mcpu=cortex-a7 -static $LIB_PATH/libsysy.a ${source_file%.*}.s -o ${source_file%.*}.tmp
 		if [ -f ${source_file%.*}.in ];
 		then
 			stdout=$(qemu-arm ${source_file%.*}.tmp < ${source_file%.*}.in)

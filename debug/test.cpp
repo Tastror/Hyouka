@@ -1,6 +1,7 @@
-int b=50;
-const int a[5]={0,1,2,3,4};
-
+//test div
 int main(){
-    return a[2];
+    int a, b;
+    a = 10;
+    b = 5;
+    return a / b;
 }
