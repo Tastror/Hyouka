@@ -7,6 +7,8 @@ AC=0
 CE=0
 WA=0
 
+echo > $LOG_FILE
+
 for source_file in $(ls $(find $TEST_PATH -name '*.sy'))
 do
 	if [ ${source_file%.*} == $TEST_PATH/sylib ];
@@ -37,14 +39,17 @@ do
 		if [ $? == 0 ];
 		then
 			printf "\e[32m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Accepted]" ${source_file%.*} "$result" "$answer"
-			echo ${source_file%.*} >> $LOG_FILE
 			AC=$((AC + 1))
 		else
 			printf "\e[31m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Wrong Answer]" ${source_file%.*} "$result" "$answer"
+			echo "WA:   \c" >> $LOG_FILE
+			echo ${source_file%.*} >> $LOG_FILE
 			WA=$((WA + 1))
 		fi
 	else
 		printf "\e[33m%-20s testcase: %-30s compilation failed.\e[0m\n" "[Compile Error]" ${source_file%.*}
+		echo "CE:   \c" >> $LOG_FILE
+    echo ${source_file%.*} >> $LOG_FILE
 		CE=$((CE + 1))
 	fi
 done
