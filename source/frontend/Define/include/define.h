@@ -13,7 +13,7 @@
 
 // all will use
 
-enum literal_type {
+enum literal_class {
     literal_int, literal_float
 };
 
@@ -29,7 +29,7 @@ const std::string basic_type_string_name[] = {
 class literal_value_storage {
 private:
     bool literal_used = false;
-    literal_type literal_type = literal_int;
+    literal_class literal_type = literal_int;
     union {
         int int_value;
         double float_value = 0.0;
@@ -46,7 +46,7 @@ public:
     void cast_and_assign(int x);
     void cast_and_assign(double x);
 
-    [[nodiscard]] enum literal_type get_literal_type() const;
+    [[nodiscard]] enum literal_class get_literal_type() const;
     [[nodiscard]] int get_int_value() const;
     [[nodiscard]] double get_float_value() const;
 };

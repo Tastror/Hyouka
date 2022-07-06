@@ -60,7 +60,7 @@ void literal_value_storage::cast_and_assign(double x) {
         literal_value.float_value = (double)x;
 }
 
-enum literal_type literal_value_storage::get_literal_type() const {
+enum literal_class literal_value_storage::get_literal_type() const {
     return literal_type;
 }
 
