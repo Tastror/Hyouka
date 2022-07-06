@@ -1,7 +1,7 @@
 COMPILER='../cmake-build-debug/compiler'
 TEST_PATH='../testcase/functional'
 LIB_PATH='../runtime_lib'
-LOG_FILE='./log_functional.txt'
+LOG_FILE='./log_functional.log'
 
 AC=0
 CE=0
@@ -42,13 +42,13 @@ do
 			AC=$((AC + 1))
 		else
 			printf "\e[31m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Wrong Answer]" ${source_file%.*} "$result" "$answer"
-			echo "WA:   \c" >> $LOG_FILE
+			echo -e "WA:   \c" >> $LOG_FILE
 			echo ${source_file%.*} >> $LOG_FILE
 			WA=$((WA + 1))
 		fi
 	else
 		printf "\e[33m%-20s testcase: %-30s compilation failed.\e[0m\n" "[Compile Error]" ${source_file%.*}
-		echo "CE:   \c" >> $LOG_FILE
+		echo -e "CE:   \c" >> $LOG_FILE
     echo ${source_file%.*} >> $LOG_FILE
 		CE=$((CE + 1))
 	fi

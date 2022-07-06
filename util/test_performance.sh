@@ -1,11 +1,13 @@
 COMPILER='../cmake-build-debug/compiler'
 TEST_PATH='../testcase/performance'
 LIB_PATH='../runtime_lib'
-LOG_FILE='./log_performance.txt'
+LOG_FILE='./log_performance.log'
 
 AC=0
 CE=0
 WA=0
+
+echo > $LOG_FILE
 
 for source_file in $(ls $(find $TEST_PATH -name '*.sy'))
 do
@@ -40,10 +42,14 @@ do
 			AC=$((AC + 1))
 		else
 			printf "\e[31m%-20s testcase: %-30s (result: %-10s | answer: %-10s).\e[0m\n" "[Wrong Answer]" ${source_file%.*} "$result" "$answer"
+			echo -e "WA:   \c" >> $LOG_FILE
+      echo ${source_file%.*} >> $LOG_FILE
 			WA=$((WA + 1))
 		fi
 	else
 		printf "\e[33m%-20s testcase: %-30s compilation failed.\e[0m\n" "[Compile Error]" ${source_file%.*}
+		echo -e "CE:   \c" >> $LOG_FILE
+    echo ${source_file%.*} >> $LOG_FILE
 		CE=$((CE + 1))
 	fi
 done
