@@ -96,6 +96,7 @@ void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_I
 
 }
 
+//FIXME:    refactor
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     // judge current function is Leaf or not
@@ -115,7 +116,10 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
     // entry of function
     function_entry_generate(now_IR_pro, isLeaf);
 
-    // content of function
+    //entry block
+    entry_block_generate(now_IR_pro);
+
+    // other blocks
     for(int i=now_IR_pro->index + 1 - ir_pro_normal_chain[0]->index; i<ir_pro_normal_chain.size(); i++){
 
     // exit of function
@@ -124,14 +128,32 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
             break;
         }
 
-        // entry of temp
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,4) == "temp") {
-            temp_generate(ir_pro_normal_chain[i]);
-        }
+        if (ir_pro_normal_chain[i]->ir_type == ir_label) {
 
-        // entry of if
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,8) == "if_wrong") {
-            if_wrong_generate(ir_pro_normal_chain[i]);
+            // temp block
+            if (ir_pro_normal_chain[i]->target.name.substr(0,4) == "temp") {
+                temp_block_generate(ir_pro_normal_chain[i]);
+            }
+
+            // if wrong
+            if (ir_pro_normal_chain[i]->target.name.substr(0,8) == "if_wrong") {
+                if_wrong_block_generate(ir_pro_normal_chain[i]);
+            }
+
+            // if end
+            if (ir_pro_normal_chain[i]->target.name.substr(0,6) == "if_end") {
+                if_end_block_generate(ir_pro_normal_chain[i]);
+            }
+
+            // while continue
+            if (ir_pro_normal_chain[i]->target.name.substr(0,14) == "while_continue") {
+                while_continue_block_generate(ir_pro_normal_chain[i]);
+            }
+
+            // while break
+            if (ir_pro_normal_chain[i]->target.name.substr(0,11) == "while_break") {
+                while_break_block_generate(ir_pro_normal_chain[i]);
+            }
         }
 
         // compare
@@ -139,21 +161,6 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
             && (ir_pro_normal_chain[i]->opera == "le"
                 || ir_pro_normal_chain[i]->opera == "eq")) {
             compare_generate(ir_pro_normal_chain[i]);
-        }
-
-        // exit of if
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,6) == "if_end") {
-            if_end_generate(ir_pro_normal_chain[i]);
-        }
-
-        // entry of while
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,14) == "while_continue") {
-            while_continue_generate(ir_pro_normal_chain[i]);
-        }
-
-        // exit of while
-        if (ir_pro_normal_chain[i]->ir_type == ir_label && ir_pro_normal_chain[i]->target.name.substr(0,11) == "while_break") {
-            while_break_generate(ir_pro_normal_chain[i]);
         }
 
         // call
@@ -244,7 +251,7 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
 
 }
 
-void InstructionAllocator::temp_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+void InstructionAllocator::entry_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
 
     ARM_node now_ARM;
 
@@ -255,7 +262,7 @@ void InstructionAllocator::temp_generate(const std::shared_ptr<IR_node_pro>& now
 
 }
 
-void InstructionAllocator::if_wrong_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+void InstructionAllocator::temp_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
 
     ARM_node now_ARM;
 
@@ -264,6 +271,70 @@ void InstructionAllocator::if_wrong_generate(const std::shared_ptr<IR_node_pro>&
     now_ARM.instruction = "." + now_IR_pro->target.name + ":";
     ARM_chain.push_back(now_ARM);
 
+}
+
+void InstructionAllocator::if_wrong_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
+
+    ARM_node now_ARM;
+
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_block_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::if_end_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
+
+    ARM_node now_ARM;
+
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_block_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::while_continue_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
+
+    ARM_node now_ARM;
+
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_block_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::while_break_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
+
+    ARM_node now_ARM;
+
+    //'.' is added since it means block entry in ARM
+    now_ARM.type = arm_block_label;
+    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_ins;
+    std::string call_string = "bl     ";
+    now_ARM.instruction = call_string + " " + now_IR_pro->target.name.erase(0,3);
+    ARM_chain.push_back(now_ARM);
+
+}
+
+void InstructionAllocator::jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_ins;
+    std::string jump_string = "b       ";
+    now_ARM.instruction = jump_string + "." + now_IR_pro->target.name;
+    ARM_chain.push_back(now_ARM);
 }
 
 void InstructionAllocator::compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
@@ -293,59 +364,6 @@ void InstructionAllocator::compare_generate(const std::shared_ptr<IR_node_pro>& 
     else if(now_IR_pro->opera == "eq")  // ==
         jump_str = "bne     ";      // !=
     now_ARM.instruction = jump_str + "." + next_IR->target.name;
-    ARM_chain.push_back(now_ARM);
-}
-
-void InstructionAllocator::if_end_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-
-    ARM_node now_ARM;
-
-    //'.' is added since it means block entry in ARM
-    now_ARM.type = arm_block_label;
-    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
-    ARM_chain.push_back(now_ARM);
-
-}
-
-void InstructionAllocator::while_continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-
-    ARM_node now_ARM;
-
-    //'.' is added since it means block entry in ARM
-    now_ARM.type = arm_block_label;
-    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
-    ARM_chain.push_back(now_ARM);
-
-}
-
-void InstructionAllocator::while_break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-
-    ARM_node now_ARM;
-
-    //'.' is added since it means block entry in ARM
-    now_ARM.type = arm_block_label;
-    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
-    ARM_chain.push_back(now_ARM);
-
-}
-
-void InstructionAllocator::call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-
-    ARM_node now_ARM;
-
-    now_ARM.type = arm_ins;
-    std::string call_string = "bl     ";
-    now_ARM.instruction = call_string + " " + now_IR_pro->target.name.erase(0,3);
-    ARM_chain.push_back(now_ARM);
-
-}
-
-void InstructionAllocator::jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
-    ARM_node now_ARM;
-
-    now_ARM.type = arm_ins;
-    std::string jump_string = "b       ";
-    now_ARM.instruction = jump_string + "." + now_IR_pro->target.name;
     ARM_chain.push_back(now_ARM);
 }
 

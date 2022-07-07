@@ -34,11 +34,12 @@ public:
     void function_entry_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
     void function_exit_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro, bool isLeaf);
 
-    void temp_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void if_wrong_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void if_end_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void while_continue_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void while_break_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void entry_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void temp_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void if_wrong_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void if_end_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_continue_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    void while_break_block_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
     void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
