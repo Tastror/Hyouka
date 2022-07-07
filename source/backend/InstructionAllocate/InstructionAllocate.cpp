@@ -253,12 +253,7 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
 
 void InstructionAllocator::entry_block_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
 
-    ARM_node now_ARM;
 
-    //'.' is added since it means block entry in ARM
-    now_ARM.type = arm_block_label;
-    now_ARM.instruction = "." + now_IR_pro->target.name + ":";
-    ARM_chain.push_back(now_ARM);
 
 }
 

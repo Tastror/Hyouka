@@ -50,7 +50,7 @@ compiler testcase.sy -S -o testcase.s [-O1]
 链接命令：
 
 ```shell
-arm-linux-gnueabihf-gcc -static libsysy.a testcase.s -o testcase
+arm-linux-gnueabihf-gcc -mcpu=cortex-a7 -static libsysy.a testcase.s -o testcase
 ```
 
 
