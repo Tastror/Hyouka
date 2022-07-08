@@ -346,14 +346,19 @@ void IRGen::array_assign_generate(const std::shared_ptr<AST_node>& now_AST) {
             create_forth("", offset, "assign", index_res);
         }
         else {
-            create_forth("", offset, "mul", offset, index_list[i]);
+            // TODO
+            //   1, mul to sr; and no instance number in mul
+            //   2, debug number index
+            IR_tuple list_num("%" + std::to_string(++now_register));
+            create_cast_or_assign("", list_num, index_list[i]);
+            create_forth("", offset, "mul", offset, list_num);
             IR_tuple index_res = expr_generate(temp);
             create_forth("", offset, "add", offset, index_res);
         }
         temp = temp->sister;
         i++;
     }
-    create_forth("", offset, "mul", offset, 4);
+    create_forth("", offset, "sll", offset, 2);
     IR_tuple assign_unit("%" + std::to_string(++now_register));
     assign_unit.IVTT = now_AST->declaration_bound_sym_node->IVTT;
     create_forth("", assign_unit, "add", assign_target, offset);
@@ -532,14 +537,18 @@ IR_tuple IRGen::array_usage_generate(const std::shared_ptr<AST_node>& now_AST, c
             create_forth("", offset, "assign", index_res);
         }
         else {
-            create_forth("", offset, "mul", offset, index_list[i]);
+            // TODO
+            //   2
+            IR_tuple list_num("%" + std::to_string(++now_register));
+            create_cast_or_assign("", list_num, index_list[i]);
+            create_forth("", offset, "mul", offset, list_num);
             IR_tuple index_res = expr_generate(temp);
             create_forth("", offset, "add", offset, index_res);
         }
         temp = temp->sister;
         i++;
     }
-    create_forth("", offset, "mul", offset, 4);
+    create_forth("", offset, "sll", offset, 2);
     IR_tuple giving_unit("%" + std::to_string(++now_register));
     giving_unit.IVTT = now_AST->declaration_bound_sym_node->IVTT;
     create_forth("", giving_unit, "add", giving_target, offset);
@@ -607,14 +616,18 @@ IR_tuple IRGen::expr_generate(const std::shared_ptr<AST_node>& now_AST, const IR
                 create_forth("", ans, "sub" + end_f, ans_1, ans_2);
             }
             else if (now_AST->data == "*") {
-                ans_1 = create_cast_or_not("", ans_1, ans);
-                ans_2 = create_cast_or_not("", ans_2, ans);
-                create_forth("", ans, "mul" + end_f, ans_1, ans_2);
+                IR_tuple mul_src1("%" + std::to_string(++now_register));
+                IR_tuple mul_src2("%" + std::to_string(++now_register));
+                mul_src1 = create_cast_or_not("", mul_src1, ans);
+                mul_src2 = create_cast_or_not("", mul_src2, ans);
+                create_forth("", ans, "mul" + end_f, mul_src1, mul_src2);
             }
             else if (now_AST->data == "/") {
-                ans_1 = create_cast_or_not("", ans_1, ans);
-                ans_2 = create_cast_or_not("", ans_2, ans);
-                create_forth("", ans, "div" + end_f, ans_1, ans_2);
+                IR_tuple mul_src1("%" + std::to_string(++now_register));
+                IR_tuple mul_src2("%" + std::to_string(++now_register));
+                mul_src1 = create_cast_or_not("", mul_src1, ans);
+                mul_src2 = create_cast_or_not("", mul_src2, ans);
+                create_forth("", ans, "div" + end_f, mul_src1, mul_src2);
             }
             else if (now_AST->data == "%")
                 create_forth("", ans, "mod", ans_1, ans_2);

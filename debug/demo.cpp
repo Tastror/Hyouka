@@ -13,6 +13,7 @@ int main() {
     res[0] = -.1;
     res[-1] = 1.23;
     a[1][2] = 3;
+    int k23 = rea * 5;
 
     while (i < 20) {
         float block;

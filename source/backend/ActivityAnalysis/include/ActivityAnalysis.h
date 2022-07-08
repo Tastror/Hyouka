@@ -20,7 +20,11 @@ class BlockVariableFactory {
 
     static bool OperatorFilter2(const std::string &op) {
         /*This filters instruction: "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod"*/
-        const std::vector<std::string> operats = {"add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod", "gr", "le", "not", "eq", "neq", "gre", "lee"};
+        const std::vector<std::string> operats = {
+                "add", "addf", "sub", "subf", "mul", "mulf", "div", "divf", "mod",
+                "gr", "le", "not", "eq", "neq", "gre", "lee",
+                "sll", "slr"
+        };
         return std::any_of(operats.begin(), operats.end(), [&op](const std::string &str) {
             return str == op;
         });
