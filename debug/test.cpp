@@ -1,24 +1,9 @@
-int b=122;
-int a=10;
-int c[2]={1256,-99};
-float kkk[11];
-
-int fun()
-{
-    return -88;
-}
-
-int test()
-{
-    return 19;
-}
-
-int main()
-{
-    a=3;
-    b=2;
-    c[1]=110;
-    int d=fun();
-    int e=test();
-    return a+b+c[1]+d+e;
+//test array define
+int main(){
+    int a[4][2] = {};
+    int b[4][2] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int c[4][2] = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+    int d[4][2] = {1, 2, {3}, {5}, 7 , 8};
+    int e[4][2] = {{d[2][1], c[2][1]}, {3, 4}, {5, 6}, {7, 8}};
+    return e[3][1] + e[0][0] + e[0][1] + a[2][0];
 }

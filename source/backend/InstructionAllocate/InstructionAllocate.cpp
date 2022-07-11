@@ -13,15 +13,17 @@ void InstructionAllocator::Generate() {
 
 void InstructionAllocator::data_section_generate() {
 
-    ARM_node now_ARM;
+    if(ir_static_chain.size() != 0){
+        ARM_node now_ARM;
 
-    now_ARM.type = arm_section;
-    now_ARM.instruction = ".data";
-    ARM_chain.push_back(now_ARM);
+        now_ARM.type = arm_section;
+        now_ARM.instruction = ".data";
+        ARM_chain.push_back(now_ARM);
 
-    now_ARM.type = arm_section;
-    now_ARM.instruction = ".align       2";
-    ARM_chain.push_back(now_ARM);
+        now_ARM.type = arm_section;
+        now_ARM.instruction = ".align       2";
+        ARM_chain.push_back(now_ARM);
+    }
 
     for (const auto& it : ir_static_chain) {
 
@@ -207,6 +209,13 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
                 || ir_pro_normal_chain[i]->opera == "div"
                 || ir_pro_normal_chain[i]->opera == "mod")) {
             arithmetic_generate(ir_pro_normal_chain[i]);
+        }
+
+        // logical
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth
+            && (ir_pro_normal_chain[i]->opera == "sll"
+                || ir_pro_normal_chain[i]->opera == "slr")) {
+            logical_generate(ir_pro_normal_chain[i]);
         }
 
         // load
@@ -462,6 +471,25 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
             + register_name_str[now_IR_pro->src1.type]
             + ", "
             + operand2_str;
+    ARM_chain.push_back(now_ARM);
+}
+
+void InstructionAllocator::logical_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    ARM_node now_ARM;
+    std::string opera_str;
+
+    if(now_IR_pro->opera == "sll")
+        opera_str = "lsl    ";
+    else if(now_IR_pro->opera == "slr")
+        opera_str = "lsr    ";
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = opera_str
+            + register_name_str[now_IR_pro->tar.type]
+            + ", "
+            + register_name_str[now_IR_pro->src1.type]
+            + ", #"
+            + std::to_string(now_IR_pro->org_2.IVTT.self_get_int_value());
     ARM_chain.push_back(now_ARM);
 }
 
