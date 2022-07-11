@@ -7,31 +7,21 @@
 #include <iostream>
 
 void InstructionAllocator::Generate() {
-    text_section_generate();
-    global_section_generate();
     code_section_generate();
     data_section_generate();
 }
 
-void InstructionAllocator::text_section_generate() {
-
-    ARM_node now_ARM;
-
-    now_ARM.type = arm_section;
-    now_ARM.instruction = ".text";
-    ARM_chain.push_back(now_ARM);
-}
-
-void InstructionAllocator::global_section_generate() {
-
-    ARM_node now_ARM;
-
-    now_ARM.type = arm_section;
-    now_ARM.instruction = ".global      main";
-    ARM_chain.push_back(now_ARM);
-}
-
 void InstructionAllocator::data_section_generate() {
+
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_section;
+    now_ARM.instruction = ".data";
+    ARM_chain.push_back(now_ARM);
+
+    now_ARM.type = arm_section;
+    now_ARM.instruction = ".align       2";
+    ARM_chain.push_back(now_ARM);
 
     for (const auto& it : ir_static_chain) {
 
@@ -43,16 +33,55 @@ void InstructionAllocator::data_section_generate() {
 
 void InstructionAllocator::code_section_generate() {
 
+    ARM_node now_ARM;
+
+    now_ARM.type = arm_section;
+    now_ARM.instruction = ".text";
+    ARM_chain.push_back(now_ARM);
+
     for (const auto& it : ir_pro_normal_chain) {
 
         if (it->ir_type == ir_label && it->target.name.at(0) == '@') {
+
+            now_ARM.type = arm_section;
+            now_ARM.instruction = ".align      1";
+            ARM_chain.push_back(now_ARM);
+
+            int line_pos = it->target.name.find('_');
+            int len = it->target.name.length();
+
+            now_ARM.type = arm_section;
+            now_ARM.instruction = ".global      "
+                    + it->target.name.substr(line_pos+1,len-line_pos-1);
+            ARM_chain.push_back(now_ARM);
+
             function_generate(it);
         }
     }
 
 }
 
-void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_IR) {
+void InstructionAllocator::global_generate(const std::shared_ptr<IR_node> &now_IR) {
+    bool isInitialized = false;
+    auto iter = now_IR->next;
+
+    while (iter != nullptr){
+        if(iter->ir_type == ir_label)
+            break;
+        if(iter->opera == "assign"){
+            isInitialized = true;
+            break;
+        }
+        iter = iter->next;
+    }
+
+    if(isInitialized)
+        initialized_generate(now_IR);
+    else
+        uninitialized_generate(now_IR);
+}
+
+void InstructionAllocator::initialized_generate(const std::shared_ptr<IR_node>& now_IR) {
 
     ARM_node now_ARM;
     auto iter = now_IR->next;
@@ -95,6 +124,20 @@ void InstructionAllocator::global_generate(const std::shared_ptr<IR_node>& now_I
         ARM_chain.push_back(now_ARM);
     }
 
+}
+
+void InstructionAllocator::uninitialized_generate(const std::shared_ptr<IR_node>& now_IR) {
+    ARM_node now_ARM;
+
+    auto it = now_IR->next;
+    //.comm	c,8,4
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = ".comm    "
+            + it->target.name.erase(0,3)
+            + ", "
+            + std::to_string(it->org_1.IVTT.self_get_int_value())
+            + ", 4";
+    ARM_chain.push_back(now_ARM);
 }
 
 void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
