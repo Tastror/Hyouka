@@ -1,31 +1,31 @@
-int FourWhile() {
-    int a;
-    a = 5;
-    int b;
-    int c;
-    b = 6;
-    c = 7;
-    int d;
-    d = 10;
-    while (a < 20) {
-        a = a + 3;
-        while(b < 10){
-            b = b + 1;
-            while(c == 7){
-                c = c - 1;
-                while(d < 20){
-                    d = d + 3;
-                }
-                d = d - 1;
-            }
-            c = c + 1;
-        }
-        b = b - 2;
-    }
+int get_one(int a) {
+    return 1;
+}
 
-    return (a + (b + d) + c);
+int deepWhileBr(int a, int b) {
+    int c;
+    c = a + b;
+    while (c < 75) {
+        int d;
+        d = 42;
+        if (c < 100) {
+            c = c + d;
+            if (c > 99) {
+                int e;
+                e = d * 2;
+                if (get_one(0) == 1) {
+                    c = e * 2;
+                }
+            }
+        }
+    }
+    return (c);
 }
 
 int main() {
-    return FourWhile();
+    int p;
+    p = 2;
+    p = deepWhileBr(p, p);
+    putint(p);
+    return 0;
 }

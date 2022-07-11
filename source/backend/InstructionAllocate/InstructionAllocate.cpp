@@ -225,12 +225,14 @@ void InstructionAllocator::function_exit_generate(const std::shared_ptr<IR_node_
 void InstructionAllocator::function_label_generate(const std::shared_ptr<IR_node_pro> &now_IR_pro) {
 
     ARM_node now_ARM;
+    int line_pos = now_IR_pro->target.name.find('_');
+    int len = now_IR_pro->target.name.length();
 
     // set label
     // only save function name since '@' means comment in ARM,
     // for example: @0_main -> main:
     now_ARM.type = arm_func_label;
-    now_ARM.instruction = now_IR_pro->target.name.erase(0,3) + ":"; //fixme
+    now_ARM.instruction = now_IR_pro->target.name.substr(line_pos+1,len-line_pos-1) + ":";
     ARM_chain.push_back(now_ARM);
 
 }
@@ -249,10 +251,12 @@ void InstructionAllocator::block_label_generate(const std::shared_ptr<IR_node_pr
 void InstructionAllocator::call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
 
     ARM_node now_ARM;
+    int line_pos = now_IR_pro->target.name.find('_');
+    int len = now_IR_pro->target.name.length();
 
     now_ARM.type = arm_ins;
     std::string call_string = "bl     ";
-    now_ARM.instruction = call_string + " " + now_IR_pro->target.name.erase(0,3);
+    now_ARM.instruction = call_string + " " + now_IR_pro->target.name.substr(line_pos+1, len-line_pos-1);
     ARM_chain.push_back(now_ARM);
 
 }
