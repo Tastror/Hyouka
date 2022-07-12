@@ -1,5 +1,6 @@
 //
 // Created by Tastror on 2022/6/21.
+// Updated by Simon on 2022/7/12
 //
 
 #include "InstructionAllocate.h"
@@ -159,49 +160,47 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
         }
     }
 
-    // functional label
     function_label_generate(now_IR_pro);
 
-    // entry of function
     function_entry_generate(now_IR_pro, isLeaf);
 
     // content of function
     for(int i=now_IR_pro->index + 1 - ir_pro_normal_chain[0]->index; i<ir_pro_normal_chain.size(); i++){
 
-    // exit of function
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jumpr") {
             function_exit_generate(ir_pro_normal_chain[i], isLeaf);
             break;
         }
 
-        // block label
         if (ir_pro_normal_chain[i]->ir_type == ir_label) {
             block_label_generate(ir_pro_normal_chain[i]);
         }
 
-        // compare
         if (ir_pro_normal_chain[i]->ir_type == ir_forth
             && (ir_pro_normal_chain[i]->opera == "le"
+                || ir_pro_normal_chain[i]->opera == "gr"
                 || ir_pro_normal_chain[i]->opera == "eq")) {
             compare_generate(ir_pro_normal_chain[i]);
         }
 
-        // call
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "call") {
             call_generate(ir_pro_normal_chain[i]);
         }
 
-        // jump inside function
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "jump") {
             jump_generate(ir_pro_normal_chain[i]);
         }
 
-        // assign
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "assign") {
             assign_generate(ir_pro_normal_chain[i]);
         }
 
-        // arithmetic
+        if (ir_pro_normal_chain[i]->ir_type == ir_forth
+            && (ir_pro_normal_chain[i]->opera == "sll"
+                || ir_pro_normal_chain[i]->opera == "slr")) {
+            shift_generate(ir_pro_normal_chain[i]);
+        }
+
         if (ir_pro_normal_chain[i]->ir_type == ir_forth
             && (ir_pro_normal_chain[i]->opera == "add"
                 || ir_pro_normal_chain[i]->opera == "sub"
@@ -211,24 +210,20 @@ void InstructionAllocator::function_generate(const std::shared_ptr<IR_node_pro>&
             arithmetic_generate(ir_pro_normal_chain[i]);
         }
 
-        // logical
         if (ir_pro_normal_chain[i]->ir_type == ir_forth
-            && (ir_pro_normal_chain[i]->opera == "sll"
-                || ir_pro_normal_chain[i]->opera == "slr")) {
+            && (ir_pro_normal_chain[i]->opera == "not"
+                || ir_pro_normal_chain[i]->opera == "lee")) {
             logical_generate(ir_pro_normal_chain[i]);
         }
 
-        // load
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "lw") {
             load_generate(ir_pro_normal_chain[i]);
         }
 
-        // store
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "sw") {
             store_generate(ir_pro_normal_chain[i]);
         }
 
-        // alloc
         if (ir_pro_normal_chain[i]->ir_type == ir_forth && ir_pro_normal_chain[i]->opera == "alloc-stack") {
             alloc_generate(ir_pro_normal_chain[i]);
         }
@@ -343,11 +338,15 @@ void InstructionAllocator::compare_generate(const std::shared_ptr<IR_node_pro>& 
 
     auto next_IR = now_IR_pro->next;
     now_ARM.type = arm_ins;
+
     std::string jump_str = "bne     ";
     if(now_IR_pro->opera == "le")   // <
         jump_str = "bge     ";      // >=
     else if(now_IR_pro->opera == "eq")  // ==
         jump_str = "bne     ";      // !=
+    else if(now_IR_pro->opera == "gr")  // >
+        jump_str = "ble     ";      // <=
+
     now_ARM.instruction = jump_str + "." + next_IR->target.name;
     ARM_chain.push_back(now_ARM);
 }
@@ -391,6 +390,25 @@ void InstructionAllocator::assign_generate(const std::shared_ptr<IR_node_pro>& n
         }
     }
 
+}
+
+void InstructionAllocator::shift_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    ARM_node now_ARM;
+    std::string opera_str;
+
+    if(now_IR_pro->opera == "sll")
+        opera_str = "lsl    ";
+    else if(now_IR_pro->opera == "slr")
+        opera_str = "lsr    ";
+
+    now_ARM.type = arm_ins;
+    now_ARM.instruction = opera_str
+                          + register_name_str[now_IR_pro->tar.type]
+                          + ", "
+                          + register_name_str[now_IR_pro->src1.type]
+                          + ", #"
+                          + std::to_string(now_IR_pro->org_2.IVTT.self_get_int_value());
+    ARM_chain.push_back(now_ARM);
 }
 
 void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
@@ -475,13 +493,14 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
 }
 
 void InstructionAllocator::logical_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro){
+    //fixme
     ARM_node now_ARM;
     std::string opera_str;
 
-    if(now_IR_pro->opera == "sll")
-        opera_str = "lsl    ";
-    else if(now_IR_pro->opera == "slr")
-        opera_str = "lsr    ";
+    if(now_IR_pro->opera == "not")
+        opera_str = "not    ";
+    else if(now_IR_pro->opera == "lee")
+        opera_str = "lee    ";
 
     now_ARM.type = arm_ins;
     now_ARM.instruction = opera_str

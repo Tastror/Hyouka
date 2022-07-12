@@ -38,19 +38,25 @@ private:
 
     void block_label_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
 
+    // add,sub,mul,div,mod
+    void arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    // assign -> mov
+    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    // logical/arithmetic shift
+    void shift_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    // cmp rn, <operand2>
+    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    // and,or,not
+    void logical_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
+    // branch
     void call_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void jump_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-
-    void compare_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void assign_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void arithmetic_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    void logical_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-
+    // memory access
     void load_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
     void store_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-
+    // global data && local array
     void alloc_generate(const std::shared_ptr<IR_node_pro>& now_IR_pro);
-    //todo: cast-int
-    //todo: float
+    //todo: cast-int, cast-float
+    //todo: float support instruction(NEON instruction set, extra registers for float)
 
 };
