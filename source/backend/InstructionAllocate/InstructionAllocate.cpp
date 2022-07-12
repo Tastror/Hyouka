@@ -431,15 +431,16 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
                               + now_IR_pro->org_1.name;
         ARM_chain.push_back(now_ARM);
 
-        /*
-        now_ARM.type = arm_ins;
-        now_ARM.instruction = "ldr     "
-                              + register_name_str[now_IR_pro->src1.type]
-                              + ", ["
-                              + register_name_str[now_IR_pro->src1.type]
-                              + "]";
-        ARM_chain.push_back(now_ARM);
-        */
+        if(now_IR_pro->org_1.IVTT.self_type().represent_type != basic_any){
+            now_ARM.type = arm_ins;
+            now_ARM.instruction = "ldr     "
+                                  + register_name_str[now_IR_pro->src1.type]
+                                  + ", ["
+                                  + register_name_str[now_IR_pro->src1.type]
+                                  + "]";
+            ARM_chain.push_back(now_ARM);
+        }
+
     }
 
     if (!now_IR_pro->org_2.name.empty() && now_IR_pro->org_2.name.substr(1,1) == "0"){
@@ -458,15 +459,16 @@ void InstructionAllocator::arithmetic_generate(const std::shared_ptr<IR_node_pro
                               + "#:upper16:"
                               + now_IR_pro->org_2.name;
         ARM_chain.push_back(now_ARM);
-/*
-        now_ARM.type = arm_ins;
-        now_ARM.instruction = "ldr     "
-                              + register_name_str[now_IR_pro->src2.type]
-                              + ", ["
-                              + register_name_str[now_IR_pro->src2.type]
-                              + "]";
-        ARM_chain.push_back(now_ARM);
-        */
+
+        if(now_IR_pro->org_2.IVTT.self_type().represent_type != basic_any){
+            now_ARM.type = arm_ins;
+            now_ARM.instruction = "ldr     "
+                                  + register_name_str[now_IR_pro->src2.type]
+                                  + ", ["
+                                  + register_name_str[now_IR_pro->src2.type]
+                                  + "]";
+            ARM_chain.push_back(now_ARM);
+        }
     }
 
     now_ARM.type = arm_ins;
